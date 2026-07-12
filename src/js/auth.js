@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleSocialLogin = async (provider) => {
         showToast(`Connecting to ${provider.toUpperCase()}... 🚀`, 'info');
 
-        // Simulate social callback details (creates a secure DB account andJWT via social API)
+        // Simulate social callback details (creates a secure DB account and JWT via social API)
         const socialProfiles = {
             google: {
                 email: 'dhiraj.yadav.google@gmail.com',
@@ -356,6 +356,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(profile)
                 });
+                
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error('Server returned non-ok response:', res.status, text);
+                    showToast(`Server Error (${res.status}). Check Vercel Logs.`, 'error');
+                    return;
+                }
+
                 const data = await res.json();
                 
                 if (data.success) {
@@ -367,7 +375,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(data.message, 'error');
                 }
             } catch (err) {
-                showToast('Failed to authenticate social account.', 'error');
+                console.error('Social auth request network exception:', err);
+                showToast('Network exception. Check your database connections or Atlas whitelist.', 'error');
             }
         }, 1200); // Small loading animation delay
     };
