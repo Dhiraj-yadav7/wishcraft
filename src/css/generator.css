@@ -1,0 +1,249 @@
+/* ========================================================
+   SPLIT PANEL LAYOUT FOR WIZARD BUILDER
+   ======================================================== */
+
+.generator-container {
+    width: 98%;
+    max-width: 1200px;
+    height: 90vh;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1.5rem;
+    z-index: 10;
+    margin: 1rem 0;
+}
+
+@media (max-width: 992px) {
+    .generator-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        margin: 2rem 0;
+    }
+}
+
+/* Scrollable configuration pane */
+.config-pane {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 2rem;
+    box-shadow: 0 30px 60px var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 993px) {
+    .config-pane {
+        max-height: 100%;
+    }
+}
+
+/* Sticky Preview simulator pane */
+.preview-pane {
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 1.5rem;
+    box-shadow: 0 20px 45px var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+@media (min-width: 993px) {
+    .preview-pane {
+        max-height: 100%;
+    }
+}
+
+/* Tab Headers Nav */
+.generator-tabs {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1.8rem;
+    gap: 0.5rem;
+}
+
+body.theme-elegant .generator-tabs,
+body.theme-cosmic .generator-tabs {
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: var(--btn-text);
+}
+
+/* Tab Content items */
+.tab-content {
+    display: none;
+    flex: 1;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Multiple photo uploads list */
+.photos-thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+    .photos-thumbnail-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.photo-thumb-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.photo-thumb-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-thumb-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #ef4444;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Mic voice message recorder layout */
+.voice-recorder-block {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+body.theme-elegant .voice-recorder-block,
+body.theme-cosmic .voice-recorder-block {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.05);
+}
+
+.rec-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.rec-btn.idle { background: #e2e8f0; color: #ef4444; }
+.rec-btn.recording { background: #ef4444; color: white; animation: pulseRed 1.5s infinite; }
+.rec-btn.has-audio { background: #10b981; color: white; }
+
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Simulated visual preview mock details */
+.preview-sim-card {
+    width: 100%;
+    max-width: 320px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 2.2rem 1.6rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.preview-sim-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.2rem;
+    border: 4px solid white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Background select options */
+.bg-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+}
+
+.bg-preset-option {
+    height: 50px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.bg-preset-option:hover {
+    transform: scale(1.05);
+}
+
+.bg-preset-option.selected {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px var(--accent-color);
+}

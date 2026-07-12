@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Card Builder - Generator 🎁</title>
+    <!-- Visual imports -->
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/auth.css">
+    <link rel="stylesheet" href="src/css/generator.css">
+    <!-- Auth Guard in Head -->
+    <script src="src/js/auth.js"></script>
+</head>
+<body class="theme-romantic">
+
+    <div class="generator-container">
+        
+        <!-- ====================================================
+             LEFT PANEL: CONFIGURATION WIZARD
+             ==================================================== -->
+        <div class="config-pane">
+            
+            <!-- Wizard Nav Tab headers -->
+            <nav class="generator-tabs" id="generatorTabs">
+                <button type="button" class="tab-btn active" data-tab="tab-basics">1. Basics</button>
+                <button type="button" class="tab-btn" data-tab="tab-media">2. Media</button>
+                <button type="button" class="tab-btn" data-tab="tab-creative">3. Creative</button>
+                <button type="button" class="tab-btn" data-tab="tab-effects">4. Effects</button>
+            </nav>
+
+            <form id="generatorForm" style="display: flex; flex-direction: column; flex: 1;">
+                
+                <!-- STEP 1: BASICS FORM -->
+                <div id="tab-basics" class="tab-content active">
+                    <h2 class="step-title">Core Birthday Details</h2>
+                    <p class="step-subtitle">Name the star and schedule their special day.</p>
+
+                    <div class="form-group">
+                        <label for="recipientName" class="form-label">Birthday Name</label>
+                        <input type="text" id="recipientName" class="text-input" placeholder="e.g., Anshika" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthdate" class="form-label">Birthday Date</label>
+                        <input type="date" id="birthdate" class="text-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="relationship" class="form-label">Relationship Type</label>
+                        <select id="relationship" class="text-input" style="appearance: auto;">
+                            <option value="friend">Friend 🤝</option>
+                            <option value="girlfriend">Girlfriend 💖</option>
+                            <option value="boyfriend">Boyfriend 💙</option>
+                            <option value="brother">Brother 👦</option>
+                            <option value="sister">Sister 👧</option>
+                            <option value="father">Father 👔</option>
+                            <option value="mother">Mother 👩</option>
+                            <option value="other">Other 💫</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="senderName" class="form-label">Your Name (Sender)</label>
+                        <input type="text" id="senderName" class="text-input" placeholder="Your name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardMessage" class="form-label">Birthday Wish Message</label>
+                        <textarea id="cardMessage" class="text-input" rows="4" placeholder="Write your warm wishes here..." required></textarea>
+                    </div>
+                </div>
+
+                <!-- STEP 2: MEDIA ASSETS FORM -->
+                <div id="tab-media" class="tab-content">
+                    <h2 class="step-title">Add Premium Media</h2>
+                    <p class="step-subtitle">Upload multiple photos, share a video, or record a sweet voice message.</p>
+
+                    <!-- Multiple Photos Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Photos (Up to 5)</label>
+                        <div class="upload-container" id="photosDropzone">
+                            <span class="upload-icon">📸</span>
+                            <p style="font-weight: 600;">Drag & drop images or click to add</p>
+                            <input type="file" id="photosInput" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div class="photos-thumbnail-grid" id="photosThumbnails">
+                            <!-- Thumbnails dynamically added here -->
+                        </div>
+                    </div>
+
+                    <!-- Video Link -->
+                    <div class="form-group">
+                        <label for="videoUrl" class="form-label">Video Link (YouTube / MP4)</label>
+                        <input type="url" id="videoUrl" class="text-input" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+
+                    <!-- Voice Recording / Audio Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Voice Message Surprise</label>
+                        <div class="voice-recorder-block">
+                            <button type="button" class="rec-btn idle" id="recordBtn">🎤</button>
+                            <p id="recStatus" style="font-weight: 600; font-size: 0.9rem;">Click icon to start microphone recording</p>
+                            <div id="audioPlayContainer" style="display: none; margin-top: 0.5rem; width: 100%;">
+                                <audio id="voicePreview" controls style="width: 100%; border-radius: 8px;"></audio>
+                                <button type="button" class="btn btn-secondary" id="clearVoiceBtn" style="margin-top: 0.5rem; padding: 0.4rem 1rem; font-size: 0.8rem;">Clear Voice Message</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: CREATIVE CONFIGS FORM -->
+                <div id="tab-creative" class="tab-content">
+                    <h2 class="step-title">Themes & Creative Styling</h2>
+                    <p class="step-subtitle">Style the layout with beautiful backgrounds, fonts, and music.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Select Visual Theme</label>
+                        <div class="select-grid theme-grid">
+                            <div class="grid-option selected" data-value="romantic" data-type="theme">
+                                <span class="emoji">💖</span>
+                                <span>Romantic</span>
+                            </div>
+                            <div class="grid-option" data-value="playful" data-type="theme">
+                                <span class="emoji">🎈</span>
+                                <span>Playful</span>
+                            </div>
+                            <div class="grid-option" data-value="elegant" data-type="theme">
+                                <span class="emoji">👑</span>
+                                <span>Elegant</span>
+                            </div>
+                            <div class="grid-option" data-value="cosmic" data-type="theme">
+                                <span class="emoji">🌌</span>
+                                <span>Cosmic</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Custom Background Style</label>
+                        <div class="bg-preset-grid" id="bgPresetList">
+                            <!-- Presets loaded dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fontSelect" class="form-label">Surprise Card Font</label>
+                        <select id="fontSelect" class="text-input" style="appearance: auto;">
+                            <option value="Outfit">Modern Clean (Outfit)</option>
+                            <option value="Playfair Display">Elegant Classic (Playfair)</option>
+                            <option value="Dancing Script">Calligraphy Handwriting (Dancing Script)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="musicSelect" class="form-label">Background Music</label>
+                        <select id="musicSelect" class="text-input" style="appearance: auto;">
+                            <option value="chimes">Nostalgic Chimes (Piano)</option>
+                            <option value="piano">Romantic Piano Ballad</option>
+                            <option value="happy">Cheerful Birthday Beats</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STEP 4: EFFECTS CONFIGS FORM -->
+                <div id="tab-effects" class="tab-content">
+                    <h2 class="step-title">Party Animations & Effects</h2>
+                    <p class="step-subtitle">Customize the fun interactive effects for the envelope reveal.</p>
+
+                    <div class="form-group">
+                        <label for="confettiSelect" class="form-label">Confetti Style</label>
+                        <select id="confettiSelect" class="text-input" style="appearance: auto;">
+                            <option value="hearts">Floating Hearts 💕</option>
+                            <option value="balloons">Floating Balloons 🎈</option>
+                            <option value="stars">Twinkling Stars ⭐</option>
+                            <option value="mixed">Traditional Mixed Confetti 🎉</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fireworksSelect" class="form-label">Fireworks Style</label>
+                        <select id="fireworksSelect" class="text-input" style="appearance: auto;">
+                            <option value="burst">Spreading Ring Burst 🎆</option>
+                            <option value="sparks">Bright Trails Sparks 🌟</option>
+                            <option value="firefly">Soft Twinkling Fireflies ✨</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cakeSelect" class="form-label">Cake Style</label>
+                        <select id="cakeSelect" class="text-input" style="appearance: auto;">
+                            <option value="animated">Animated Glowing Cake 🎂</option>
+                            <option value="chocolate">Luxury Chocolate Cake 🍫</option>
+                            <option value="cupcake">Cute Strawberry Cupcake 🧁</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="greetingSelect" class="form-label">Typing Greeting Style</label>
+                        <select id="greetingSelect" class="text-input" style="appearance: auto;">
+                            <option value="typewriter">Typewriter Character Print ⌨️</option>
+                            <option value="fade-in">Soft Words Fade-in 👁️</option>
+                            <option value="neon-glow">Glowing Neon Slide 🚨</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Wizard Actions Footer buttons -->
+                <div class="btn-container" style="margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                    <button type="button" class="btn btn-secondary" id="backBtn" style="display: none;">⬅️ Back</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn">Next step ➡️</button>
+                    
+                    <!-- Save states (Active only when relevant) -->
+                    <div id="saveActions" style="display: flex; gap: 0.5rem; flex: 1;">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Save Draft 📝</button>
+                        <button type="button" class="btn btn-primary" id="publishBtn">Publish Card 🎁</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- ====================================================
+             RIGHT PANEL: SIMULATOR LIVE PREVIEW
+             ==================================================== -->
+        <div class="preview-pane" id="previewPane">
+            
+            <div class="preview-sim-card" id="simCard">
+                <img id="simPhoto" src="public/anshika.png.jpeg" alt="Simulated photo" class="preview-sim-image">
+                <h3 id="simName" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; margin-bottom: 0.2rem;">Recipient Name</h3>
+                <span id="simRelation" class="relationship-badge" style="font-size: 0.75rem;">RELATION</span>
+                <p id="simMessage" style="font-size: 0.95rem; line-height: 1.4; opacity: 0.85; margin-top: 0.8rem; font-style: italic;">
+                    Wish message preview appears here...
+                </p>
+            </div>
+            
+            <span style="position: absolute; bottom: 10px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; opacity: 0.5; text-transform: uppercase;">
+                Interactive Simulator Panel
+            </span>
+        </div>
+
+    </div>
+
+    <!-- Generator Scripts -->
+    <script src="src/js/generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Card Builder - Dashboard 📊</title>
+    <!-- CSS styles imports -->
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/auth.css">
+    <link rel="stylesheet" href="src/css/dashboard.css">
+    <!-- Auth Route Protection Guard in Head -->
+    <script src="src/js/auth.js"></script>
+</head>
+<body class="theme-romantic">
+
+    <div class="dashboard-container">
+        
+        <!-- Header Panel -->
+        <header class="dash-header">
+            <div class="dash-logo-block">
+                <h1>My Surprises 🎂</h1>
+                <p style="font-size: 0.9rem; opacity: 0.85; margin-top: 0.2rem;" id="userWelcomeText">Hello, Surprise Creator!</p>
+            </div>
+            
+            <div class="dash-header-actions">
+                <!-- Notifications Bell -->
+                <div class="notif-bell-container" id="notifBell">
+                    🔔
+                    <span class="notif-badge" id="notifCount" style="display: none;">0</span>
+                    
+                    <!-- Notification Drawer Panel -->
+                    <div class="notif-drawer" id="notifDrawer">
+                        <div class="notif-drawer-header">Recent Notifications</div>
+                        <div id="notifList">
+                            <p style="font-size: 0.8rem; text-align: center; opacity: 0.6; padding: 1rem 0;">No new alerts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <a href="profile.html" class="btn btn-secondary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; text-decoration: none;">👤 My Profile</a>
+                <button type="button" id="createNewCardBtn" class="btn btn-primary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold;">➕ Create Surprise</button>
+            </div>
+        </header>
+
+        <!-- Statistics counters block -->
+        <section class="stats-grid">
+            <div class="stats-card">
+                <span class="stats-icon">🎁</span>
+                <span class="stats-value" id="stat-total">0</span>
+                <span class="stats-label">Total Cards</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-icon">🔗</span>
+                <span class="stats-value" id="stat-active">0</span>
+                <span class="stats-label">Active Links</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-icon">👁️</span>
+                <span class="stats-value" id="stat-views">0</span>
+                <span class="stats-label">Total Views</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-icon">✍️</span>
+                <span class="stats-value" id="stat-wishes">0</span>
+                <span class="stats-label">Guest Wishes</span>
+            </div>
+        </section>
+
+        <!-- Search and filters toolbar -->
+        <section class="search-filter-bar">
+            <div class="search-box">
+                <input type="text" id="searchSurprises" class="text-input" placeholder="🔍 Search by name or relationship..." autocomplete="off">
+            </div>
+            
+            <div class="filter-pills" id="filterPills">
+                <button type="button" class="filter-pill active" data-filter="all">All</button>
+                <button type="button" class="filter-pill" data-filter="draft">Drafts</button>
+                <button type="button" class="filter-pill" data-filter="public">Public</button>
+                <button type="button" class="filter-pill" data-filter="private">Private</button>
+                <button type="button" class="filter-pill" data-filter="scheduled">Scheduled</button>
+            </div>
+        </section>
+
+        <!-- Dynamic List display of cards -->
+        <main class="cards-grid" id="cardsGrid">
+            <!-- Loading Indicator -->
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;" id="loadingContainer">
+                <p style="font-weight: 600; font-size: 1.1rem; opacity: 0.8;">Loading your cards list... 🚀</p>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JS Controller implementation -->
+    <script src="src/js/dashboard.js"></script>
+</body>
+</html>

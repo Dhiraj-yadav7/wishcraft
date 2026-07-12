@@ -4,6 +4,10 @@
 antigravity-ide/
 *.log
 
+# Local package dependencies & Database
+node_modules/
+db.json
+
 # OS generated files
 .DS_Store
 Thumbs.db

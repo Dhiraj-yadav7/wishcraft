@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Card Surprise! 🎁</title>
+    <!-- Use core styles, overridden dynamically by builder selections -->
+    <link rel="stylesheet" href="src/css/style.css">
+    <style>
+        /* Viewer Page Layout Tweaks for scrollable guestbook */
+        .wish-body {
+            overflow-y: auto !important;
+            height: auto !important;
+            min-height: 100vh;
+            padding: 3rem 0;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Photos Carousel styling */
+        .carousel-deck {
+            position: relative;
+            width: 190px;
+            height: 190px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            border: 4px solid white;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            border-radius: 50%;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+        }
+
+        /* Cassette Player for Audio messages */
+        .cassette-block {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cassette-tape {
+            font-size: 2.2rem;
+            animation: spin 3s linear infinite paused;
+        }
+
+        .cassette-tape.playing {
+            animation-play-state: running;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Video Iframe container */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 14px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            margin: 1.5rem 0;
+        }
+
+        .video-wrapper iframe,
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Cake animation wrapper */
+        .cake-block {
+            font-size: 3.5rem;
+            margin: 1.2rem 0;
+            animation: floatUp 3s ease-in-out infinite alternate;
+        }
+
+        /* ====================================================
+           GUESTBOOK WISH BOX STYLING
+           ==================================================== */
+        .guestbook-card {
+            width: 92%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 2.2rem;
+            box-shadow: 0 20px 45px var(--shadow-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10;
+        }
+
+        .wishes-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .wish-post {
+            background: rgba(255,255,255,0.4);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 0.8rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.5);
+            text-align: left;
+        }
+
+        body.theme-elegant .wish-post,
+        body.theme-cosmic .wish-post {
+            background: rgba(15, 23, 42, 0.3);
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .wish-post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .wish-post-author {
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .wish-post-text {
+            margin-top: 0.2rem;
+            opacity: 0.9;
+        }
+
+        /* Avatar Picker Grid */
+        .avatar-picker {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-pick-option {
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .avatar-pick-option.selected {
+            border-color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="wish-body theme-romantic">
+
+    <!-- Screen overlays -->
+    <canvas id="fireworks-canvas"></canvas>
+
+    <div class="surprise-reveal-wrapper">
+        
+        <!-- sealed envelope card -->
+        <div id="envelope" class="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-pocket"></div>
+            <div class="envelope-seal">💌</div>
+            <div class="envelope-invitation-text">TAP TO OPEN SURPRISE</div>
+        </div>
+
+        <!-- Main Display Card -->
+        <div id="displayCard" class="display-card">
+            
+            <!-- Photo Slider Carousel -->
+            <div class="carousel-deck" id="photoDeck">
+                <img id="recipientPhoto" src="" alt="Birthday Portrait" class="carousel-slide active">
+                <!-- Dynamic photos loaded here -->
+            </div>
+
+            <span id="relationBadge" class="relationship-badge">Friend</span>
+            
+            <h1 id="cardTitle" class="birthday-title">Happy Birthday! 🎉</h1>
+            
+            <p id="senderTag" style="font-size: 0.9rem; font-weight: 700; opacity: 0.8; margin-top: -0.8rem; margin-bottom: 1.5rem;">From Sender</p>
+
+            <!-- Video player container -->
+            <div id="videoContainer" style="display: none;">
+                <div class="video-wrapper" id="videoWrapper"></div>
+            </div>
+
+            <!-- Voice Tape Cassette Player -->
+            <div id="cassetteContainer" style="display: none;">
+                <div class="cassette-block">
+                    <span class="cassette-tape" id="cassetteTape">📼</span>
+                    <div style="flex: 1; text-align: left;">
+                        <span style="font-size: 0.85rem; font-weight: 800; display: block;">VOICE MESSAGE FROM SENDER</span>
+                        <span style="font-size: 0.75rem; opacity: 0.7;" id="tapeStatus">Click play button to listen</span>
+                    </div>
+                    <button type="button" id="tapePlayBtn" class="control-btn" style="border-radius: 50%; width: 36px; height: 36px;">▶️</button>
+                    <audio id="voiceMessageAudio"></audio>
+                </div>
+            </div>
+
+            <!-- Heartfelt Wish Message -->
+            <div id="wishMessage" class="wish-message"></div>
+
+            <!-- Cake animation box -->
+            <div id="cakeBox" class="cake-block">🎂</div>
+
+            <!-- Controls row -->
+            <div class="card-controls" style="margin-top: 2rem;">
+                <button type="button" id="musicBtn" class="control-btn" title="Toggle Music">🎵</button>
+                <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks">🎆</button>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <!-- ====================================================
+         GUESTBOOK FORM & WISH POSTS LISTING
+         ==================================================== -->
+    <section class="guestbook-card" id="guestbookCard" style="display: none; opacity: 0; transition: opacity 0.8s ease;">
+        <h3 class="wishes-title">Wishes Guestbook ✍️</h3>
+        
+        <!-- Wishes list container -->
+        <div id="guestWishesList">
+            <!-- Wishes posts loaded here -->
+        </div>
+
+        <!-- Add a wish form -->
+        <form id="guestbookForm" style="margin-top: 1.8rem; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 1.2rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 800; text-align: center; margin-bottom: 0.8rem;">Write your wish to the star:</h4>
+            
+            <div class="form-group">
+                <input type="text" id="guestAuthor" class="text-input" placeholder="Your Name" required>
+            </div>
+
+            <div class="avatar-picker" id="guestAvatarGrid">
+                <!-- Emojis picker selection -->
+                <span class="avatar-pick-option selected" data-emoji="🎈">🎈</span>
+                <span class="avatar-pick-option" data-emoji="🎁">🎁</span>
+                <span class="avatar-pick-option" data-emoji="🥳">🥳</span>
+                <span class="avatar-pick-option" data-emoji="🎂">🎂</span>
+                <span class="avatar-pick-option" data-emoji="💖">💖</span>
+                <span class="avatar-pick-option" data-emoji="✨">✨</span>
+            </div>
+
+            <div class="form-group">
+                <textarea id="guestText" class="text-input" rows="2" placeholder="Happy Birthday! Have a wonderful day..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" style="padding: 0.6rem 1.2rem;">Sign Guestbook ✍️</button>
+        </form>
+    </section>
+
+    <!-- JS Logic loader -->
+    <script src="src/js/viewer.js"></script>
+</body>
+</html>

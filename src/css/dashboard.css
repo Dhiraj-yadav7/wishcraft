@@ -1,0 +1,377 @@
+/* ========================================================
+   DASHBOARD VISUAL INTERFACE
+   ======================================================== */
+
+.dashboard-container {
+    width: 95%;
+    max-width: 1080px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 2rem;
+    box-shadow: 0 30px 60px var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10;
+    margin: 2rem 0;
+}
+
+/* Header bar styling */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.dash-logo-block h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dash-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Notification bell badge */
+.notif-bell-container {
+    position: relative;
+    cursor: pointer;
+    font-size: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.theme-elegant .notif-bell-container,
+body.theme-cosmic .notif-bell-container {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.notif-bell-container:hover {
+    transform: scale(1.08);
+}
+
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Notification Drawer dropdown */
+.notif-drawer {
+    display: none;
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 320px;
+    max-height: 400px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    z-index: 100;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.notif-drawer.active {
+    display: block;
+}
+
+.notif-drawer-header {
+    font-weight: 800;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.notif-item {
+    padding: 0.6rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.4);
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+body.theme-elegant .notif-item,
+body.theme-cosmic .notif-item {
+    background: rgba(15, 23, 42, 0.3);
+}
+
+.notif-item.unread {
+    border-color: var(--accent-color);
+    background: rgba(168, 85, 247, 0.08);
+}
+
+.notif-item-title {
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.notif-item-time {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 0.25rem;
+}
+
+/* Grid of Statistics */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 1.5rem 1.2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+body.theme-elegant .stats-card,
+body.theme-cosmic .stats-card {
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.stats-icon {
+    font-size: 2rem;
+}
+
+.stats-value {
+    font-size: 2.1rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+}
+
+.stats-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Search and Filters Bar */
+.search-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.8rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    max-width: 320px;
+    width: 100%;
+}
+
+.filter-pills {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.05);
+    background: rgba(255,255,255,0.6);
+    color: var(--text-color);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+body.theme-elegant .filter-pill,
+body.theme-cosmic .filter-pill {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.filter-pill:hover {
+    border-color: var(--primary-color);
+}
+
+.filter-pill.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--btn-text);
+}
+
+/* Cards Grid List */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.birthday-card-item {
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 22px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+body.theme-elegant .birthday-card-item,
+body.theme-cosmic .birthday-card-item {
+    background: rgba(30, 41, 59, 0.45);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.birthday-card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px var(--shadow-color);
+}
+
+.card-status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+    letter-spacing: 0.05em;
+}
+
+.status-public { background: #d1fae5; color: #065f46; }
+.status-draft { background: #f3f4f6; color: #374151; }
+.status-private { background: #fee2e2; color: #991b1b; }
+.status-scheduled { background: #f3e8ff; color: #6b21a8; }
+
+.card-recipient-name {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+    padding-right: 4rem; /* Save space for status badge */
+}
+
+.card-meta-row {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+}
+
+.card-actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 1rem;
+}
+
+body.theme-elegant .card-actions-bar,
+body.theme-cosmic .card-actions-bar {
+    border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+.action-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.05);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+body.theme-elegant .action-icon-btn,
+body.theme-cosmic .action-icon-btn {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-icon-btn:hover {
+    transform: scale(1.1);
+    background: var(--primary-color);
+    color: var(--btn-text);
+}
+
+.action-icon-btn.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Empty State Illustration */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    animation: floatUp 3s ease-in-out infinite alternate;
+}
