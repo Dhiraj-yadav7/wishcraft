@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load Card Settings from API
 async function fetchCardDetails(pageId) {
     try {
-        const res = await fetch(`/api/pages/public?id=${pageId}`);
+        const res = await fetch(`/api/pages?action=public&id=${pageId}`);
         const data = await res.json();
         
         if (data.success) {
@@ -282,7 +282,7 @@ function setupGuestbookForm() {
         if (!author || !text || !viewerConfig.pageId) return;
 
         try {
-            const res = await fetch('/api/pages/guestbook', {
+            const res = await fetch('/api/pages?action=guestbook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

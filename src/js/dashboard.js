@@ -36,7 +36,7 @@ async function fetchDashboardData() {
 
     try {
         // 1. Fetch Stats
-        const statsRes = await fetch('/api/dashboard/stats', {
+        const statsRes = await fetch('/api/dashboard?action=stats', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const statsData = await statsRes.json();
@@ -48,7 +48,7 @@ async function fetchDashboardData() {
         }
 
         // 2. Fetch Pages list
-        const pagesRes = await fetch('/api/pages', {
+        const pagesRes = await fetch('/api/pages?action=list', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const pagesData = await pagesRes.json();
@@ -58,7 +58,7 @@ async function fetchDashboardData() {
         }
 
         // 3. Fetch Notifications list
-        const notifRes = await fetch('/api/notifications', {
+        const notifRes = await fetch('/api/dashboard?action=notifications', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const notifData = await notifRes.json();
@@ -205,7 +205,7 @@ async function duplicatePage(pageId) {
     showToast('Duplicating layout...', 'info');
 
     try {
-        const res = await fetch('/api/pages/duplicate', {
+        const res = await fetch('/api/pages?action=duplicate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ async function deletePage(pageId, name) {
     showToast('Deleting surprise...', 'info');
 
     try {
-        const res = await fetch(`/api/pages/detail?id=${pageId}`, {
+        const res = await fetch(`/api/pages?action=detail&id=${pageId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -260,7 +260,7 @@ async function markNotificationAsRead(notifId, element) {
     if (!token) return;
 
     try {
-        const res = await fetch('/api/notifications', {
+        const res = await fetch('/api/dashboard?action=notifications', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

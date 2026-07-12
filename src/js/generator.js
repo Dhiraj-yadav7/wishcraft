@@ -75,7 +75,7 @@ async function loadEditDetails(pageId) {
     showToast('Loading card details...', 'info');
 
     try {
-        const res = await fetch(`/api/pages/detail?id=${pageId}`, {
+        const res = await fetch(`/api/pages?action=detail&id=${pageId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -508,7 +508,7 @@ async function submitCardData(status) {
     };
 
     const isEdit = generatorState.pageId !== null;
-    const url = isEdit ? `/api/pages/detail?id=${generatorState.pageId}` : '/api/pages';
+    const url = isEdit ? `/api/pages?action=detail&id=${generatorState.pageId}` : '/api/pages?action=list';
     const method = isEdit ? 'PUT' : 'POST';
 
     showToast(isEdit ? 'Saving changes...' : 'Creating surprise...', 'info');

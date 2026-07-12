@@ -73,7 +73,7 @@ const authManager = {
         if (!token) return false;
 
         try {
-            const res = await fetch('/api/auth/user', {
+            const res = await fetch('/api/auth?action=user', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch('/api/auth/login', {
+                const res = await fetch('/api/auth?action=login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch('/api/auth/signup', {
+                const res = await fetch('/api/auth?action=signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch('/api/auth/forgot', {
+                const res = await fetch('/api/auth?action=forgot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch('/api/auth/reset', {
+                const res = await fetch('/api/auth?action=reset', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, password })
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(async () => {
             try {
-                const res = await fetch('/api/auth/social', {
+                const res = await fetch('/api/auth?action=social', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(profile)
