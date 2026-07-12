@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Card Builder - Profile 👤</title>
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/auth.css">
+</head>
+<body class="theme-romantic">
+
+    <div class="glass-container">
+        
+        <div class="profile-card">
+            
+            <!-- Avatar Circle -->
+            <div class="profile-avatar-container">
+                <div id="profile-avatar" class="profile-avatar">
+                    <span id="profile-avatar-initials">👤</span>
+                </div>
+            </div>
+
+            <h2 id="profile-name" class="profile-name">User Name</h2>
+            <p id="profile-email" class="profile-email">email@domain.com</p>
+
+            <!-- Metadata List -->
+            <div class="profile-info-grid">
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Account Status</span>
+                    <span id="profile-status-val" class="profile-info-value" style="color: #10b981;">Active ✓</span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Member Since</span>
+                    <span id="profile-joined-val" class="profile-info-value">-</span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Application Role</span>
+                    <span class="profile-info-value">Surprise Creator 🎁</span>
+                </div>
+            </div>
+
+            <!-- Profile Controls -->
+            <div class="btn-container">
+                <button type="button" id="backToBuilder" class="btn btn-secondary">⬅️ Go to Builder</button>
+                <button type="button" id="logoutBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);">Log Out 🚪</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Core Auth Script Guard -->
+    <script src="src/js/auth.js"></script>
+    <script>
+        // Populate profile screen with verified user details from local storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = authManager.getUser();
+            if (user) {
+                document.getElementById('profile-name').textContent = user.name;
+                document.getElementById('profile-email').textContent = user.email;
+                
+                if (user.createdAt) {
+                    const date = new Date(user.createdAt);
+                    document.getElementById('profile-joined-val').textContent = date.toLocaleDateString(undefined, { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                } else {
+                    document.getElementById('profile-joined-val').textContent = 'Today';
+                }
+
+                // Generate Name Initials
+                const initials = user.name
+                    .split(' ')
+                    .map(word => word[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 2);
+                document.getElementById('profile-avatar-initials').textContent = initials || '👤';
+            }
+
+            // Click handlers
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                authManager.logout();
+            });
+
+            document.getElementById('backToBuilder').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

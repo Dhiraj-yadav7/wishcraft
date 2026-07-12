@@ -1,0 +1,279 @@
+/* ========================================================
+   AUTH FORM & TOAST NOTIFICATION CSS
+   ======================================================== */
+
+/* Toggle forms visibility helper */
+.auth-form {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.auth-form.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Social Buttons Grid */
+.social-login-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-social {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    background: white;
+    color: #1e1b4b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+body.theme-elegant .btn-social,
+body.theme-cosmic .btn-social {
+    background: rgba(30, 41, 59, 0.8);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-social:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.btn-social.google:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+body.theme-elegant .btn-social.google:hover,
+body.theme-cosmic .btn-social.google:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.btn-social.github:hover {
+    background: #f8fafc;
+    border-color: #0f172a;
+}
+
+body.theme-elegant .btn-social.github:hover,
+body.theme-cosmic .btn-social.github:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+/* Divider styling */
+.auth-divider {
+    text-align: center;
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+.auth-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+    z-index: 1;
+}
+
+body.theme-elegant .auth-divider::before,
+body.theme-cosmic .auth-divider::before {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider span {
+    position: relative;
+    z-index: 2;
+    background: var(--card-bg);
+    padding: 0 0.8rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+/* Auth link footer */
+.auth-footer-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-footer-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.auth-footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================================
+   TOAST NOTIFICATION MODULE
+   ======================================================== */
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 320px;
+    max-width: 90%;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #1e1b4b;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Toast Status Variances */
+.toast-success {
+    border-left: 5px solid #10b981;
+}
+.toast-error {
+    border-left: 5px solid #ef4444;
+}
+.toast-warning {
+    border-left: 5px solid #f59e0b;
+}
+.toast-info {
+    border-left: 5px solid #3b82f6;
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+}
+
+.toast-message {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* ========================================================
+   USER PROFILE PAGE STYLING
+   ======================================================== */
+.profile-card {
+    text-align: center;
+}
+
+.profile-avatar-container {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    padding: 4px;
+    margin: 0 auto 1.2rem;
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.2rem;
+}
+
+body.theme-elegant .profile-avatar,
+body.theme-cosmic .profile-avatar {
+    background: #1e293b;
+}
+
+.profile-name {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+}
+
+.profile-email {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    opacity: 0.85;
+}
+
+.profile-info-grid {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 16px;
+    padding: 1.2rem;
+    margin-bottom: 2rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+body.theme-elegant .profile-info-grid,
+body.theme-cosmic .profile-info-grid {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+body.theme-elegant .profile-info-row,
+body.theme-cosmic .profile-info-row {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.profile-info-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.profile-info-label {
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.profile-info-value {
+    font-weight: 700;
+}

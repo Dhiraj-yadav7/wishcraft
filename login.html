@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Card Builder - Login 🔐</title>
+    <!-- Keep visual harmony by importing core styling and auth styles -->
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/auth.css">
+</head>
+<body class="theme-romantic"> <!-- Root theme styling matches the main builder -->
+
+    <div class="glass-container">
+        
+        <!-- ====================================================
+             LOGIN VIEW SECTION
+             ==================================================== -->
+        <div id="login-form" class="auth-form active">
+            <h2 class="step-title">Welcome Back!</h2>
+            <p class="step-subtitle">Log in to create and manage your premium birthday surprises.</p>
+
+            <!-- Social Logins (Google & GitHub) -->
+            <div class="social-login-grid">
+                <button type="button" id="google-btn" class="btn-social google">
+                    <span class="emoji">🔴</span> Google
+                </button>
+                <button type="button" id="github-btn" class="btn-social github">
+                    <span class="emoji">🐙</span> GitHub
+                </button>
+            </div>
+
+            <div class="auth-divider">
+                <span>or use email</span>
+            </div>
+
+            <!-- Normal Form -->
+            <form id="login-form-el">
+                <div class="form-group">
+                    <label for="login-email" class="form-label">Email Address</label>
+                    <input type="email" id="login-email" class="text-input" placeholder="name@domain.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label for="login-password" class="form-label">Password</label>
+                        <a href="#" id="to-forgot" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none; font-weight: 600; margin-bottom: 0.5rem;">Forgot?</a>
+                    </div>
+                    <input type="password" id="login-password" class="text-input" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary btn-full">Log In 🔓</button>
+                </div>
+            </form>
+
+            <p class="auth-footer-link">Don't have an account? <a href="#" id="to-signup">Sign up</a></p>
+        </div>
+
+        <!-- ====================================================
+             SIGNUP VIEW SECTION
+             ==================================================== -->
+        <div id="signup-form" class="auth-form">
+            <h2 class="step-title">Create Account</h2>
+            <p class="step-subtitle">Start making gorgeous, personalized birthday surprise cards.</p>
+
+            <form id="signup-form-el">
+                <div class="form-group">
+                    <label for="signup-name" class="form-label">Your Name</label>
+                    <input type="text" id="signup-name" class="text-input" placeholder="John Doe" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-email" class="form-label">Email Address</label>
+                    <input type="email" id="signup-email" class="text-input" placeholder="name@domain.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-password" class="form-label">Password</label>
+                    <input type="password" id="signup-password" class="text-input" placeholder="At least 6 characters" required autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-confirm" class="form-label">Confirm Password</label>
+                    <input type="password" id="signup-confirm" class="text-input" placeholder="••••••••" required autocomplete="new-password">
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary btn-full">Sign Up 🚀</button>
+                </div>
+            </form>
+
+            <p class="auth-footer-link">Already have an account? <a href="#" id="to-login">Log in</a></p>
+        </div>
+
+        <!-- ====================================================
+             FORGOT PASSWORD VIEW SECTION
+             ==================================================== -->
+        <div id="forgot-form" class="auth-form">
+            <h2 class="step-title">Recover Password</h2>
+            <p class="step-subtitle">Enter your email and we'll help you reset your credentials.</p>
+
+            <form id="forgot-form-el">
+                <div class="form-group">
+                    <label for="forgot-email" class="form-label">Email Address</label>
+                    <input type="email" id="forgot-email" class="text-input" placeholder="name@domain.com" required autocomplete="email">
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary btn-full">Send Recovery Link ✉️</button>
+                </div>
+            </form>
+
+            <p class="auth-footer-link">Remembered your credentials? <a href="#" id="to-login-2">Back to login</a></p>
+        </div>
+
+        <!-- ====================================================
+             RESET PASSWORD VIEW SECTION
+             ==================================================== -->
+        <div id="reset-form" class="auth-form">
+            <h2 class="step-title">Reset Password</h2>
+            <p class="step-subtitle">Input your recovery token and type a new secure password.</p>
+
+            <form id="reset-form-el">
+                <div class="form-group">
+                    <label for="reset-token" class="form-label">Recovery Token</label>
+                    <input type="text" id="reset-token" class="text-input" placeholder="Paste reset token here" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reset-password" class="form-label">New Password</label>
+                    <input type="password" id="reset-password" class="text-input" placeholder="At least 6 characters" required autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="reset-confirm" class="form-label">Confirm New Password</label>
+                    <input type="password" id="reset-confirm" class="text-input" placeholder="••••••••" required autocomplete="new-password">
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary btn-full">Update Password 🔒</button>
+                </div>
+            </form>
+
+            <p class="auth-footer-link">Change mind? <a href="#" id="to-login-3">Back to login</a></p>
+        </div>
+
+    </div>
+
+    <!-- Load Auth Logic -->
+    <script src="src/js/auth.js"></script>
+</body>
+</html>
