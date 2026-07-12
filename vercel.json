@@ -1,8 +1,14 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
     { "source": "/signup", "destination": "/login.html" },
-    { "source": "/login", "destination": "/login.html" }
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/generator", "destination": "/generator.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/view", "destination": "/view.html" },
+    { "source": "/wish", "destination": "/wish.html" }
   ],
   "builds": [
     { "src": "api/**/*.js", "use": "@vercel/node" },
