@@ -1,0 +1,9 @@
+# IDE and configuration files
+.gemini/
+.agents/
+antigravity-ide/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
