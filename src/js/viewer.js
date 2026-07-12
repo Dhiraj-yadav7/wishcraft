@@ -4,7 +4,7 @@ let viewerConfig = {
     name: 'Anshika',
     senderName: 'Your Love',
     relationship: 'girlfriend',
-    message: "Happy Birthday, my love 😈🔥 you own my heart, my thoughts, and every wild desire in between 😘❤️‍🔥 Tonight isn't just about candles and cake—it's about passion, obsession, and you being dangerously unforgettable 🖤🔥🎂",
+    message: "Happy Birthday, my love! You own my heart and thoughts. 😘❤️",
     photos: [],
     videoUrl: '',
     voiceMessage: '',
@@ -16,11 +16,25 @@ let viewerConfig = {
     fireworksStyle: 'burst',
     cakeStyle: 'animated',
     greetingStyle: 'typewriter',
+    
+    // premium variables
+    timeline: [],
+    aiWishes: [],
+    expiresAt: null,
+    hasPassword: false,
+    
     comments: [],
     guestbook: []
 };
 
+// Analytics tracks
+let sessionStartTime = null;
+
 // DOM elements
+const loadingScreen = document.getElementById('loadingScreen');
+const passwordGate = document.getElementById('passwordGate');
+const expiredGate = document.getElementById('expiredGate');
+const giftBoxContainer = document.getElementById('giftBoxContainer');
 const envelope = document.getElementById('envelope');
 const displayCard = document.getElementById('displayCard');
 const guestbookCard = document.getElementById('guestbookCard');
@@ -35,21 +49,59 @@ document.addEventListener('DOMContentLoaded', () => {
         viewerConfig.pageId = id;
         fetchCardDetails(id);
     } else {
-        // Run with mock/default settings
-        setupSurpriseCardUI();
+        // Run with mock defaults
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => loadingScreen.style.display = 'none', 500);
+            setupSurpriseCardUI();
+        }, 1000);
     }
 
     setupEnvelopeReveal();
     setupGuestbookForm();
+    setupPremiumActions();
+    setupSessionTracker();
 });
 
-// Load Card Settings from API
-async function fetchCardDetails(pageId) {
+// Load Card Settings from API (supporting password gate check)
+async function fetchCardDetails(pageId, passwordValue = '') {
     try {
-        const res = await fetch(`/api/pages?action=public&id=${pageId}`);
+        let url = `/api/pages?action=public&id=${pageId}`;
+        
+        // Append password query if provided
+        if (passwordValue) {
+            url += `&password=${encodeURIComponent(passwordValue)}`;
+        }
+
+        // Get referral channel if any
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref) {
+            url += `&ref=${encodeURIComponent(ref)}`;
+        }
+
+        const res = await fetch(url);
+        
+        // Handle expiration (Vercel returns 410 for expired pages)
+        if (res.status === 410) {
+            loadingScreen.style.display = 'none';
+            passwordGate.style.display = 'none';
+            expiredGate.style.display = 'flex';
+            return;
+        }
+
         const data = await res.json();
         
         if (data.success) {
+            // Check if page is locked under password gate
+            if (data.data.isGated) {
+                loadingScreen.style.display = 'none';
+                passwordGate.style.display = 'flex';
+                setupPasswordGateSubmit(pageId);
+                return;
+            }
+
+            // Successfully unlocked/open
             viewerConfig = {
                 ...viewerConfig,
                 ...data.data.page,
@@ -57,30 +109,53 @@ async function fetchCardDetails(pageId) {
                 guestbook: data.data.guestbook || []
             };
 
+            // Hide gates
+            passwordGate.style.display = 'none';
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => loadingScreen.style.display = 'none', 500);
+
             setupSurpriseCardUI();
             renderGuestbookWishes();
         } else {
-            alert('This birthday card is private or does not exist.');
+            alert(data.message || 'Birthday surprise not found.');
             window.location.href = 'login.html';
         }
     } catch (e) {
         console.error('Fetch card details error:', e);
+        loadingScreen.style.display = 'none';
     }
+}
+
+// Password Gate controls
+function setupPasswordGateSubmit(pageId) {
+    const submitBtn = document.getElementById('gateSubmitBtn');
+    const input = document.getElementById('gatePasswordInput');
+
+    const submitPassword = () => {
+        const passwordValue = input.value.trim();
+        if (!passwordValue) return;
+        
+        loadingScreen.style.display = 'flex';
+        loadingScreen.style.opacity = '1';
+        fetchCardDetails(pageId, passwordValue);
+    };
+
+    submitBtn.addEventListener('click', submitPassword);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitPassword();
+    });
 }
 
 // Populate card fields, background, media elements, and styles
 function setupSurpriseCardUI() {
-    // Apply theme & background
     document.body.className = `wish-body theme-${viewerConfig.theme}`;
     document.body.style.background = viewerConfig.background;
     
-    // Apply font
     const font = viewerConfig.font || 'Outfit';
     displayCard.style.fontFamily = font;
     wishMessage.style.fontFamily = font;
     document.getElementById('cardTitle').style.fontFamily = font;
     
-    // Set headers
     document.getElementById('relationBadge').textContent = viewerConfig.relationship.toUpperCase();
     document.getElementById('cardTitle').textContent = `Happy Birthday, ${viewerConfig.name}! 🎉`;
     document.getElementById('senderTag').textContent = `From: ${viewerConfig.senderName}`;
@@ -94,25 +169,27 @@ function setupSurpriseCardUI() {
     // 3. Voice Message Cassette
     setupVoiceMessagePlayer();
 
-    // 4. Cake style emoji selection
-    const cakeBox = document.getElementById('cakeBox');
-    if (viewerConfig.cakeStyle === 'chocolate') {
-        cakeBox.textContent = '🍫🎂';
-    } else if (viewerConfig.cakeStyle === 'cupcake') {
-        cakeBox.textContent = '🧁';
-    } else {
-        cakeBox.textContent = '🎂🕯️'; // default glowing cake
-    }
+    // 4. Cake style blowing interaction
+    setupCakeBlowing();
+
+    // 5. Memory Timeline
+    setupTimelineMemoryLane();
+
+    // 6. Countdown Timer
+    setupBirthdayCountdown();
+
+    // 7. QR Code Generation
+    setupQrCodeShare();
 }
 
 // Photo Slider Slide Deck
 function setupPhotosCarousel() {
     const photoDeck = document.getElementById('photoDeck');
-    photoDeck.innerHTML = ''; // clear
+    photoDeck.innerHTML = '';
 
     const images = viewerConfig.photos && viewerConfig.photos.length > 0 ? 
                    viewerConfig.photos : 
-                   [generateFallbackPhoto(viewerConfig.gender || 'female')];
+                   [generateFallbackPhoto(viewerConfig.relationship)];
 
     images.forEach((base64, idx) => {
         const slide = document.createElement('img');
@@ -122,19 +199,20 @@ function setupPhotosCarousel() {
         photoDeck.appendChild(slide);
     });
 
-    // Auto slideshow if multiple photos
     if (images.length > 1) {
         let currentSlide = 0;
         setInterval(() => {
             const slides = document.querySelectorAll('.carousel-slide');
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
+            if (slides.length > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
         }, 3000);
     }
 }
 
-function generateFallbackPhoto(gender) {
+function generateFallbackPhoto(relation) {
     const canvas = document.createElement('canvas');
     canvas.width = 160;
     canvas.height = 160;
@@ -147,7 +225,7 @@ function generateFallbackPhoto(gender) {
     ctx.arc(80, 80, 80, 0, Math.PI * 2);
     ctx.fill();
     
-    const emoji = (gender === 'male') ? '🤵' : '👸';
+    const emoji = (relation === 'girlfriend' || relation === 'sister' || relation === 'mother') ? '👸' : '🤵';
     ctx.font = '80px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -168,7 +246,6 @@ function setupVideoEmbed() {
 
     container.style.display = 'block';
     
-    // Resolve Youtube links to embed iframe
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
         if (url.includes('v=')) {
@@ -184,7 +261,6 @@ function setupVideoEmbed() {
             </iframe>
         `;
     } else {
-        // standard direct mp4 video asset
         wrapper.innerHTML = `
             <video src="${url}" controls preload="metadata"></video>
         `;
@@ -209,10 +285,8 @@ function setupVoiceMessagePlayer() {
 
     playBtn.addEventListener('click', () => {
         if (audio.paused) {
-            // Stop background song to focus on voice message
             stopSong();
             audio.play();
-            
             playBtn.textContent = '⏸️';
             tape.classList.add('playing');
             status.textContent = 'Playing voice note... 🔊';
@@ -228,9 +302,276 @@ function setupVoiceMessagePlayer() {
         playBtn.textContent = '▶️';
         tape.classList.remove('playing');
         status.textContent = 'Listen again';
-        // Resume background song
         playSong();
     });
+}
+
+// Memory Timeline loader (Premium feature)
+function setupTimelineMemoryLane() {
+    const container = document.getElementById('timelineContainer');
+    const list = document.getElementById('timelineList');
+    list.innerHTML = '';
+
+    if (!viewerConfig.timeline || viewerConfig.timeline.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+
+    viewerConfig.timeline.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'timeline-item-card';
+        
+        card.innerHTML = `
+            ${item.photo ? `<img src="${item.photo}" class="timeline-img" alt="Memory">` : '<div style="font-size:1.8rem; padding: 0.5rem;">📅</div>'}
+            <div style="flex:1;">
+                <span style="font-size:0.75rem; font-weight:800; color:var(--primary-color); display:block; text-transform:uppercase;">${item.date}</span>
+                <strong style="font-size:0.9rem; display:block; margin-top:0.1rem; color:var(--text-color);">${item.title}</strong>
+                <p style="font-size:0.8rem; opacity:0.85; margin-top:0.2rem; line-height:1.3;">${item.text}</p>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+// Countdown Clock (Premium feature)
+function setupBirthdayCountdown() {
+    const container = document.getElementById('countdownBlock');
+    const countdownText = document.getElementById('countdownText');
+    
+    // Parse target date
+    const bdayDate = new Date(viewerConfig.date);
+    const today = new Date();
+    
+    // If the birthday already passed this year, calculate for next year's anniversary
+    let targetYear = today.getFullYear();
+    let targetDate = new Date(targetYear, bdayDate.getMonth(), bdayDate.getDate());
+    
+    if (today > targetDate) {
+        targetDate.setFullYear(targetYear + 1);
+    }
+
+    container.style.display = 'block';
+
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = targetDate.getTime() - now;
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        if (distance < 0) {
+            countdownText.textContent = "It's Celebration Day! 🎂🥳";
+            clearInterval(timerInterval);
+        } else {
+            countdownText.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+    };
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+}
+
+// Cake Blowing candle blow interactions
+function setupCakeBlowing() {
+    const cakeBox = document.getElementById('cakeBox');
+    const hint = document.getElementById('candleHint');
+    
+    let blownOut = false;
+
+    // Default cake emoji set
+    if (viewerConfig.cakeStyle === 'chocolate') {
+        cakeBox.textContent = '🍫🎂🕯️';
+    } else if (viewerConfig.cakeStyle === 'cupcake') {
+        cakeBox.textContent = '🧁🕯️';
+    } else {
+        cakeBox.textContent = '🎂🕯️';
+    }
+
+    cakeBox.addEventListener('click', () => {
+        if (blownOut) return;
+        blownOut = true;
+        
+        // Remove candle flame emoji
+        if (viewerConfig.cakeStyle === 'chocolate') {
+            cakeBox.textContent = '🍫🎂💨';
+        } else if (viewerConfig.cakeStyle === 'cupcake') {
+            cakeBox.textContent = '🧁💨';
+        } else {
+            cakeBox.textContent = '🎂💨';
+        }
+
+        hint.textContent = 'Candle Blown! Happy Birthday! 🎉🎈';
+        hint.style.color = '#10b981';
+
+        // Play applause synthesized tone
+        playBlowoutApplause();
+        
+        // Trigger massive fireworks burst
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        createBurst(w * 0.5, h * 0.5);
+        createBurst(w * 0.25, h * 0.4);
+        createBurst(w * 0.75, h * 0.4);
+    });
+}
+
+function playBlowoutApplause() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const now = audioCtx.currentTime;
+    
+    // Play celebratory fast arpeggios
+    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+        
+        gain.gain.setValueAtTime(0, now + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+        
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.3);
+    });
+}
+
+// Generate QR Code linking to this view page
+function setupQrCodeShare() {
+    const img = document.getElementById('qrCodeImg');
+    const pageUrl = window.location.href;
+    
+    // Use public QR Code generator API
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pageUrl)}`;
+}
+
+// Setup premium actions (PDF downloads, PNG downloads, Calendar events)
+function setupPremiumActions() {
+    const pdfBtn = document.getElementById('downloadPdfBtn');
+    const imgBtn = document.getElementById('downloadImgBtn');
+    const calendarBtn = document.getElementById('calendarBtn');
+
+    // 1. Download PDF using html2canvas and jsPDF
+    pdfBtn.addEventListener('click', async () => {
+        showToast('Preparing PDF download...', 'info');
+        logShareClick();
+
+        try {
+            const canvasEl = await html2canvas(displayCard, { scale: 2 });
+            const imgData = canvasEl.toDataURL('image/png');
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = (canvasEl.height * imgWidth) / canvasEl.width;
+            
+            pdf.addImage(imgData, 'PNG', 10, 15, imgWidth, imgHeight);
+            pdf.save(`Surprise_${viewerConfig.name}.pdf`);
+            showToast('PDF downloaded successfully! 📄', 'success');
+        } catch (e) {
+            console.error('PDF export error:', e);
+            showToast('PDF download failed. Try again.', 'error');
+        }
+    });
+
+    // 2. Download Image (PNG)
+    imgBtn.addEventListener('click', async () => {
+        showToast('Saving wish card image...', 'info');
+        logShareClick();
+
+        try {
+            const canvasEl = await html2canvas(displayCard, { scale: 2 });
+            const link = document.createElement('a');
+            link.download = `Surprise_${viewerConfig.name}.png`;
+            link.href = canvasEl.toDataURL('image/png');
+            link.click();
+            showToast('Image downloaded successfully! 🖼️', 'success');
+        } catch (e) {
+            console.error('Image capture error', e);
+            showToast('Image download failed.', 'error');
+        }
+    });
+
+    // 3. Add to Google Calendar Template Link
+    calendarBtn.addEventListener('click', () => {
+        logShareClick();
+        
+        const name = viewerConfig.name;
+        const bdayDate = new Date(viewerConfig.date);
+        
+        // Set dates range for calendar (all day event)
+        const dateStr = bdayDate.toISOString().split('T')[0].replace(/-/g, '');
+        const nextDay = new Date(bdayDate.getTime() + 24 * 60 * 60 * 1000);
+        const nextDayStr = nextDay.toISOString().split('T')[0].replace(/-/g, '');
+
+        const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Happy+Birthday+${encodeURIComponent(name)}+%F0%9F%8E%82&dates=${dateStr}/${nextDayStr}&details=Sent+via+Surprise+Card+App%21&recur=RRULE:FREQ=YEARLY`;
+        
+        window.open(calUrl, '_blank');
+    });
+}
+
+// Session duration tracking
+function setupSessionTracker() {
+    sessionStartTime = new Date();
+
+    // Log duration on page close
+    window.addEventListener('beforeunload', logSessionDuration);
+    window.addEventListener('pagehide', logSessionDuration);
+}
+
+function logSessionDuration() {
+    if (!sessionStartTime || !viewerConfig.pageId) return;
+
+    const endTime = new Date();
+    const durationSeconds = Math.floor((endTime - sessionStartTime) / 1000);
+
+    if (durationSeconds <= 0) return;
+
+    // Send Beacon payload to be reliable
+    const payload = JSON.stringify({
+        id: viewerConfig.pageId,
+        duration: durationSeconds
+    });
+
+    const url = `/api/pages?action=logDuration`;
+    
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+    } else {
+        // Fallback fetch sync
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+            keepalive: true
+        });
+    }
+
+    // Reset to avoid double counts
+    sessionStartTime = null;
+}
+
+// Log share transaction
+async function logShareClick() {
+    if (!viewerConfig.pageId) return;
+    try {
+        await fetch('/api/pages?action=logShare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: viewerConfig.pageId })
+        });
+    } catch(e) {}
 }
 
 // Guestbook Wish list rendering
@@ -264,7 +605,6 @@ function setupGuestbookForm() {
     const avatarOptions = document.querySelectorAll('.avatar-pick-option');
     let selectedEmoji = '🎈';
 
-    // Click handler to choose custom emojis
     avatarOptions.forEach(opt => {
         opt.addEventListener('click', () => {
             avatarOptions.forEach(o => o.classList.remove('selected'));
@@ -295,18 +635,12 @@ function setupGuestbookForm() {
             const data = await res.json();
             
             if (data.success) {
-                // Clear input
                 document.getElementById('guestText').value = '';
                 
-                // Add new post to array
                 viewerConfig.guestbook.unshift(data.data);
                 renderGuestbookWishes();
                 
-                if (typeof showToast === 'function') {
-                    showToast('Wishes signed in guestbook! ✍️', 'success');
-                } else {
-                    alert('Wishes signed in guestbook! ✍️');
-                }
+                showToast('Wishes signed in guestbook! ✍️', 'success');
             }
         } catch (err) {
             console.error('Submit guestbook error:', err);
@@ -314,18 +648,29 @@ function setupGuestbookForm() {
     });
 }
 
-// ========================================================
-// ENVELOPE INTERACTIVE REVEAL
-// ========================================================
+// Envelope Interactive Click Reveal inside gift box sequence
 function setupEnvelopeReveal() {
+    const giftBox = document.getElementById('giftBoxContainer');
+    
+    giftBox.addEventListener('click', () => {
+        // Bounce out gift box
+        giftBox.style.transform = 'scale(0.01)';
+        
+        // Launch floating balloons on box open! (Premium enhancement)
+        startFloatingBalloons();
+
+        setTimeout(() => {
+            giftBox.style.display = 'none';
+            envelope.style.display = 'block';
+            setTimeout(() => envelope.style.opacity = '1', 50);
+        }, 400);
+    });
+
     envelope.addEventListener('click', () => {
         if (!envelope.classList.contains('open')) {
             envelope.classList.add('open');
-            
-            // 1. Play Background loops
             playSong();
             
-            // 2. Trigger initial bursts
             setTimeout(() => {
                 const w = window.innerWidth;
                 const h = window.innerHeight;
@@ -333,19 +678,14 @@ function setupEnvelopeReveal() {
                 createBurst(w * 0.75, h * 0.3);
             }, 600);
 
-            // 3. Slide card up & Fade envelope
             setTimeout(() => {
                 envelope.style.opacity = '0';
                 envelope.style.pointerEvents = 'none';
                 displayCard.classList.add('show');
                 
-                // Start typing message greeting
                 triggerGreetingMessage();
-                
-                // Start particle floaters
                 startFloatingConfetti();
                 
-                // Show guestbook panel
                 if (viewerConfig.pageId) {
                     guestbookCard.style.display = 'block';
                     setTimeout(() => guestbookCard.style.opacity = '1', 50);
@@ -376,7 +716,7 @@ function triggerGreetingMessage() {
         wishMessage.style.opacity = '0';
         wishMessage.style.transition = 'opacity 1.5s ease-in';
         setTimeout(() => wishMessage.style.opacity = '1', 50);
-    } else { // fade-in
+    } else {
         wishMessage.innerHTML = viewerConfig.message;
         wishMessage.style.opacity = '0';
         wishMessage.style.transition = 'opacity 1.5s ease-in';
@@ -384,13 +724,33 @@ function triggerGreetingMessage() {
     }
 }
 
-// ========================================================
-// FLOATING PARTICLES CONFETTI SYSTEM
-// ========================================================
+// Floating balloons (gently rising, color variations)
+function startFloatingBalloons() {
+    const colors = ['#f43f5e', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#a855f7'];
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            const balloon = document.createElement('div');
+            balloon.className = 'floating-emoji';
+            balloon.textContent = '🎈';
+            balloon.style.left = Math.random() * 90 + 'vw';
+            balloon.style.fontSize = Math.random() * 2 + 1.5 + 'rem';
+            
+            // Custom CSS filters to shift balloon colors! (Aesthetic)
+            const colorIdx = Math.floor(Math.random() * colors.length);
+            balloon.style.filter = `hue-rotate(${colorIdx * 60}deg)`;
+            
+            balloon.style.animation = `floatUp ${Math.random() * 4 + 4}s linear forwards`;
+            document.body.appendChild(balloon);
+            setTimeout(() => balloon.remove(), 8000);
+        }, i * 200);
+    }
+}
+
+// Confetti System
 let confettiInterval = null;
 const confettiPresets = {
     hearts: ['❤️', '💖', '💕', '🌹', '💟'],
-    balloons: ['🎈', '🎈', '🎈', '🎈'],
+    balloons: ['🎈', '🎈', '🎈'],
     stars: ['⭐', '✨', '🌟', '💫'],
     mixed: ['🎉', '🥳', '🎁', '🎂', '🍬', '🎈', '💖']
 };
@@ -412,14 +772,27 @@ function startFloatingConfetti() {
         el.style.animation = `floatUp ${Math.random() * 3 + 5}s linear forwards`;
         
         document.body.appendChild(el);
-        
         setTimeout(() => el.remove(), 8000);
     }, 450);
 }
 
-// ========================================================
-// CANVAS FIREWORKS SYSTEM (TRANS-SAFE TRAILS)
-// ========================================================
+// Canvas Sparkles trailing mouse trail (Premium feature)
+let mousePos = { x: 0, y: 0 };
+let isSparkling = false;
+
+window.addEventListener('mousemove', (e) => {
+    mousePos.x = e.clientX;
+    mousePos.y = e.clientY;
+    
+    // Add trial sparkles occasionally
+    if (displayCard.classList.contains('show') && Math.random() < 0.28) {
+        const colors = getThemeColors();
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particles.push(new Particle(mousePos.x, mousePos.y, color, 'firefly'));
+    }
+});
+
+// Canvas particle system (loops trailing sparkles & fireworks)
 const canvas = document.getElementById('fireworks-canvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -498,7 +871,7 @@ function getThemeColors() {
         return ['217, 119, 6', '251, 191, 36', '255, 255, 255', '245, 158, 11'];
     } else if (viewerConfig.theme === 'playful') {
         return ['6, 182, 212', '244, 63, 94', '234, 179, 8', '168, 85, 247'];
-    } else { // cosmic
+    } else {
         return ['99, 102, 241', '168, 85, 247', '236, 72, 153', '6, 182, 212'];
     }
 }
@@ -518,7 +891,6 @@ function animate() {
 }
 animate();
 
-// Autoplay fireworks occasionally
 setInterval(() => {
     if (displayCard.classList.contains('show') && particles.length < 80) {
         createBurst(
@@ -548,7 +920,6 @@ const noteFreqs = {
     'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
 };
 
-// Birthday melody notes mapping
 const melody = [
     { note: 'C4', dur: 0.5 }, { note: 'C4', dur: 0.5 }, { note: 'D4', dur: 1 }, { note: 'C4', dur: 1 }, { note: 'F4', dur: 1 }, { note: 'E4', dur: 2 },
     { note: 'C4', dur: 0.5 }, { note: 'C4', dur: 0.5 }, { note: 'D4', dur: 1 }, { note: 'C4', dur: 1 }, { note: 'G4', dur: 1 }, { note: 'F4', dur: 2 },
@@ -565,18 +936,16 @@ function playNote(freq, start, duration, style) {
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     
-    // Choose tone color based on selected music option
     if (style === 'piano') {
-        osc.type = 'sine'; // soft classical sine
+        osc.type = 'sine';
     } else if (style === 'happy') {
-        osc.type = 'sawtooth'; // bright retro synth
+        osc.type = 'sawtooth';
     } else {
-        osc.type = 'triangle'; // chime box bell
+        osc.type = 'triangle';
     }
     
     osc.frequency.value = freq;
     
-    // Volume envelope
     gain.gain.setValueAtTime(0, start);
     gain.gain.linearRampToValueAtTime(style === 'happy' ? 0.12 : 0.22, start + 0.04);
     gain.gain.exponentialRampToValueAtTime(0.001, start + duration - 0.04);
@@ -603,7 +972,6 @@ function playSong() {
     
     let time = audioCtx.currentTime + 0.1;
     
-    // Adjust tempo based on selected music category
     const style = viewerConfig.music || 'chimes';
     const beatLength = style === 'happy' ? 0.45 : (style === 'piano' ? 0.65 : 0.55);
     
@@ -637,6 +1005,12 @@ document.getElementById('musicBtn').addEventListener('click', () => {
     if (isPlaying) {
         stopSong();
     } else {
+        // Pause any recorded voice notes before playing bg music
+        document.getElementById('voiceMessageAudio').pause();
+        document.getElementById('tapePlayBtn').textContent = '▶️';
+        document.getElementById('cassetteTape').classList.remove('playing');
+        document.getElementById('tapeStatus').textContent = 'Voice note paused';
+        
         playSong();
     }
 });

@@ -55,10 +55,10 @@
                 <span class="stats-value" id="stat-active">0</span>
                 <span class="stats-label">Active Links</span>
             </div>
-            <div class="stats-card">
+            <div class="stats-card" id="viewsStatCard" style="cursor: pointer;">
                 <span class="stats-icon">👁️</span>
                 <span class="stats-value" id="stat-views">0</span>
-                <span class="stats-label">Total Views</span>
+                <span class="stats-label">Total Views (Click to view)</span>
             </div>
             <div class="stats-card">
                 <span class="stats-icon">✍️</span>
@@ -86,10 +86,48 @@
         <main class="cards-grid" id="cardsGrid">
             <!-- Loading Indicator -->
             <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;" id="loadingContainer">
-                <p style="font-weight: 600; font-size: 1.1rem; opacity: 0.8;">Loading your cards list... 🚀</p>
+                <p style="font-weight: 600; font-size: 1.1rem; opacity: 0.8;">Loading your surprises... 🚀</p>
             </div>
         </main>
 
+    </div>
+
+    <!-- Analytics Insight Modal Overlay (Premium Analytics) -->
+    <div id="analyticsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200;">
+        <div style="width: 90%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 1.2rem; color: var(--text-color); border-color: rgba(255,255,255,0.1);">
+            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 0.2rem;">Surprise Card Analytics 📈</h3>
+            <p style="font-size: 0.85rem; text-align: center; opacity: 0.8; margin-top: -0.8rem;" id="analStarName">Analytics for recipient</p>
+            
+            <!-- Metrics Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Unique Visitors</span>
+                    <span style="font-size: 1.5rem; font-weight: 800;" id="analUniques">0</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Total Views</span>
+                    <span style="font-size: 1.5rem; font-weight: 800;" id="analViews">0</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Social Shares</span>
+                    <span style="font-size: 1.5rem; font-weight: 800;" id="analShares">0</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Avg. Session Time</span>
+                    <span style="font-size: 1.2rem; font-weight: 800;" id="analDuration">0s</span>
+                </div>
+            </div>
+
+            <!-- Referral sources breakdown list -->
+            <div>
+                <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Referral Channels:</strong>
+                <div id="analReferralsContainer" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 120px; overflow-y: auto;">
+                    <!-- Referral source lines loaded here -->
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="analCloseBtn" style="padding: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem; font-weight: bold; border-radius: 12px;">Close Analytics</button>
+        </div>
     </div>
 
     <!-- JS Controller implementation -->

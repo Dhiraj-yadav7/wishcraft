@@ -15,7 +15,14 @@ const notifCount = document.getElementById('notifCount');
 const notifDrawer = document.getElementById('notifDrawer');
 const notifList = document.getElementById('notifList');
 
+// Analytics elements
+const analyticsModal = document.getElementById('analyticsModal');
+const analCloseBtn = document.getElementById('analCloseBtn');
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Hide analytics modal to prevent flashing
+    analyticsModal.style.display = 'none';
+
     setupDashboardUser();
     fetchDashboardData();
     setupDashboardEvents();
@@ -77,7 +84,6 @@ async function fetchDashboardData() {
 function renderPages() {
     cardsGrid.innerHTML = '';
     
-    // Filter list
     let filtered = dashState.pages;
     if (dashState.activeFilter !== 'all') {
         filtered = filtered.filter(p => p.status === dashState.activeFilter);
@@ -92,7 +98,6 @@ function renderPages() {
         );
     }
 
-    // Check if empty state
     if (filtered.length === 0) {
         cardsGrid.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
@@ -105,7 +110,6 @@ function renderPages() {
         return;
     }
 
-    // Loop and build cards
     filtered.forEach(page => {
         const dateStr = new Date(page.date).toLocaleDateString(undefined, { 
             year: 'numeric', 
@@ -130,12 +134,13 @@ function renderPages() {
                 <button type="button" class="action-icon-btn edit-btn" data-id="${page.id}" title="Edit Card Parameters">✏️</button>
                 <!-- Duplicate -->
                 <button type="button" class="action-icon-btn duplicate-btn" data-id="${page.id}" title="Duplicate / Clone Layout">📋</button>
+                <!-- Analytics -->
+                <button type="button" class="action-icon-btn analytics-btn" data-id="${page.id}" title="View Card Analytics">📈</button>
                 <!-- Delete -->
                 <button type="button" class="action-icon-btn delete-btn" data-id="${page.id}" title="Delete Surprise Card">🗑️</button>
             </div>
         `;
 
-        // Hook click listeners to action buttons
         card.querySelector('.preview-btn').addEventListener('click', () => {
             window.open(`view.html?id=${page.id}`, '_blank');
         });
@@ -146,6 +151,10 @@ function renderPages() {
 
         card.querySelector('.duplicate-btn').addEventListener('click', () => {
             duplicatePage(page.id);
+        });
+
+        card.querySelector('.analytics-btn').addEventListener('click', () => {
+            openAnalyticsModal(page.id, page.name);
         });
 
         card.querySelector('.delete-btn').addEventListener('click', () => {
@@ -197,6 +206,90 @@ function renderNotifications() {
     });
 }
 
+// ========================================================
+// VISITOR ANALYTICS DISPLAYER (Premium Feature)
+// ========================================================
+async function openAnalyticsModal(pageId, name) {
+    const token = authManager.getToken();
+    if (!token) return;
+
+    showToast('Loading analytics...', 'info');
+
+    try {
+        const res = await fetch(`/api/pages?action=detail&id=${pageId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            const anal = data.data.analytics;
+            
+            document.getElementById('analStarName').textContent = `Analytics for surprise card: "${name}"`;
+            
+            // Unique visitors count
+            const uniques = anal.visitorIps ? anal.visitorIps.length : 0;
+            document.getElementById('analUniques').textContent = uniques;
+            
+            // Total Views
+            document.getElementById('analViews').textContent = anal.views || 0;
+            
+            // Total Shares
+            document.getElementById('analShares').textContent = anal.sharesCount || 0;
+            
+            // Average Session Duration
+            const durations = anal.visitDurations || [];
+            if (durations.length === 0) {
+                document.getElementById('analDuration').textContent = '0s';
+            } else {
+                const sum = durations.reduce((a, b) => a + b, 0);
+                const avg = Math.round(sum / durations.length);
+                if (avg < 60) {
+                    document.getElementById('analDuration').textContent = `${avg}s`;
+                } else {
+                    const mins = Math.floor(avg / 60);
+                    const secs = avg % 60;
+                    document.getElementById('analDuration').textContent = `${mins}m ${secs}s`;
+                }
+            }
+
+            // Render Referral Progress bar charts
+            const referralsContainer = document.getElementById('analReferralsContainer');
+            referralsContainer.innerHTML = '';
+
+            const refs = anal.referrals || [];
+            if (refs.length === 0) {
+                referralsContainer.innerHTML = `<p style="font-size: 0.8rem; opacity: 0.65; text-align: center; padding: 0.5rem 0;">Direct link visits or untracked referrals.</p>`;
+            } else {
+                // Sort by count descending
+                refs.sort((a, b) => b.count - a.count);
+                
+                refs.forEach(ref => {
+                    const pct = anal.views > 0 ? Math.round((ref.count / anal.views) * 100) : 0;
+                    
+                    const row = document.createElement('div');
+                    row.style.marginBottom = '0.5rem';
+                    row.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:0.15rem;">
+                            <span style="font-weight:700; text-transform:uppercase;">🔗 ${ref.source}</span>
+                            <span><strong>${ref.count}</strong> visits (${pct}%)</span>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.04); height:6px; border-radius:3px; overflow:hidden; border: 1px solid rgba(0,0,0,0.02);">
+                            <div style="background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); height:100%; width: ${pct}%;"></div>
+                        </div>
+                    `;
+                    referralsContainer.appendChild(row);
+                });
+            }
+
+            analyticsModal.style.display = 'flex';
+        } else {
+            showToast('Failed to load card analytics.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error loading analytics.', 'error');
+    }
+}
+
 // Action: Duplicate Card API
 async function duplicatePage(pageId) {
     const token = authManager.getToken();
@@ -217,7 +310,7 @@ async function duplicatePage(pageId) {
         
         if (data.success) {
             showToast(data.message, 'success');
-            fetchDashboardData(); // Refresh UI
+            fetchDashboardData();
         } else {
             showToast(data.message, 'error');
         }
@@ -245,7 +338,7 @@ async function deletePage(pageId, name) {
         
         if (data.success) {
             showToast(data.message, 'success');
-            fetchDashboardData(); // Refresh
+            fetchDashboardData();
         } else {
             showToast(data.message, 'error');
         }
@@ -272,7 +365,6 @@ async function markNotificationAsRead(notifId, element) {
         
         if (data.success) {
             element.classList.remove('unread');
-            // Re-fetch to update counts
             fetchDashboardData();
         }
     } catch (e) {
@@ -282,13 +374,11 @@ async function markNotificationAsRead(notifId, element) {
 
 // Setup Event Listeners
 function setupDashboardEvents() {
-    // Search listener
     searchInput.addEventListener('input', (e) => {
         dashState.searchQuery = e.target.value;
         renderPages();
     });
 
-    // Filter pills toggles
     filterPills.addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-pill');
         if (!btn) return;
@@ -300,19 +390,29 @@ function setupDashboardEvents() {
         renderPages();
     });
 
-    // Toggle Notifications dropdown drawer
     notifBell.addEventListener('click', (e) => {
         e.stopPropagation();
         notifDrawer.classList.toggle('active');
     });
 
-    // Hide notifications dropdown on click outside
     document.addEventListener('click', () => {
         notifDrawer.classList.remove('active');
     });
 
-    // Redirect to create card
+    analCloseBtn.addEventListener('click', () => {
+        analyticsModal.style.display = 'none';
+    });
+
     document.getElementById('createNewCardBtn').addEventListener('click', () => {
         window.location.href = 'generator.html';
+    });
+    
+    // Clicking the view summary card opens the latest page analytics if available
+    document.getElementById('viewsStatCard').addEventListener('click', () => {
+        if (dashState.pages.length > 0) {
+            openAnalyticsModal(dashState.pages[0].id, dashState.pages[0].name);
+        } else {
+            showToast('Create a surprise page first to see analytics! 📈', 'info');
+        }
     });
 }

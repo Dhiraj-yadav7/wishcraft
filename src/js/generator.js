@@ -6,6 +6,12 @@ let generatorState = {
     voiceMessage: '', // Base64 audio
     theme: 'romantic',
     background: 'linear-gradient(135deg, #ffe4e6 0%, #fbcfe8 100%)',
+    
+    // premium specs
+    timeline: [], // Array of { date, title, text, photo }
+    aiWishes: [], // Array of { category, text, favorite }
+    currentTimelinePhoto: '', // Temp base64 for upload
+
     mediaRecorder: null,
     audioChunks: [],
     isRecording: false
@@ -24,6 +30,9 @@ const backgroundPresets = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Hide AI Modal initially to prevent flash
+    document.getElementById('aiAssistModal').style.display = 'none';
+
     // 1. Initial renders
     renderBackgroundPresets();
     setupSimulatorSync();
@@ -32,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupVoiceRecorder();
     setupSaveActions();
     
+    // Premium setups
+    setupAiAssistModule();
+    setupTimelineManager();
+    
     // 2. Check if Edit Mode (url query parameter ?id=xxx)
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -39,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         generatorState.pageId = id;
         loadEditDetails(id);
     } else {
-        // Set default date to today
         document.getElementById('birthdate').value = new Date().toISOString().split('T')[0];
     }
 });
@@ -59,7 +71,6 @@ function renderBackgroundPresets() {
             document.querySelectorAll('.bg-preset-option').forEach(o => o.classList.remove('selected'));
             option.classList.add('selected');
             generatorState.background = preset.value;
-            // Update preview simulator container background
             document.getElementById('previewPane').style.background = preset.value;
         });
 
@@ -97,6 +108,15 @@ async function loadEditDetails(pageId) {
             document.getElementById('cakeSelect').value = page.cakeStyle || 'animated';
             document.getElementById('greetingSelect').value = page.greetingStyle || 'typewriter';
 
+            // Premium inputs populate
+            document.getElementById('linkPassword').value = page.password || '';
+            if (page.expiresAt) {
+                document.getElementById('linkExpiry').value = new Date(page.expiresAt).toISOString().slice(0, 16);
+            }
+            generatorState.timeline = page.timeline || [];
+            updateTimelineItemsList();
+            generatorState.aiWishes = page.aiWishes || [];
+
             // Sync grid theme selection
             document.querySelectorAll('.grid-option[data-type="theme"]').forEach(opt => {
                 if (opt.dataset.value === page.theme) {
@@ -125,7 +145,6 @@ async function loadEditDetails(pageId) {
             generatorState.background = page.background || backgroundPresets[0].value;
             document.getElementById('previewPane').style.background = generatorState.background;
             
-            // Highlight selected background preset if match found
             document.querySelectorAll('.bg-preset-option').forEach(opt => {
                 if (opt.dataset.val === page.background) {
                     opt.classList.add('selected');
@@ -134,7 +153,6 @@ async function loadEditDetails(pageId) {
                 }
             });
 
-            // Trigger simulator sync refresh
             syncSimulator();
         } else {
             showToast(data.message, 'error');
@@ -152,7 +170,6 @@ function setupSimulatorSync() {
         document.getElementById(id).addEventListener('change', syncSimulator);
     });
 
-    // Theme selector click sync
     document.querySelectorAll('.grid-option[data-type="theme"]').forEach(opt => {
         opt.addEventListener('click', (e) => {
             document.querySelectorAll('.grid-option[data-type="theme"]').forEach(o => o.classList.remove('selected'));
@@ -175,19 +192,14 @@ function syncSimulator() {
     document.getElementById('simRelation').textContent = rel.toUpperCase();
     document.getElementById('simMessage').textContent = msg;
 
-    // Apply selected font
     document.getElementById('simCard').style.fontFamily = font;
     document.getElementById('simMessage').style.fontFamily = font;
-
-    // Sync theme visual class on simulator card
     document.getElementById('simCard').className = `preview-sim-card theme-${generatorState.theme}`;
 
-    // Show first uploaded photo in simulator if available
     const simPhoto = document.getElementById('simPhoto');
     if (generatorState.photos.length > 0) {
         simPhoto.src = generatorState.photos[0];
     } else {
-        // Fallback gender icon
         simPhoto.src = generateFallbackAvatar();
     }
 }
@@ -212,11 +224,9 @@ function generateFallbackAvatar() {
 }
 
 // Tab Wizard Navigation
-const tabs = ['tab-basics', 'tab-media', 'tab-creative', 'tab-effects'];
 function setupTabWizard() {
     const nextBtn = document.getElementById('nextBtn');
     const backBtn = document.getElementById('backBtn');
-    const saveActions = document.getElementById('saveActions');
 
     nextBtn.addEventListener('click', () => {
         if (validateStep(generatorState.activeStep)) {
@@ -230,11 +240,9 @@ function setupTabWizard() {
         showTabStep(generatorState.activeStep);
     });
 
-    // Directly bind tab buttons
     document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
         btn.addEventListener('click', () => {
             const targetStep = idx + 1;
-            // Validate previous steps before skipping forward
             if (targetStep > generatorState.activeStep && !validateStep(generatorState.activeStep)) {
                 return;
             }
@@ -264,7 +272,6 @@ function showTabStep(step) {
     const backBtn = document.getElementById('backBtn');
     const saveActions = document.getElementById('saveActions');
 
-    // Show/hide buttons
     if (step === 1) {
         backBtn.style.display = 'none';
         nextBtn.style.display = 'block';
@@ -279,24 +286,16 @@ function showTabStep(step) {
         saveActions.style.display = 'none';
     }
 
-    // Toggle active classes
     document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-        if (idx === (step - 1)) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+        if (idx === (step - 1)) btn.classList.add('active');
+        else btn.classList.remove('active');
     });
 
     document.querySelectorAll('.tab-content').forEach((content, idx) => {
-        if (idx === (step - 1)) {
-            content.classList.add('active');
-        } else {
-            content.classList.remove('active');
-        }
+        if (idx === (step - 1)) content.classList.add('active');
+        else content.classList.remove('active');
     });
 
-    // Theme changes body class
     document.body.className = `theme-${generatorState.theme}`;
 }
 
@@ -332,7 +331,6 @@ function setupPhotoManager() {
 }
 
 function handlePhotoFiles(files) {
-    // Check limit
     if (generatorState.photos.length + files.length > 5) {
         showToast('You can upload a maximum of 5 photos! 📸', 'warning');
         return;
@@ -349,7 +347,7 @@ function handlePhotoFiles(files) {
         reader.onload = (e) => {
             generatorState.photos.push(e.target.result);
             updatePhotoThumbnailsGrid();
-            syncSimulator(); // Update preview
+            syncSimulator();
         };
         reader.readAsDataURL(file);
     });
@@ -389,7 +387,6 @@ function setupVoiceRecorder() {
     const playContainer = document.getElementById('audioPlayContainer');
 
     recordBtn.addEventListener('click', async () => {
-        // If has audio, play/pause
         if (recordBtn.classList.contains('has-audio')) {
             if (voicePreview.paused) {
                 voicePreview.play();
@@ -401,13 +398,10 @@ function setupVoiceRecorder() {
             return;
         }
 
-        // Toggle record state
         if (generatorState.isRecording) {
-            // Stop recording
             generatorState.mediaRecorder.stop();
             generatorState.isRecording = false;
         } else {
-            // Start recording
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 generatorState.audioChunks = [];
@@ -460,6 +454,208 @@ function setupVoiceRecorder() {
     });
 }
 
+// ========================================================
+// TIMELINE MEMORY LANE EDITOR (Premium feature)
+// ========================================================
+function setupTimelineManager() {
+    const photoBtn = document.getElementById('timelinePhotoBtn');
+    const photoInput = document.getElementById('timelinePhotoInput');
+    const previewImg = document.getElementById('timelinePreviewImg');
+    const previewContainer = document.getElementById('timelinePhotoPreview');
+    const addBtn = document.getElementById('addTimelineItemBtn');
+
+    photoBtn.addEventListener('click', () => photoInput.click());
+
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        if (file.size > 1.2 * 1024 * 1024) {
+            showToast('Timeline photos must be smaller than 1.2MB.', 'warning');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            generatorState.currentTimelinePhoto = ev.target.result;
+            previewImg.src = ev.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    addBtn.addEventListener('click', () => {
+        const title = document.getElementById('timelineTitle').value.trim();
+        const date = document.getElementById('timelineDate').value.trim();
+        const text = document.getElementById('timelineText').value.trim();
+
+        if (!title || !date) {
+            showToast('Please provide a Title and Date/Age for the memory node.', 'warning');
+            return;
+        }
+
+        if (generatorState.timeline.length >= 4) {
+            showToast('Timeline is limited to 4 memory nodes for best display.', 'warning');
+            return;
+        }
+
+        // Add node
+        generatorState.timeline.push({
+            title,
+            date,
+            text: text || '',
+            photo: generatorState.currentTimelinePhoto || ''
+        });
+
+        // Reset inputs
+        document.getElementById('timelineTitle').value = '';
+        document.getElementById('timelineDate').value = '';
+        document.getElementById('timelineText').value = '';
+        generatorState.currentTimelinePhoto = '';
+        previewContainer.style.display = 'none';
+        previewImg.src = '';
+        photoInput.value = '';
+
+        updateTimelineItemsList();
+        showToast('Memory node added to timeline! ⏰', 'success');
+    });
+}
+
+function updateTimelineItemsList() {
+    const container = document.getElementById('timelineItemsList');
+    container.innerHTML = '';
+
+    generatorState.timeline.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.justifyContent = 'space-between';
+        div.style.padding = '0.5rem 0.8rem';
+        div.style.background = 'rgba(255,255,255,0.5)';
+        div.style.borderRadius = '10px';
+        div.style.border = '1px solid rgba(0,0,0,0.04)';
+        div.style.fontSize = '0.8rem';
+
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+                ${item.photo ? `<img src="${item.photo}" style="width:28px; height:28px; object-fit:cover; border-radius:50%;">` : '📅'}
+                <span><strong>${item.date}</strong>: ${item.title}</span>
+            </div>
+            <button type="button" class="photo-thumb-remove" data-idx="${idx}" style="position:static; width:22px; height:22px; flex-shrink:0;">✕</button>
+        `;
+
+        div.querySelector('button').addEventListener('click', (e) => {
+            const removeIdx = parseInt(e.target.dataset.idx);
+            generatorState.timeline.splice(removeIdx, 1);
+            updateTimelineItemsList();
+        });
+
+        container.appendChild(div);
+    });
+}
+
+// ========================================================
+// GEMINI AI ASSIST DIALOG DRAWER (Premium integration)
+// ========================================================
+function setupAiAssistModule() {
+    const modal = document.getElementById('aiAssistModal');
+    const openBtn = document.getElementById('aiAssistBtn');
+    const closeBtn = document.getElementById('aiCloseBtn');
+    const generateBtn = document.getElementById('aiGenerateBtn');
+    const regenBtn = document.getElementById('aiRegenerateBtn');
+    const copyBtn = document.getElementById('aiCopyBtn');
+    const favoriteBtn = document.getElementById('aiFavoriteBtn');
+    const useBtn = document.getElementById('aiUseBtn');
+    
+    const shimmer = document.getElementById('aiShimmer');
+    const resultBlock = document.getElementById('aiResultBlock');
+    const resultText = document.getElementById('aiResultText');
+    const categorySelect = document.getElementById('aiCategory');
+
+    openBtn.addEventListener('click', () => {
+        const name = document.getElementById('recipientName').value.trim();
+        if (!name) {
+            showToast('Please fill in the Birthday Name first to generate custom wishes!', 'warning');
+            return;
+        }
+        modal.style.display = 'flex';
+        resultBlock.style.display = 'none';
+        shimmer.style.display = 'none';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    const triggerGeneration = async () => {
+        const token = authManager.getToken();
+        if (!token) return;
+
+        const recipientName = document.getElementById('recipientName').value.trim();
+        const relation = document.getElementById('relationship').value;
+        const category = categorySelect.value;
+
+        shimmer.style.display = 'block';
+        resultBlock.style.display = 'none';
+        generateBtn.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ recipientName, relation, category })
+            });
+            const data = await res.json();
+            
+            shimmer.style.display = 'none';
+            generateBtn.style.display = 'block';
+            
+            if (data.success) {
+                resultText.value = data.data.text;
+                resultBlock.style.display = 'flex';
+                showToast(data.message, 'success');
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            shimmer.style.display = 'none';
+            generateBtn.style.display = 'block';
+            showToast('Failed to contact AI engine.', 'error');
+        }
+    };
+
+    generateBtn.addEventListener('click', triggerGeneration);
+    regenBtn.addEventListener('click', triggerGeneration);
+
+    copyBtn.addEventListener('click', () => {
+        resultText.select();
+        document.execCommand('copy');
+        showToast('Copied to clipboard! 📋', 'success');
+    });
+
+    useBtn.addEventListener('click', () => {
+        const text = resultText.value.trim();
+        if (text) {
+            document.getElementById('cardMessage').value = text;
+            syncSimulator();
+            modal.style.display = 'none';
+            showToast('AI wishes copied to message card! 🪄', 'success');
+        }
+    });
+
+    favoriteBtn.addEventListener('click', () => {
+        const text = resultText.value.trim();
+        const category = categorySelect.value;
+        if (text) {
+            // Push to favs list
+            generatorState.aiWishes.push({ category, text, favorite: true });
+            showToast('Saved to your AI favorites! ❤️', 'success');
+        }
+    });
+}
+
 // Save as Draft or Publish Card
 function setupSaveActions() {
     const saveDraftBtn = document.getElementById('saveDraftBtn');
@@ -473,7 +669,6 @@ async function submitCardData(status) {
     const token = authManager.getToken();
     if (!token) return;
 
-    // Collect values
     const name = document.getElementById('recipientName').value.trim();
     const date = document.getElementById('birthdate').value;
     const relationship = document.getElementById('relationship').value;
@@ -486,6 +681,11 @@ async function submitCardData(status) {
     const fireworksStyle = document.getElementById('fireworksSelect').value;
     const cakeStyle = document.getElementById('cakeSelect').value;
     const greetingStyle = document.getElementById('greetingSelect').value;
+
+    // Premium attributes
+    const password = document.getElementById('linkPassword').value.trim();
+    const expiresAtVal = document.getElementById('linkExpiry').value;
+    const expiresAt = expiresAtVal ? new Date(expiresAtVal).toISOString() : null;
 
     const payload = {
         name,
@@ -504,7 +704,13 @@ async function submitCardData(status) {
         fireworksStyle,
         cakeStyle,
         greetingStyle,
-        status
+        status,
+        
+        // Premium payload maps
+        password,
+        expiresAt,
+        timeline: generatorState.timeline,
+        aiWishes: generatorState.aiWishes
     };
 
     const isEdit = generatorState.pageId !== null;

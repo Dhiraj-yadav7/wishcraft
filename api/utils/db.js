@@ -40,6 +40,13 @@ const BirthdayPageSchema = new mongoose.Schema({
     cakeStyle: { type: String, default: '' },
     greetingStyle: { type: String, default: '' },
     status: { type: String, enum: ['draft', 'public', 'private', 'scheduled'], default: 'draft' },
+    
+    // Premium Configuration additions
+    password: { type: String, default: '' },
+    expiresAt: { type: Date, default: null },
+    timeline: { type: [Object], default: [] }, // Array of { date, title, text, photo }
+    aiWishes: { type: [Object], default: [] }, // Array of { category, text, favorite }
+
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -49,7 +56,12 @@ const AnalyticsSchema = new mongoose.Schema({
     views: { type: Number, default: 0 },
     clicks: { type: Number, default: 0 },
     visitorIps: { type: [String], default: [] },
-    lastViewedAt: { type: Date, default: Date.now }
+    lastViewedAt: { type: Date, default: Date.now },
+    
+    // Detailed Analytics additions
+    sharesCount: { type: Number, default: 0 },
+    visitDurations: { type: [Number], default: [] }, // session lengths in seconds
+    referrals: { type: [Object], default: [] } // Array of { source: 'whatsapp', count: 1 }
 });
 
 const CommentSchema = new mongoose.Schema({
@@ -110,7 +122,6 @@ function readLocalDb() {
         }
         const data = fs.readFileSync(DB_FILE, 'utf8');
         const parsed = JSON.parse(data);
-        // Ensure all collections exist in local file
         if (!parsed.pages) parsed.pages = [];
         if (!parsed.analytics) parsed.analytics = [];
         if (!parsed.comments) parsed.comments = [];
@@ -131,7 +142,6 @@ function writeLocalDb(data) {
     }
 }
 
-// Helper to map local file object to behave like Mongoose document
 const mapDoc = (obj) => {
     if (!obj) return null;
     return { ...obj, _id: obj.id };
@@ -218,7 +228,6 @@ const dbAdapter = {
         } else {
             const db = readLocalDb();
             const userPages = db.pages.filter(p => p.userId === userId);
-            // Sort by createdAt descending
             userPages.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
             return userPages.map(mapDoc);
         }
@@ -260,6 +269,13 @@ const dbAdapter = {
                 cakeStyle: pageData.cakeStyle || '',
                 greetingStyle: pageData.greetingStyle || '',
                 status: pageData.status || 'draft',
+                
+                // premium variables mappings
+                password: pageData.password || '',
+                expiresAt: pageData.expiresAt ? new Date(pageData.expiresAt).toISOString() : null,
+                timeline: pageData.timeline || [],
+                aiWishes: pageData.aiWishes || [],
+
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -280,6 +296,9 @@ const dbAdapter = {
             if (updates.date && updates.date instanceof Date) {
                 updates.date = updates.date.toISOString();
             }
+            if (updates.expiresAt && updates.expiresAt instanceof Date) {
+                updates.expiresAt = updates.expiresAt.toISOString();
+            }
             updates.updatedAt = new Date().toISOString();
             db.pages[idx] = { ...db.pages[idx], ...updates };
             writeLocalDb(db);
@@ -290,7 +309,6 @@ const dbAdapter = {
         if (MONGODB_URI) {
             await connectMongo();
             await BirthdayPageModel.findByIdAndDelete(id);
-            // Cascading cleanups
             await AnalyticsModel.deleteMany({ pageId: id });
             await CommentModel.deleteMany({ pageId: id });
             await GuestbookModel.deleteMany({ pageId: id });
@@ -306,7 +324,7 @@ const dbAdapter = {
         }
     },
 
-    // ANALYTICS COLLECTION
+    // ANALYTICS & VISIT METRICS
     findAnalyticsByPageId: async (pageId) => {
         if (MONGODB_URI) {
             await connectMongo();
@@ -322,7 +340,7 @@ const dbAdapter = {
             await connectMongo();
             let analytics = await AnalyticsModel.findOne({ pageId });
             if (!analytics) {
-                analytics = new AnalyticsModel({ pageId, views: 0, clicks: 0, visitorIps: [] });
+                analytics = new AnalyticsModel({ pageId, views: 0, clicks: 0, visitorIps: [], sharesCount: 0, visitDurations: [], referrals: [] });
             }
             analytics.views += 1;
             if (!analytics.visitorIps.includes(visitorIp)) {
@@ -340,7 +358,10 @@ const dbAdapter = {
                     views: 0,
                     clicks: 0,
                     visitorIps: [],
-                    lastViewedAt: new Date().toISOString()
+                    lastViewedAt: new Date().toISOString(),
+                    sharesCount: 0,
+                    visitDurations: [],
+                    referrals: []
                 };
                 db.analytics.push(newAnalytic);
                 idx = db.analytics.length - 1;
@@ -350,6 +371,111 @@ const dbAdapter = {
                 db.analytics[idx].visitorIps.push(visitorIp);
             }
             db.analytics[idx].lastViewedAt = new Date().toISOString();
+            writeLocalDb(db);
+            return mapDoc(db.analytics[idx]);
+        }
+    },
+    incrementShares: async (pageId) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await AnalyticsModel.findOneAndUpdate(
+                { pageId },
+                { $inc: { sharesCount: 1 } },
+                { upsert: true, new: true }
+            );
+        } else {
+            const db = readLocalDb();
+            let idx = db.analytics.findIndex(a => a.pageId === pageId);
+            if (idx === -1) {
+                db.analytics.push({
+                    id: Math.random().toString(36).substring(2, 11),
+                    pageId,
+                    views: 0,
+                    clicks: 0,
+                    visitorIps: [],
+                    lastViewedAt: new Date().toISOString(),
+                    sharesCount: 0,
+                    visitDurations: [],
+                    referrals: []
+                });
+                idx = db.analytics.length - 1;
+            }
+            db.analytics[idx].sharesCount += 1;
+            writeLocalDb(db);
+            return mapDoc(db.analytics[idx]);
+        }
+    },
+    logVisitDuration: async (pageId, duration) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await AnalyticsModel.findOneAndUpdate(
+                { pageId },
+                { $push: { visitDurations: duration } },
+                { upsert: true, new: true }
+            );
+        } else {
+            const db = readLocalDb();
+            let idx = db.analytics.findIndex(a => a.pageId === pageId);
+            if (idx === -1) {
+                db.analytics.push({
+                    id: Math.random().toString(36).substring(2, 11),
+                    pageId,
+                    views: 0,
+                    clicks: 0,
+                    visitorIps: [],
+                    lastViewedAt: new Date().toISOString(),
+                    sharesCount: 0,
+                    visitDurations: [],
+                    referrals: []
+                });
+                idx = db.analytics.length - 1;
+            }
+            if (!db.analytics[idx].visitDurations) db.analytics[idx].visitDurations = [];
+            db.analytics[idx].visitDurations.push(duration);
+            writeLocalDb(db);
+            return mapDoc(db.analytics[idx]);
+        }
+    },
+    logReferral: async (pageId, source = 'direct') => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            let analytics = await AnalyticsModel.findOne({ pageId });
+            if (!analytics) {
+                analytics = new AnalyticsModel({ pageId, views: 0, clicks: 0, visitorIps: [], sharesCount: 0, visitDurations: [], referrals: [] });
+            }
+            
+            let refObj = analytics.referrals.find(r => r.source === source);
+            if (refObj) {
+                refObj.count += 1;
+            } else {
+                analytics.referrals.push({ source, count: 1 });
+            }
+            analytics.markModified('referrals');
+            return await analytics.save();
+        } else {
+            const db = readLocalDb();
+            let idx = db.analytics.findIndex(a => a.pageId === pageId);
+            if (idx === -1) {
+                db.analytics.push({
+                    id: Math.random().toString(36).substring(2, 11),
+                    pageId,
+                    views: 0,
+                    clicks: 0,
+                    visitorIps: [],
+                    lastViewedAt: new Date().toISOString(),
+                    sharesCount: 0,
+                    visitDurations: [],
+                    referrals: []
+                });
+                idx = db.analytics.length - 1;
+            }
+            if (!db.analytics[idx].referrals) db.analytics[idx].referrals = [];
+            let refObj = db.analytics[idx].referrals.find(r => r.source === source);
+            if (refObj) {
+                refObj.count += 1;
+            } else {
+                db.analytics[idx].referrals.push({ source, count: 1 });
+            }
             writeLocalDb(db);
             return mapDoc(db.analytics[idx]);
         }

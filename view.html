@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surprise Card Surprise! 🎁</title>
-    <!-- Use core styles, overridden dynamically by builder selections -->
+    <!-- Use core styles -->
     <link rel="stylesheet" href="src/css/style.css">
+    
+    <!-- Premium client-side libraries downloads dynamically -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        /* Viewer Page Layout Tweaks for scrollable guestbook */
         .wish-body {
             overflow-y: auto !important;
             height: auto !important;
@@ -17,7 +21,6 @@
             gap: 2rem;
         }
 
-        /* Photos Carousel styling */
         .carousel-deck {
             position: relative;
             width: 190px;
@@ -44,7 +47,6 @@
             opacity: 1;
         }
 
-        /* Cassette Player for Audio messages */
         .cassette-block {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.25);
@@ -69,11 +71,10 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Video Iframe container */
         .video-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             border-radius: 14px;
@@ -91,16 +92,18 @@
             border: none;
         }
 
-        /* Cake animation wrapper */
         .cake-block {
             font-size: 3.5rem;
             margin: 1.2rem 0;
-            animation: floatUp 3s ease-in-out infinite alternate;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .cake-block:hover {
+            transform: scale(1.1);
         }
 
-        /* ====================================================
-           GUESTBOOK WISH BOX STYLING
-           ==================================================== */
         .guestbook-card {
             width: 92%;
             max-width: 480px;
@@ -165,7 +168,6 @@
             opacity: 0.9;
         }
 
-        /* Avatar Picker Grid */
         .avatar-picker {
             display: flex;
             justify-content: center;
@@ -186,6 +188,32 @@
             border-color: var(--accent-color);
             background: rgba(255, 255, 255, 0.4);
         }
+
+        /* Timeline memory styles */
+        .timeline-item-card {
+            background: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        body.theme-elegant .timeline-item-card,
+        body.theme-cosmic .timeline-item-card {
+            background: rgba(30, 41, 59, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid white;
+        }
     </style>
 </head>
 <body class="wish-body theme-romantic">
@@ -193,10 +221,39 @@
     <!-- Screen overlays -->
     <canvas id="fireworks-canvas"></canvas>
 
+    <!-- Glassmorphic Loading Screen (UX upgrade) -->
+    <div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s ease; color: var(--text-color);">
+        <div style="font-size: 3rem; animation: floatUp 1.2s infinite alternate;">🎂</div>
+        <p style="margin-top: 1rem; font-weight: 800; font-family: var(--font-heading);">Preparing your sweet surprise... ✨</p>
+    </div>
+
+    <!-- Password protected gate overlay -->
+    <div id="passwordGate" style="display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 500; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; color: var(--text-color);">
+        <div style="font-size: 3.5rem;">🔒</div>
+        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800;">This surprise card is password protected</h3>
+        <p style="font-size: 0.9rem; opacity: 0.85;">Please enter the password to view this wish.</p>
+        <input type="password" id="gatePasswordInput" class="text-input" placeholder="Password" style="max-width: 280px; text-align: center;" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="gateSubmitBtn" style="max-width: 280px; padding: 0.6rem 2rem; border-radius: 12px; font-weight: bold;">Unlock Card 🔓</button>
+    </div>
+
+    <!-- Expired Warning gate overlay -->
+    <div id="expiredGate" style="display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 500; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; color: var(--text-color);">
+        <div style="font-size: 4rem;">⌛</div>
+        <h3 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;">Surprise Link Expired</h3>
+        <p style="font-size: 0.95rem; opacity: 0.8; max-width: 320px; text-align: center;">Sorry, this birthday card link has expired and is no longer available.</p>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='login.html'" style="border-radius: 12px; font-weight: bold;">Create your own ➕</button>
+    </div>
+
     <div class="surprise-reveal-wrapper">
         
-        <!-- sealed envelope card -->
-        <div id="envelope" class="envelope">
+        <!-- Animated 3D Gift Box (Step 0 - reveal envelope) -->
+        <div id="giftBoxContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s ease; z-index: 15; text-align: center; color: var(--text-color);">
+            <div style="font-size: 6rem; animation: floatUp 2s infinite alternate;">🎁</div>
+            <p style="margin-top: 1rem; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">You've received a gift! Tap to open</p>
+        </div>
+
+        <!-- Sealed envelope card (Step 1 - reveal card) -->
+        <div id="envelope" class="envelope" style="display: none; opacity: 0; transition: opacity 0.5s ease;">
             <div class="envelope-flap"></div>
             <div class="envelope-pocket"></div>
             <div class="envelope-seal">💌</div>
@@ -206,10 +263,17 @@
         <!-- Main Display Card -->
         <div id="displayCard" class="display-card">
             
+            <!-- Birthday Countdown Timer -->
+            <div id="countdownBlock" style="margin-bottom: 1rem; display: none;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: bold; background: rgba(255,255,255,0.25); padding: 0.4rem 0.8rem; border-radius: 10px;">
+                    <span>Countdown:</span>
+                    <span id="countdownText" style="color: var(--primary-color);">0d 0h 0m 0s</span>
+                </div>
+            </div>
+
             <!-- Photo Slider Carousel -->
             <div class="carousel-deck" id="photoDeck">
                 <img id="recipientPhoto" src="" alt="Birthday Portrait" class="carousel-slide active">
-                <!-- Dynamic photos loaded here -->
             </div>
 
             <span id="relationBadge" class="relationship-badge">Friend</span>
@@ -239,13 +303,41 @@
             <!-- Heartfelt Wish Message -->
             <div id="wishMessage" class="wish-message"></div>
 
-            <!-- Cake animation box -->
-            <div id="cakeBox" class="cake-block">🎂</div>
+            <!-- Memory Lane Timeline vertical view -->
+            <div id="timelineContainer" style="display: none; margin: 2rem 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1.5rem; text-align: left;">
+                <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; text-align: center;">Memory Lane Timeline ⏰</h3>
+                <div id="timelineList">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Interactive Cake Candle blowing out animation -->
+            <div style="margin: 1.5rem 0;">
+                <div id="cakeBox" class="cake-block">🎂</div>
+                <p id="candleHint" style="font-size: 0.75rem; opacity: 0.8; font-weight: 700; margin-top: 0.25rem;">Tap candle to blow it out! 🕯️</p>
+            </div>
 
             <!-- Controls row -->
-            <div class="card-controls" style="margin-top: 2rem;">
+            <div class="card-controls">
                 <button type="button" id="musicBtn" class="control-btn" title="Toggle Music">🎵</button>
                 <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks">🎆</button>
+            </div>
+
+            <!-- Premium Actions Bar (Downloads, QR, Calendars) -->
+            <div id="premiumIntegrationsBlock" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 800;">Integrations & Sharing 🎁</h3>
+                
+                <div style="display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">📄 Download PDF</button>
+                    <button type="button" class="btn btn-secondary" id="downloadImgBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">🖼️ Save Image</button>
+                    <button type="button" class="btn btn-secondary" id="calendarBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">📅 Add Calendar</button>
+                </div>
+
+                <!-- QR code share -->
+                <div style="text-align: center; margin-top: 0.5rem;" id="qrCodeContainer">
+                    <img id="qrCodeImg" src="" style="width: 120px; height: 120px; border-radius: 12px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" alt="QR Code Link">
+                    <p style="font-size: 0.7rem; opacity: 0.75; margin-top: 0.3rem;">Scan QR to open card directly!</p>
+                </div>
             </div>
             
         </div>
@@ -258,12 +350,8 @@
     <section class="guestbook-card" id="guestbookCard" style="display: none; opacity: 0; transition: opacity 0.8s ease;">
         <h3 class="wishes-title">Wishes Guestbook ✍️</h3>
         
-        <!-- Wishes list container -->
-        <div id="guestWishesList">
-            <!-- Wishes posts loaded here -->
-        </div>
+        <div id="guestWishesList"></div>
 
-        <!-- Add a wish form -->
         <form id="guestbookForm" style="margin-top: 1.8rem; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 1.2rem;">
             <h4 style="font-size: 0.95rem; font-weight: 800; text-align: center; margin-bottom: 0.8rem;">Write your wish to the star:</h4>
             
@@ -272,7 +360,6 @@
             </div>
 
             <div class="avatar-picker" id="guestAvatarGrid">
-                <!-- Emojis picker selection -->
                 <span class="avatar-pick-option selected" data-emoji="🎈">🎈</span>
                 <span class="avatar-pick-option" data-emoji="🎁">🎁</span>
                 <span class="avatar-pick-option" data-emoji="🥳">🥳</span>
@@ -285,7 +372,7 @@
                 <textarea id="guestText" class="text-input" rows="2" placeholder="Happy Birthday! Have a wonderful day..." required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full" style="padding: 0.6rem 1.2rem;">Sign Guestbook ✍️</button>
+            <button type="submit" class="btn btn-primary btn-full" style="padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: bold;">Sign Guestbook ✍️</button>
         </form>
     </section>
 

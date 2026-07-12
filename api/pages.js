@@ -4,7 +4,6 @@ const { success, error } = require('./utils/response');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 
-// Helper to authenticate session token in protected routes
 function authenticate(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,17 +18,40 @@ module.exports = async function handler(req, res) {
 
     try {
         // ====================================================
-        // PUBLIC RETRIEVAL ACTION (Open to everyone)
+        // PUBLIC RETRIEVAL ACTION WITH SECURITY & EXPIRATIONS
         // ====================================================
         if (action === 'public') {
             if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
-            const { id } = req.query;
+            const { id, password, ref } = req.query;
             if (!id) return error(res, 'Missing card page identifier.', 400);
 
             const page = await db.findPageById(id);
             if (!page) return error(res, 'Surprise birthday card not found.', 404);
 
-            // Access control for draft/private pages
+            // 1. Gating check: link expiration
+            if (page.expiresAt && new Date(page.expiresAt) < new Date()) {
+                return error(res, 'This surprise link has expired! ⌛', 410);
+            }
+
+            // 2. Gating check: password gate
+            if (page.password && page.password.trim() !== '') {
+                if (!password || password.trim() !== page.password.trim()) {
+                    // Return Gated skeleton details so viewer style matches (for premium look)
+                    return success(res, {
+                        isGated: true,
+                        page: {
+                            id: page._id,
+                            name: page.name,
+                            relationship: page.relationship,
+                            theme: page.theme || 'romantic',
+                            background: page.background || '',
+                            font: page.font || ''
+                        }
+                    }, 'Password protection gate triggered.', 200);
+                }
+            }
+
+            // 3. Visibility check: draft/private
             if (page.status === 'private' || page.status === 'draft') {
                 const authHeader = req.headers.authorization;
                 let authenticated = false;
@@ -47,6 +69,14 @@ module.exports = async function handler(req, res) {
                 }
             }
 
+            // 4. Track referral sources
+            if (ref) {
+                await db.logReferral(id, ref);
+            } else {
+                await db.logReferral(id, 'direct');
+            }
+
+            // 5. Log views analytics
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
             await db.incrementViews(id, ip);
 
@@ -73,6 +103,13 @@ module.exports = async function handler(req, res) {
                     fireworksStyle: page.fireworksStyle || '',
                     cakeStyle: page.cakeStyle || '',
                     greetingStyle: page.greetingStyle || '',
+                    
+                    // premium specs
+                    timeline: page.timeline || [],
+                    aiWishes: page.aiWishes || [],
+                    expiresAt: page.expiresAt,
+                    hasPassword: !!page.password,
+
                     status: page.status,
                     createdAt: page.createdAt
                 },
@@ -83,7 +120,28 @@ module.exports = async function handler(req, res) {
         }
 
         // ====================================================
-        // COMMENT POST ACTION (Open to everyone)
+        // ANALYTICS TRACKERS (Open to everyone)
+        // ====================================================
+        else if (action === 'logShare') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { id } = req.body;
+            if (!id) return error(res, 'Missing page ID.', 400);
+
+            await db.incrementShares(id);
+            return success(res, null, 'Share transaction recorded.', 200);
+        }
+
+        else if (action === 'logDuration') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { id, duration } = req.body;
+            if (!id || duration === undefined) return error(res, 'Missing inputs.', 400);
+
+            await db.logVisitDuration(id, Number(duration));
+            return success(res, null, 'Visit duration recorded.', 200);
+        }
+
+        // ====================================================
+        // COMMENT POST ACTION
         // ====================================================
         else if (action === 'comment') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
@@ -94,8 +152,6 @@ module.exports = async function handler(req, res) {
             if (!page) return error(res, 'Birthday page not found.', 404);
 
             const comment = await db.createComment({ pageId, author, text, avatarIndex });
-            
-            // Notify creator
             await db.createNotification({
                 userId: page.userId.toString(),
                 title: 'New Comment Left 💬',
@@ -106,7 +162,7 @@ module.exports = async function handler(req, res) {
         }
 
         // ====================================================
-        // GUESTBOOK POST ACTION (Open to everyone)
+        // GUESTBOOK POST ACTION
         // ====================================================
         else if (action === 'guestbook') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
@@ -117,8 +173,6 @@ module.exports = async function handler(req, res) {
             if (!page) return error(res, 'Birthday page not found.', 404);
 
             const entry = await db.createGuestbookEntry({ pageId, author, text, avatarIndex });
-            
-            // Notify creator
             await db.createNotification({
                 userId: page.userId.toString(),
                 title: 'New Guestbook Wish ✍️',
@@ -160,7 +214,9 @@ module.exports = async function handler(req, res) {
                         name, date, relationship, senderName, message, 
                         photos, videoUrl, voiceMessage, theme, background, 
                         music, font, confettiStyle, fireworksStyle, cakeStyle, 
-                        greetingStyle, status 
+                        greetingStyle, status,
+                        
+                        password, expiresAt, timeline, aiWishes
                     } = req.body;
 
                     if (!name || !date || !relationship || !senderName || !message) {
@@ -172,7 +228,12 @@ module.exports = async function handler(req, res) {
                         photos: photos || [], videoUrl: videoUrl || '', voiceMessage: voiceMessage || '',
                         theme: theme || 'romantic', background: background || '', music: music || '',
                         font: font || '', confettiStyle: confettiStyle || '', fireworksStyle: fireworksStyle || '',
-                        cakeStyle: cakeStyle || '', greetingStyle: greetingStyle || '', status: status || 'draft'
+                        cakeStyle: cakeStyle || '', greetingStyle: greetingStyle || '', status: status || 'draft',
+                        
+                        password: password || '',
+                        expiresAt: expiresAt || null,
+                        timeline: timeline || [],
+                        aiWishes: aiWishes || []
                     });
                     return success(res, page, 'Birthday card created successfully! 🎉', 201);
                 } else {
@@ -190,7 +251,11 @@ module.exports = async function handler(req, res) {
                 if (page.userId.toString() !== userId) return error(res, 'Access denied.', 403);
 
                 if (req.method === 'GET') {
-                    return success(res, page, 'Page details retrieved.', 200);
+                    const analytics = await db.findAnalyticsByPageId(id);
+                    return success(res, {
+                        page,
+                        analytics: analytics || { views: 0, sharesCount: 0, visitDurations: [], referrals: [] }
+                    }, 'Page details retrieved.', 200);
                 } 
                 
                 else if (req.method === 'PUT' || req.method === 'POST') {
@@ -238,12 +303,18 @@ module.exports = async function handler(req, res) {
                     fireworksStyle: page.fireworksStyle || '',
                     cakeStyle: page.cakeStyle || '',
                     greetingStyle: page.greetingStyle || '',
+                    
+                    // premium duplicates specs
+                    password: page.password || '',
+                    expiresAt: page.expiresAt || null,
+                    timeline: page.timeline || [],
+                    aiWishes: page.aiWishes || [],
+
                     status: 'draft'
                 });
                 return success(res, duplicatedPage, 'Surprise card layout duplicated successfully! 📋', 201);
             }
 
-            // Invalid action
             else {
                 return error(res, 'Action not found', 404);
             }
