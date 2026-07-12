@@ -3,46 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surprise Card Builder - Profile 👤</title>
+    <title>Surprise Card Builder - Profile & Settings 👤</title>
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/auth.css">
+    <!-- PWA Settings manifest -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="theme-romantic">
 
     <div class="glass-container">
         
-        <div class="profile-card">
+        <div class="profile-card" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 1.2rem;">
             
             <!-- Avatar Circle -->
-            <div class="profile-avatar-container">
+            <div class="profile-avatar-container" style="align-self: center;">
                 <div id="profile-avatar" class="profile-avatar">
                     <span id="profile-avatar-initials">👤</span>
                 </div>
             </div>
 
-            <h2 id="profile-name" class="profile-name">User Name</h2>
-            <p id="profile-email" class="profile-email">email@domain.com</p>
+            <h2 id="profile-name" class="profile-name" style="text-align: center; font-family: var(--font-heading);">User Name</h2>
+            <p id="profile-email" class="profile-email" style="text-align: center; opacity: 0.8; margin-top: -0.8rem;">email@domain.com</p>
 
             <!-- Metadata List -->
             <div class="profile-info-grid">
                 <div class="profile-info-row">
                     <span class="profile-info-label">Account Status</span>
-                    <span id="profile-status-val" class="profile-info-value" style="color: #10b981;">Active ✓</span>
+                    <span id="profile-status-val" class="profile-info-value" style="color: #10b981; font-weight: bold;">Active ✓</span>
                 </div>
                 <div class="profile-info-row">
                     <span class="profile-info-label">Member Since</span>
                     <span id="profile-joined-val" class="profile-info-value">-</span>
                 </div>
                 <div class="profile-info-row">
-                    <span class="profile-info-label">Application Role</span>
-                    <span class="profile-info-value">Surprise Creator 🎁</span>
+                    <span class="profile-info-label">SaaS Subscription</span>
+                    <span class="profile-info-value" style="font-weight: bold; color: var(--primary-color);">Premium Pro Plan 💎</span>
+                </div>
+            </div>
+
+            <!-- Custom Domain Settings Box -->
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.2rem; text-align: left; color: var(--text-color);">
+                <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">🌐 Custom Domains Map</h3>
+                <p style="font-size: 0.75rem; opacity: 0.75; margin-bottom: 0.8rem;">Point your DNS CNAME record to `cname.vercel-dns.com` to host cards on your own brand domain.</p>
+                
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <input type="text" id="saasDomainInput" class="text-input" placeholder="e.g., wish.anshika.com" style="font-size: 0.85rem;">
+                </div>
+                <button type="button" class="btn btn-primary" id="saveSaasDomainBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; width: 100%; border-radius: 10px; font-weight: bold;">Save Brand Domain</button>
+            </div>
+
+            <!-- Notifications Center Settings Box -->
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.2rem; text-align: left; color: var(--text-color);">
+                <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">🔔 App & Alerts Setup</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                    <button type="button" class="btn btn-secondary" id="installPwaSettingsBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; justify-content: center; font-weight: bold; width: 100%;" onclick="installPwaApp()">📱 Install Mobile App</button>
+                    <button type="button" class="btn btn-secondary" id="alertsPwaSettingsBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; justify-content: center; font-weight: bold; width: 100%;" onclick="requestPushPermissions()">🔔 Enable Web Notifications</button>
                 </div>
             </div>
 
             <!-- Profile Controls -->
-            <div class="btn-container">
-                <button type="button" id="backToBuilder" class="btn btn-secondary">⬅️ Go to Builder</button>
-                <button type="button" id="logoutBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);">Log Out 🚪</button>
+            <div class="btn-container" style="margin-top: 1rem;">
+                <button type="button" id="backToBuilder" class="btn btn-secondary">⬅️ Hub Dashboard</button>
+                <button type="button" id="logoutBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); border: none;">Log Out 🚪</button>
             </div>
 
         </div>
@@ -51,6 +74,9 @@
 
     <!-- Core Auth Script Guard -->
     <script src="src/js/auth.js"></script>
+    <!-- PWA settings -->
+    <script src="src/js/pwa.js"></script>
+    
     <script>
         // Populate profile screen with verified user details from local storage
         document.addEventListener('DOMContentLoaded', () => {
@@ -78,6 +104,10 @@
                     .toUpperCase()
                     .substring(0, 2);
                 document.getElementById('profile-avatar-initials').textContent = initials || '👤';
+
+                // Load custom domain if saved in local storage configuration
+                const savedDomain = localStorage.getItem('saas_custom_domain') || '';
+                document.getElementById('saasDomainInput').value = savedDomain;
             }
 
             // Click handlers
@@ -86,8 +116,22 @@
             });
 
             document.getElementById('backToBuilder').addEventListener('click', () => {
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             });
+
+            document.getElementById('saveSaasDomainBtn').addEventListener('click', () => {
+                const domVal = document.getElementById('saasDomainInput').value.trim();
+                localStorage.setItem('saas_custom_domain', domVal);
+                showToast('Brand domain config saved successfully! 🌐', 'success');
+            });
+
+            // Adjust PWA install button in settings page
+            setTimeout(() => {
+                const pwaBtn = document.getElementById('installPwaSettingsBtn');
+                if (window.deferredPrompt) {
+                    pwaBtn.style.display = 'inline-flex';
+                }
+            }, 500);
         });
     </script>
 </body>

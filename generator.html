@@ -8,8 +8,11 @@
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/auth.css">
     <link rel="stylesheet" href="src/css/generator.css">
+    <link rel="stylesheet" href="src/css/themes.css">
     <!-- Auth Guard in Head -->
     <script src="src/js/auth.js"></script>
+    <!-- PWA Settings manifest -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="theme-romantic">
 
@@ -146,8 +149,43 @@
                     <h2 class="step-title">Themes & Creative Styling</h2>
                     <p class="step-subtitle">Style the layout with beautiful backgrounds, fonts, and music.</p>
 
+                    <!-- SaaS Visual Template Marketplace Presets -->
                     <div class="form-group">
-                        <label class="form-label">Select Visual Theme</label>
+                        <label class="form-label">SaaS Template Presets 💎</label>
+                        <div class="select-grid theme-grid" id="themesPresetGrid" style="grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));">
+                            <div class="grid-option selected" data-value="romantic" data-type="themePreset">
+                                <span class="emoji">💖</span>
+                                <span>Romantic</span>
+                            </div>
+                            <div class="grid-option" data-value="luxury" data-type="themePreset">
+                                <span class="emoji">👑</span>
+                                <span>Luxury</span>
+                            </div>
+                            <div class="grid-option" data-value="royal" data-type="themePreset">
+                                <span class="emoji">🌌</span>
+                                <span>Royal</span>
+                            </div>
+                            <div class="grid-option" data-value="minimal" data-type="themePreset">
+                                <span class="emoji">⚪</span>
+                                <span>Minimal</span>
+                            </div>
+                            <div class="grid-option" data-value="anime" data-type="themePreset">
+                                <span class="emoji">🌸</span>
+                                <span>Anime</span>
+                            </div>
+                            <div class="grid-option" data-value="kids" data-type="themePreset">
+                                <span class="emoji">🎈</span>
+                                <span>Kids</span>
+                            </div>
+                            <div class="grid-option" data-value="dark" data-type="themePreset">
+                                <span class="emoji">🖤</span>
+                                <span>Dark</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display: none;">
+                        <label class="form-label">Old Selector (Compatibility)</label>
                         <div class="select-grid theme-grid">
                             <div class="grid-option selected" data-value="romantic" data-type="theme">
                                 <span class="emoji">💖</span>
@@ -156,14 +194,6 @@
                             <div class="grid-option" data-value="playful" data-type="theme">
                                 <span class="emoji">🎈</span>
                                 <span>Playful</span>
-                            </div>
-                            <div class="grid-option" data-value="elegant" data-type="theme">
-                                <span class="emoji">👑</span>
-                                <span>Elegant</span>
-                            </div>
-                            <div class="grid-option" data-value="cosmic" data-type="theme">
-                                <span class="emoji">🌌</span>
-                                <span>Cosmic</span>
                             </div>
                         </div>
                     </div>
@@ -249,6 +279,20 @@
                             <label for="linkExpiry" class="form-label">Link Expiration Date (Optional)</label>
                             <input type="datetime-local" id="linkExpiry" class="text-input">
                         </div>
+
+                        <!-- Private Time-Locked Capsule (SaaS Feature) -->
+                        <div class="form-group" style="margin-top: 1rem; border-top: 1px dashed rgba(0,0,0,0.05); padding-top: 0.8rem;">
+                            <label class="form-label" style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                <input type="checkbox" id="capsuleLockedToggle" style="width: auto;">
+                                <span>Private Locked Capsule 🔒</span>
+                            </label>
+                            <p style="font-size: 0.75rem; opacity: 0.75; margin-bottom: 0.5rem; margin-left: 1.4rem;">Hides all photos/timelines/messages until the birthday date is reached.</p>
+                            
+                            <div id="capsuleTimeBlock" style="display: none; margin-left: 1.4rem; margin-top: 0.5rem;">
+                                <label for="capsuleUnlockDate" class="form-label" style="font-size: 0.8rem;">Capsule Release Date & Time</label>
+                                <input type="datetime-local" id="capsuleUnlockDate" class="text-input">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -290,15 +334,22 @@
 
     <!-- Gemini AI Assist Modal Dialog overlay -->
     <div id="aiAssistModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200;">
-        <div style="width: 90%; max-width: 460px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 1rem; border-color: rgba(255,255,255,0.1); color: var(--text-color);">
-            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 0.2rem;">Gemini AI Writer 🪄</h3>
-            <p style="font-size: 0.85rem; text-align: center; opacity: 0.8;">Choose a tone/style to generate custom creative text.</p>
+        <div style="width: 90%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 1rem; border-color: rgba(255,255,255,0.1); color: var(--text-color);">
+            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 0.2rem;">Gemini AI Planner 🪄</h3>
+            <p style="font-size: 0.85rem; text-align: center; opacity: 0.8; margin-top: -0.8rem;">Select a planning assistant or creative generator.</p>
             
             <div class="form-group">
-                <label for="aiCategory" class="form-label">Select Category</label>
+                <label for="aiCategory" class="form-label">Assistant Type</label>
                 <select id="aiCategory" class="text-input" style="appearance: auto; font-size: 0.9rem;">
                     <option value="wishes">Standard Birthday Wish 🎂</option>
                     <option value="poems">Heartfelt Poetry / Rhyme ✍️</option>
+                    <option value="story">AI Memory Story Generator ⏰📖</option>
+                    <option value="video">AI Video Script Generator 📽️🎬</option>
+                    <option value="gift">AI Gift Recommendations 🎁</option>
+                    <option value="plan">AI Party Planner Itinerary 🗓️</option>
+                    <option value="decor">AI Theme Decor Suggestions 🎈</option>
+                    <option value="cake">AI Designer Cake Blueprint 🎂</option>
+                    <option value="budget">AI Party Budget Estimate 💰</option>
                     <option value="quotes">Inspirational Life Quotes 💬</option>
                     <option value="funny">Funny / Teasing Wish 😂</option>
                     <option value="romantic">Romantic & Obsessive Message 💕</option>
@@ -311,7 +362,7 @@
                 </select>
             </div>
 
-            <button type="button" class="btn btn-primary" id="aiGenerateBtn">Generate Wording ✨</button>
+            <button type="button" class="btn btn-primary" id="aiGenerateBtn">Generate with Gemini ✨</button>
             
             <!-- Loading shimmer -->
             <div id="aiShimmer" style="display: none; text-align: center; padding: 1rem 0;">
@@ -320,13 +371,13 @@
 
             <!-- AI result section -->
             <div id="aiResultBlock" style="display: none; flex-direction: column; gap: 0.8rem;">
-                <textarea id="aiResultText" class="text-input" rows="5" style="font-size: 0.9rem; font-style: italic;"></textarea>
+                <textarea id="aiResultText" class="text-input" rows="7" style="font-size: 0.9rem; font-style: italic;"></textarea>
                 
                 <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
                     <button type="button" class="btn btn-secondary" id="aiRegenerateBtn" style="flex: 1; padding: 0.5rem; font-size: 0.8rem;">🔄 Retry</button>
                     <button type="button" class="btn btn-secondary" id="aiCopyBtn" style="flex: 1; padding: 0.5rem; font-size: 0.8rem;">📋 Copy</button>
                     <button type="button" class="btn btn-secondary" id="aiFavoriteBtn" style="flex: 1; padding: 0.5rem; font-size: 0.8rem;">❤️ Favorite</button>
-                    <button type="button" class="btn btn-primary" id="aiUseBtn" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; font-weight: bold; margin-top: 0.2rem;">✍️ Use Message</button>
+                    <button type="button" class="btn btn-primary" id="aiUseBtn" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; font-weight: bold; margin-top: 0.2rem;">✍️ Use Content</button>
                 </div>
             </div>
 
@@ -334,6 +385,8 @@
         </div>
     </div>
 
+    <!-- PWA settings -->
+    <script src="src/js/pwa.js"></script>
     <!-- Generator Scripts -->
     <script src="src/js/generator.js"></script>
 </body>

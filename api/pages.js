@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
 
     try {
         // ====================================================
-        // PUBLIC RETRIEVAL ACTION WITH SECURITY & EXPIRATIONS
+        // PUBLIC RETRIEVAL ACTION WITH SECURITY & CAPSULE GATES
         // ====================================================
         if (action === 'public') {
             if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
@@ -33,10 +33,45 @@ module.exports = async function handler(req, res) {
                 return error(res, 'This surprise link has expired! ⌛', 410);
             }
 
-            // 2. Gating check: password gate
+            // 2. Gating check: Digital Time Capsule Time Lock (Secure redact)
+            if (page.capsuleLocked && page.unlockDate && new Date(page.unlockDate) > new Date()) {
+                // Check if visitors is the owner (allow previewing even if locked)
+                const authHeader = req.headers.authorization;
+                let isOwner = false;
+                if (authHeader && authHeader.startsWith('Bearer ')) {
+                    try {
+                        const token = authHeader.split(' ')[1];
+                        const decoded = jwt.verify(token, JWT_SECRET);
+                        if (decoded.userId === page.userId.toString()) {
+                            isOwner = true;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!isOwner) {
+                    // RETURN SECURELY REDACTED METADATA ONLY
+                    return success(res, {
+                        isCapsuleLocked: true,
+                        unlockDate: page.unlockDate,
+                        page: {
+                            id: page._id,
+                            name: page.name,
+                            relationship: page.relationship,
+                            theme: page.theme || 'romantic',
+                            themePreset: page.themePreset || 'romantic',
+                            background: page.background || '',
+                            font: page.font || '',
+                            music: page.music || '',
+                            status: page.status,
+                            createdAt: page.createdAt
+                        }
+                    }, 'This birthday capsule is locked until the set unlock time.', 200);
+                }
+            }
+
+            // 3. Gating check: password gate
             if (page.password && page.password.trim() !== '') {
                 if (!password || password.trim() !== page.password.trim()) {
-                    // Return Gated skeleton details so viewer style matches (for premium look)
                     return success(res, {
                         isGated: true,
                         page: {
@@ -44,6 +79,7 @@ module.exports = async function handler(req, res) {
                             name: page.name,
                             relationship: page.relationship,
                             theme: page.theme || 'romantic',
+                            themePreset: page.themePreset || 'romantic',
                             background: page.background || '',
                             font: page.font || ''
                         }
@@ -51,7 +87,7 @@ module.exports = async function handler(req, res) {
                 }
             }
 
-            // 3. Visibility check: draft/private
+            // 4. Visibility check: draft/private
             if (page.status === 'private' || page.status === 'draft') {
                 const authHeader = req.headers.authorization;
                 let authenticated = false;
@@ -69,14 +105,14 @@ module.exports = async function handler(req, res) {
                 }
             }
 
-            // 4. Track referral sources
+            // 5. Track referral sources
             if (ref) {
                 await db.logReferral(id, ref);
             } else {
                 await db.logReferral(id, 'direct');
             }
 
-            // 5. Log views analytics
+            // 6. Log views analytics
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
             await db.incrementViews(id, ip);
 
@@ -110,6 +146,13 @@ module.exports = async function handler(req, res) {
                     expiresAt: page.expiresAt,
                     hasPassword: !!page.password,
 
+                    // saas capsule parameters
+                    capsuleLocked: page.capsuleLocked,
+                    unlockDate: page.unlockDate,
+                    customDomain: page.customDomain,
+                    themePreset: page.themePreset || 'romantic',
+                    favoriteTemplate: page.favoriteTemplate,
+
                     status: page.status,
                     createdAt: page.createdAt
                 },
@@ -120,7 +163,7 @@ module.exports = async function handler(req, res) {
         }
 
         // ====================================================
-        // ANALYTICS TRACKERS (Open to everyone)
+        // ANALYTICS TRACKERS
         // ====================================================
         else if (action === 'logShare') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
@@ -216,7 +259,10 @@ module.exports = async function handler(req, res) {
                         music, font, confettiStyle, fireworksStyle, cakeStyle, 
                         greetingStyle, status,
                         
-                        password, expiresAt, timeline, aiWishes
+                        password, expiresAt, timeline, aiWishes,
+                        
+                        // saas parameters
+                        capsuleLocked, unlockDate, customDomain, themePreset, favoriteTemplate
                     } = req.body;
 
                     if (!name || !date || !relationship || !senderName || !message) {
@@ -233,7 +279,13 @@ module.exports = async function handler(req, res) {
                         password: password || '',
                         expiresAt: expiresAt || null,
                         timeline: timeline || [],
-                        aiWishes: aiWishes || []
+                        aiWishes: aiWishes || [],
+
+                        capsuleLocked: capsuleLocked || false,
+                        unlockDate: unlockDate || null,
+                        customDomain: customDomain || '',
+                        themePreset: themePreset || 'romantic',
+                        favoriteTemplate: favoriteTemplate || false
                     });
                     return success(res, page, 'Birthday card created successfully! 🎉', 201);
                 } else {
@@ -304,15 +356,20 @@ module.exports = async function handler(req, res) {
                     cakeStyle: page.cakeStyle || '',
                     greetingStyle: page.greetingStyle || '',
                     
-                    // premium duplicates specs
                     password: page.password || '',
                     expiresAt: page.expiresAt || null,
                     timeline: page.timeline || [],
                     aiWishes: page.aiWishes || [],
 
+                    capsuleLocked: page.capsuleLocked || false,
+                    unlockDate: page.unlockDate || null,
+                    customDomain: page.customDomain || '',
+                    themePreset: page.themePreset || 'romantic',
+                    favoriteTemplate: page.favoriteTemplate || false,
+
                     status: 'draft'
                 });
-                return success(res, duplicatedPage, 'Surprise card layout duplicated successfully! 📋', 201);
+                return success(res, duplicatedPage, 'Surprise card duplicated.', 201);
             }
 
             else {

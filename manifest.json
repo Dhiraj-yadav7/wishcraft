@@ -1,0 +1,23 @@
+{
+  "name": "Surprise Capsule SaaS Platform",
+  "short_name": "SurpriseSaaS",
+  "description": "Premium multi-step time-locked digital birthday capsules and cards builder.",
+  "start_url": "/login.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090b",
+  "theme_color": "#ec4899",
+  "icons": [
+    {
+      "src": "https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=SurpriseApp",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=SurpriseApp",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

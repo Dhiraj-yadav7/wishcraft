@@ -1,0 +1,188 @@
+/* ========================================================
+   SAAS PLATFORM VISUAL THEME PRESETS
+   ======================================================== */
+
+/* --- LUXURY THEME --- */
+body.theme-luxury {
+    --bg-color: #0b0904;
+    --text-color: #f7ebd3;
+    --card-bg: rgba(18, 15, 10, 0.75);
+    --card-border: 1px solid #d4af37;
+    --primary-color: #d4af37;
+    --accent-color: #f3e5ab;
+    --text-muted: #cbbba2;
+    background: linear-gradient(135deg, #0f0d07 0%, #1c180e 100%) !important;
+}
+body.theme-luxury .display-card,
+body.theme-luxury .guestbook-card {
+    border: 2px solid #d4af37;
+    box-shadow: 0 15px 45px rgba(212, 175, 55, 0.15);
+    font-family: 'Playfair Display', Georgia, serif;
+    background: rgba(20, 17, 12, 0.85);
+}
+body.theme-luxury .btn-primary {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8421 100%);
+    color: #000;
+    border: none;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.2);
+}
+body.theme-luxury .btn-secondary {
+    border-color: #d4af37;
+    color: #d4af37;
+    background: transparent;
+}
+body.theme-luxury .btn-secondary:hover {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* --- ROYAL THEME --- */
+body.theme-royal {
+    --bg-color: #0f1026;
+    --text-color: #f3f4f6;
+    --card-bg: rgba(20, 22, 54, 0.8);
+    --card-border: 1px solid #d4af37;
+    --primary-color: #6366f1;
+    --accent-color: #fbbf24;
+    --text-muted: #a5b4fc;
+    background: linear-gradient(135deg, #090a18 0%, #1e1e4a 100%) !important;
+}
+body.theme-royal .display-card,
+body.theme-royal .guestbook-card {
+    border: 2px dashed #fbbf24;
+    box-shadow: 0 15px 45px rgba(251, 191, 36, 0.2);
+    font-family: 'Playfair Display', Georgia, serif;
+}
+body.theme-royal .btn-primary {
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    color: #0f1026;
+    border: none;
+    font-weight: 800;
+}
+
+/* --- MINIMAL THEME --- */
+body.theme-minimal {
+    --bg-color: #fafafa;
+    --text-color: #18181b;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-border: 1px solid #e4e4e7;
+    --primary-color: #09090b;
+    --accent-color: #71717a;
+    --text-muted: #52525b;
+    background: #f4f4f5 !important;
+}
+body.theme-minimal .display-card,
+body.theme-minimal .guestbook-card {
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body.theme-minimal .btn-primary {
+    background: #09090b;
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+}
+body.theme-minimal .btn-secondary {
+    border-color: #e4e4e7;
+    color: #18181b;
+    border-radius: 8px;
+    background: #fff;
+}
+body.theme-minimal .btn-secondary:hover {
+    background: #f4f4f5;
+}
+
+/* --- ANIME THEME --- */
+body.theme-anime {
+    --bg-color: #fef2f2;
+    --text-color: #1f2937;
+    --card-bg: #ffffff;
+    --card-border: 3px solid #000000;
+    --primary-color: #ec4899;
+    --accent-color: #3b82f6;
+    --text-muted: #4b5563;
+    background: radial-gradient(circle, #fce7f3 20%, transparent 20%), radial-gradient(circle, #fce7f3 20%, transparent 20%) !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 10px 10px !important;
+    background-color: #fdf2f8 !important;
+}
+body.theme-anime .display-card,
+body.theme-anime .guestbook-card {
+    border: 3px solid #000000;
+    border-radius: 0px;
+    box-shadow: 8px 8px 0px #000000;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+body.theme-anime .btn-primary {
+    background: #f43f5e;
+    color: #fff;
+    border: 2px solid #000;
+    border-radius: 0px;
+    box-shadow: 3px 3px 0px #000;
+    font-weight: 900;
+}
+body.theme-anime .btn-primary:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+}
+
+/* --- KIDS THEME --- */
+body.theme-kids {
+    --bg-color: #ecfeff;
+    --text-color: #0f766e;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-border: 3px solid #f59e0b;
+    --primary-color: #06b6d4;
+    --accent-color: #f43f5e;
+    --text-muted: #0d9488;
+    background: linear-gradient(135deg, #e0f2fe 0%, #ccfbf1 100%) !important;
+}
+body.theme-kids .display-card,
+body.theme-kids .guestbook-card {
+    border: 4px solid #3b82f6;
+    border-radius: 36px;
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+    font-family: 'Outfit', sans-serif;
+}
+body.theme-kids .btn-primary {
+    background: #e11d48;
+    color: #fff;
+    border-radius: 50px;
+    border: 3px solid #fff;
+    box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3);
+}
+
+/* --- DARK THEME --- */
+body.theme-dark {
+    --bg-color: #09090b;
+    --text-color: #f4f4f5;
+    --card-bg: rgba(24, 24, 27, 0.85);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --primary-color: #a855f7;
+    --accent-color: #22d3ee;
+    --text-muted: #a1a1aa;
+    background: #030303 !important;
+}
+body.theme-dark .display-card,
+body.theme-dark .guestbook-card {
+    background: rgba(18, 18, 18, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.15);
+    color: #fff;
+}
+body.theme-dark .btn-primary {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+body.theme-dark .btn-secondary {
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    background: rgba(255,255,255,0.02);
+}
+body.theme-dark .btn-secondary:hover {
+    background: rgba(255,255,255,0.08);
+}

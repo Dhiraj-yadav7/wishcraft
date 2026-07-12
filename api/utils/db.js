@@ -47,6 +47,13 @@ const BirthdayPageSchema = new mongoose.Schema({
     timeline: { type: [Object], default: [] }, // Array of { date, title, text, photo }
     aiWishes: { type: [Object], default: [] }, // Array of { category, text, favorite }
 
+    // SaaS Digital Capsule & Marketplace additions
+    capsuleLocked: { type: Boolean, default: false },
+    unlockDate: { type: Date, default: null },
+    customDomain: { type: String, default: '' },
+    themePreset: { type: String, default: 'romantic' }, // luxury | royal | minimal | anime | kids | dark
+    favoriteTemplate: { type: Boolean, default: false },
+
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -58,10 +65,9 @@ const AnalyticsSchema = new mongoose.Schema({
     visitorIps: { type: [String], default: [] },
     lastViewedAt: { type: Date, default: Date.now },
     
-    // Detailed Analytics additions
     sharesCount: { type: Number, default: 0 },
-    visitDurations: { type: [Number], default: [] }, // session lengths in seconds
-    referrals: { type: [Object], default: [] } // Array of { source: 'whatsapp', count: 1 }
+    visitDurations: { type: [Number], default: [] },
+    referrals: { type: [Object], default: [] }
 });
 
 const CommentSchema = new mongoose.Schema({
@@ -276,6 +282,13 @@ const dbAdapter = {
                 timeline: pageData.timeline || [],
                 aiWishes: pageData.aiWishes || [],
 
+                // SaaS capsule mapping
+                capsuleLocked: pageData.capsuleLocked || false,
+                unlockDate: pageData.unlockDate ? new Date(pageData.unlockDate).toISOString() : null,
+                customDomain: pageData.customDomain || '',
+                themePreset: pageData.themePreset || 'romantic',
+                favoriteTemplate: pageData.favoriteTemplate || false,
+
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -298,6 +311,9 @@ const dbAdapter = {
             }
             if (updates.expiresAt && updates.expiresAt instanceof Date) {
                 updates.expiresAt = updates.expiresAt.toISOString();
+            }
+            if (updates.unlockDate && updates.unlockDate instanceof Date) {
+                updates.unlockDate = updates.unlockDate.toISOString();
             }
             updates.updatedAt = new Date().toISOString();
             db.pages[idx] = { ...db.pages[idx], ...updates };

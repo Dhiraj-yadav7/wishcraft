@@ -9,6 +9,7 @@ let viewerConfig = {
     videoUrl: '',
     voiceMessage: '',
     theme: 'romantic',
+    themePreset: 'romantic',
     background: 'linear-gradient(135deg, #ffe4e6 0%, #fbcfe8 100%)',
     music: 'chimes',
     font: 'Outfit',
@@ -23,6 +24,10 @@ let viewerConfig = {
     expiresAt: null,
     hasPassword: false,
     
+    // saas capsule gating
+    capsuleLocked: false,
+    unlockDate: null,
+    
     comments: [],
     guestbook: []
 };
@@ -34,6 +39,7 @@ let sessionStartTime = null;
 const loadingScreen = document.getElementById('loadingScreen');
 const passwordGate = document.getElementById('passwordGate');
 const expiredGate = document.getElementById('expiredGate');
+const capsuleLockedGate = document.getElementById('capsuleLockedGate');
 const giftBoxContainer = document.getElementById('giftBoxContainer');
 const envelope = document.getElementById('envelope');
 const displayCard = document.getElementById('displayCard');
@@ -63,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSessionTracker();
 });
 
-// Load Card Settings from API (supporting password gate check)
+// Load Card Settings from API (supporting password gate & capsule gates check)
 async function fetchCardDetails(pageId, passwordValue = '') {
     try {
         let url = `/api/pages?action=public&id=${pageId}`;
@@ -86,6 +92,7 @@ async function fetchCardDetails(pageId, passwordValue = '') {
         if (res.status === 410) {
             loadingScreen.style.display = 'none';
             passwordGate.style.display = 'none';
+            capsuleLockedGate.style.display = 'none';
             expiredGate.style.display = 'flex';
             return;
         }
@@ -93,9 +100,20 @@ async function fetchCardDetails(pageId, passwordValue = '') {
         const data = await res.json();
         
         if (data.success) {
-            // Check if page is locked under password gate
+            // 1. Check if Capsule is locked
+            if (data.data.isCapsuleLocked) {
+                loadingScreen.style.display = 'none';
+                passwordGate.style.display = 'none';
+                capsuleLockedGate.style.display = 'flex';
+                
+                setupCapsuleTimeLockCountdown(pageId, data.data.unlockDate);
+                return;
+            }
+
+            // 2. Check if page is locked under password gate
             if (data.data.isGated) {
                 loadingScreen.style.display = 'none';
+                capsuleLockedGate.style.display = 'none';
                 passwordGate.style.display = 'flex';
                 setupPasswordGateSubmit(pageId);
                 return;
@@ -111,6 +129,7 @@ async function fetchCardDetails(pageId, passwordValue = '') {
 
             // Hide gates
             passwordGate.style.display = 'none';
+            capsuleLockedGate.style.display = 'none';
             loadingScreen.style.opacity = '0';
             setTimeout(() => loadingScreen.style.display = 'none', 500);
 
@@ -146,9 +165,73 @@ function setupPasswordGateSubmit(pageId) {
     });
 }
 
+// Time-Locked Capsule countdown clock trigger
+function setupCapsuleTimeLockCountdown(pageId, unlockDateStr) {
+    const clockText = document.getElementById('capsuleCountdownText');
+    const targetTime = new Date(unlockDateStr).getTime();
+
+    const updateClock = () => {
+        const now = new Date().getTime();
+        const distance = targetTime - now;
+
+        if (distance <= 0) {
+            clearInterval(capsuleInterval);
+            clockText.textContent = "Capsule Unlocked! 🔓🎂";
+            
+            // Magical Unlock Experience! (Sound chimes, confetti burst)
+            playMagicalUnlockSequence();
+            
+            setTimeout(() => {
+                // Re-fetch now-decrypted data
+                fetchCardDetails(pageId);
+            }, 1500);
+        } else {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            clockText.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+    };
+
+    updateClock();
+    const capsuleInterval = setInterval(updateClock, 1000);
+}
+
+function playMagicalUnlockSequence() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const now = audioCtx.currentTime;
+    
+    // Synthesis cute ascending sound
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+        gain.gain.setValueAtTime(0, now + idx * 0.1);
+        gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.1 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+        osc.start(now + idx * 0.1);
+        osc.stop(now + idx * 0.1 + 0.4);
+    });
+
+    // Massive canvas fireworks
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    createBurst(w * 0.5, h * 0.4);
+    createBurst(w * 0.3, h * 0.5);
+    createBurst(w * 0.7, h * 0.5);
+}
+
 // Populate card fields, background, media elements, and styles
 function setupSurpriseCardUI() {
-    document.body.className = `wish-body theme-${viewerConfig.theme}`;
+    const currentTheme = viewerConfig.themePreset || viewerConfig.theme || 'romantic';
+    document.body.className = `wish-body theme-${currentTheme}`;
     document.body.style.background = viewerConfig.background;
     
     const font = viewerConfig.font || 'Outfit';
@@ -175,7 +258,7 @@ function setupSurpriseCardUI() {
     // 5. Memory Timeline
     setupTimelineMemoryLane();
 
-    // 6. Countdown Timer
+    // 6. Birthday Countdown Timer
     setupBirthdayCountdown();
 
     // 7. QR Code Generation
@@ -510,7 +593,6 @@ function setupPremiumActions() {
         const name = viewerConfig.name;
         const bdayDate = new Date(viewerConfig.date);
         
-        // Set dates range for calendar (all day event)
         const dateStr = bdayDate.toISOString().split('T')[0].replace(/-/g, '');
         const nextDay = new Date(bdayDate.getTime() + 24 * 60 * 60 * 1000);
         const nextDayStr = nextDay.toISOString().split('T')[0].replace(/-/g, '');
@@ -538,7 +620,6 @@ function logSessionDuration() {
 
     if (durationSeconds <= 0) return;
 
-    // Send Beacon payload to be reliable
     const payload = JSON.stringify({
         id: viewerConfig.pageId,
         duration: durationSeconds
@@ -558,7 +639,6 @@ function logSessionDuration() {
         });
     }
 
-    // Reset to avoid double counts
     sessionStartTime = null;
 }
 
@@ -653,10 +733,7 @@ function setupEnvelopeReveal() {
     const giftBox = document.getElementById('giftBoxContainer');
     
     giftBox.addEventListener('click', () => {
-        // Bounce out gift box
         giftBox.style.transform = 'scale(0.01)';
-        
-        // Launch floating balloons on box open! (Premium enhancement)
         startFloatingBalloons();
 
         setTimeout(() => {
@@ -724,7 +801,7 @@ function triggerGreetingMessage() {
     }
 }
 
-// Floating balloons (gently rising, color variations)
+// Floating balloons
 function startFloatingBalloons() {
     const colors = ['#f43f5e', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#a855f7'];
     for (let i = 0; i < 15; i++) {
@@ -735,7 +812,6 @@ function startFloatingBalloons() {
             balloon.style.left = Math.random() * 90 + 'vw';
             balloon.style.fontSize = Math.random() * 2 + 1.5 + 'rem';
             
-            // Custom CSS filters to shift balloon colors! (Aesthetic)
             const colorIdx = Math.floor(Math.random() * colors.length);
             balloon.style.filter = `hue-rotate(${colorIdx * 60}deg)`;
             
@@ -776,15 +852,13 @@ function startFloatingConfetti() {
     }, 450);
 }
 
-// Canvas Sparkles trailing mouse trail (Premium feature)
+// Canvas Sparkles trailing
 let mousePos = { x: 0, y: 0 };
-let isSparkling = false;
 
 window.addEventListener('mousemove', (e) => {
     mousePos.x = e.clientX;
     mousePos.y = e.clientY;
     
-    // Add trial sparkles occasionally
     if (displayCard.classList.contains('show') && Math.random() < 0.28) {
         const colors = getThemeColors();
         const color = colors[Math.floor(Math.random() * colors.length)];
@@ -792,7 +866,7 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
-// Canvas particle system (loops trailing sparkles & fireworks)
+// Canvas particle system
 const canvas = document.getElementById('fireworks-canvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -865,14 +939,20 @@ function createBurst(x, y) {
 }
 
 function getThemeColors() {
-    if (viewerConfig.theme === 'romantic') {
+    if (viewerConfig.themePreset === 'romantic' || viewerConfig.theme === 'romantic') {
         return ['244, 63, 94', '236, 72, 153', '255, 192, 203', '225, 29, 72'];
-    } else if (viewerConfig.theme === 'elegant') {
-        return ['217, 119, 6', '251, 191, 36', '255, 255, 255', '245, 158, 11'];
-    } else if (viewerConfig.theme === 'playful') {
-        return ['6, 182, 212', '244, 63, 94', '234, 179, 8', '168, 85, 247'];
+    } else if (viewerConfig.themePreset === 'luxury') {
+        return ['212, 175, 55', '243, 229, 171', '255, 255, 255', '170, 132, 33'];
+    } else if (viewerConfig.themePreset === 'royal') {
+        return ['99, 102, 241', '251, 191, 36', '245, 158, 11', '30, 30, 74'];
+    } else if (viewerConfig.themePreset === 'minimal') {
+        return ['9, 9, 11', '113, 113, 122', '244, 244, 245', '82, 82, 91'];
+    } else if (viewerConfig.themePreset === 'anime') {
+        return ['236, 72, 153', '59, 130, 246', '234, 179, 8', '16, 185, 129'];
+    } else if (viewerConfig.themePreset === 'kids') {
+        return ['6, 182, 212', '244, 63, 94', '245, 158, 11', '16, 185, 129'];
     } else {
-        return ['99, 102, 241', '168, 85, 247', '236, 72, 153', '6, 182, 212'];
+        return ['168, 85, 247', '34, 211, 238', '244, 63, 94', '9, 9, 11'];
     }
 }
 
@@ -1005,7 +1085,6 @@ document.getElementById('musicBtn').addEventListener('click', () => {
     if (isPlaying) {
         stopSong();
     } else {
-        // Pause any recorded voice notes before playing bg music
         document.getElementById('voiceMessageAudio').pause();
         document.getElementById('tapePlayBtn').textContent = '▶️';
         document.getElementById('cassetteTape').classList.remove('playing');

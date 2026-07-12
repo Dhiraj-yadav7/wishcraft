@@ -4,7 +4,7 @@ const { success, error } = require('./utils/response');
 const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Rules-based static generator templates for instant offline fallbacks
+// Curriculum of local rules fallbacks for advanced AI actions
 const fallbackTemplates = {
     wishes: {
         girlfriend: "Happy Birthday to the one who makes my heart beat faster and my world so much brighter! I love you more every single day. 💕",
@@ -41,6 +41,33 @@ const fallbackTemplates = {
     },
     hashtags: {
         other: "#HappyBirthday #Celebration #BirthdayVibes #PartyTime #Blessed"
+    },
+
+    // ====================================================
+    // ADVANCED PLANNING ENGINE FALLBACKS
+    // ====================================================
+    story: {
+        girlfriend: "Once upon a time, in a world full of ordinary moments, I met someone who changed everything. recipient has been my anchor, my spark of joy, and my favorite adventure. Looking back at our memories—from late-night laughs to quiet morning coffee dates—I realize how blessed I am. This birthday is a celebration of the wonderful story we are writing together. Happy Birthday, my love! 💕📖",
+        other: "Every year is a chapter in the book of life. For recipient, this chapter represents growth, triumphs over hurdles, and sharing beautiful laughs with those who care. The story of our bond is written in trust, joy, and small kind gestures. Here's to writing the next chapter of your journey!"
+    },
+    video: {
+        other: "[SCENE 1: Warm smile to camera]\nHost: 'Hey everyone! Today is an incredibly special day... it's recipient's birthday!'\n[SCENE 2: Montage of memories slideshow]\nHost (voiceover): 'From the silly laughs to the big milestones, you make every day brighter.'\n[SCENE 3: Raise a cup/cake]\nHost: 'Sending you oceans of love and success. Happy Birthday! Let's make this year unforgettable!' 🎉📽️"
+    },
+    gift: {
+        girlfriend: "Top 3 Luxury Gift Suggestions:\n1. Custom Gold Name Pendant (matching the Royal Theme aesthetic).\n2. Instax Mini Instant Camera (to capture more timeline memory nodes).\n3. Curated Spa Day Gift Voucher (to pamper your queen). 🎁👑",
+        other: "Top 3 Gift Suggestions:\n1. Personalized Leather Wallet or Handbag.\n2. Visual Memory Box filled with custom notes.\n3. Premium Noise-Canceling Wireless Earbuds. 🎁"
+    },
+    plan: {
+        other: "Party Itinerary:\n- 10:00 AM: Surprise Birthday Breakfast & flower deliveries.\n- 02:00 PM: Cozy family lunch & memory timeline viewing.\n- 06:00 PM: Envelope unlock reveal ceremony & cake blowout!\n- 08:00 PM: Intimate dinner with friends and toasts. ⏰🥂"
+    },
+    decor: {
+        other: "Decoration Concepts:\n- Luxury Gold: Velvet table runners, warm fairy string lights, gold foil balloons.\n- Minimal: Neutral linen accents, fresh eucalyptus branches, polaroid memory clothesline.\n- Kids/Playful: Bright colorful hanging streamers, bubble generators, balloon arch. 🎈🎨"
+    },
+    cake: {
+        other: "Cake Inspiration:\n- Option 1: Luxury Dual-Layer Belgian Chocolate Truffle Cake with gold foil flakes.\n- Option 2: Pastel Strawberry Chiffon Cake with vanilla frosting and glowing sparkles.\n- Option 3: Cyberpunk Galaxy Mirror-Glaze Cake with neon glowing candles. 🎂"
+    },
+    budget: {
+        other: "Estimated Party Budget (Base 20 guests):\n- Catering/Drinks: $300\n- Custom Cake & Candles: $60\n- Theme Decorations: $80\n- Gift Capsule Items: $100\n-------------------------\nEstimated Total Spend: $540 💰"
     }
 };
 
@@ -49,7 +76,6 @@ module.exports = async function handler(req, res) {
         return error(res, 'Method not allowed', 405);
     }
 
-    // Authenticate creator token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return error(res, 'Unauthenticated. Token missing.', 401);
@@ -73,7 +99,16 @@ module.exports = async function handler(req, res) {
     // ====================================================
     if (GEMINI_API_KEY) {
         try {
-            const prompt = `Generate a creative, high-quality, premium ${category.replace('_', ' ')} for my ${relation} whose name is "${recipientName}". Format the output as clean, direct, ready-to-copy text. Do not include any intros, meta-descriptions, labels, quotes, or prefaces. Just generate the exact text.`;
+            let stylePrompt = `a creative ${category}`;
+            if (category === 'story') stylePrompt = 'an emotional, tear-jerker memory lane story';
+            else if (category === 'video') stylePrompt = 'a detailed birthday video greeting script with scenes and camera directions';
+            else if (category === 'gift') stylePrompt = 'a personalized list of 3 premium gift suggestions based on age and interests';
+            else if (category === 'plan') stylePrompt = 'a full chronological birthday celebration planner itinerary';
+            else if (category === 'decor') stylePrompt = 'a theme decoration board guideline containing colors, balloons, and setups';
+            else if (category === 'cake') stylePrompt = 'a custom designer cake concept, listing flavors and layering designs';
+            else if (category === 'budget') stylePrompt = 'a guest budget planner containing cost lines (food, cake, decor) in a clean text table';
+
+            const prompt = `Generate ${stylePrompt} for my ${relation} whose name is "${recipientName}". Output only the direct result text itself. Do not include any intro, prefaces, conversational responses, or meta-labels. Just output the clean text.`;
 
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
@@ -89,7 +124,7 @@ module.exports = async function handler(req, res) {
             
             if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
                 const aiResult = data.candidates[0].content.parts[0].text.trim();
-                return success(res, { text: aiResult }, 'Wishes generated by Gemini AI.', 200);
+                return success(res, { text: aiResult }, 'Content generated by Gemini AI.', 200);
             } else {
                 console.error("Gemini structure error:", JSON.stringify(data));
             }
@@ -99,7 +134,7 @@ module.exports = async function handler(req, res) {
     }
 
     // ====================================================
-    // RULES ENGINE FALLBACK (If key missing or fetch failed)
+    // RULES ENGINE FALLBACK (Curated templates)
     // ====================================================
     const categoryDict = fallbackTemplates[category] || fallbackTemplates['wishes'];
     let textResult = categoryDict[relation] || categoryDict['other'] || fallbackTemplates['wishes']['friend'];
@@ -107,5 +142,5 @@ module.exports = async function handler(req, res) {
     // Replace placeholder name if applicable
     textResult = textResult.replace(/recipient/g, recipientName);
 
-    return success(res, { text: textResult, isFallback: true }, 'Wishes loaded from curated template library.', 200);
+    return success(res, { text: textResult, isFallback: true }, 'Content loaded from curated template library.', 200);
 };

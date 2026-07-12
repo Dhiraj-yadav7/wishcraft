@@ -6,10 +6,14 @@
     <title>Surprise Card Surprise! 🎁</title>
     <!-- Use core styles -->
     <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/themes.css">
     
     <!-- Premium client-side libraries downloads dynamically -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- PWA Settings manifest -->
+    <link rel="manifest" href="manifest.json">
 
     <style>
         .wish-body {
@@ -141,7 +145,10 @@
         }
 
         body.theme-elegant .wish-post,
-        body.theme-cosmic .wish-post {
+        body.theme-cosmic .wish-post,
+        body.theme-luxury .wish-post,
+        body.theme-royal .wish-post,
+        body.theme-dark .wish-post {
             background: rgba(15, 23, 42, 0.3);
             border-color: rgba(255,255,255,0.05);
         }
@@ -202,7 +209,10 @@
         }
 
         body.theme-elegant .timeline-item-card,
-        body.theme-cosmic .timeline-item-card {
+        body.theme-cosmic .timeline-item-card,
+        body.theme-luxury .timeline-item-card,
+        body.theme-royal .timeline-item-card,
+        body.theme-dark .timeline-item-card {
             background: rgba(30, 41, 59, 0.4);
             border-color: rgba(255, 255, 255, 0.05);
         }
@@ -225,6 +235,21 @@
     <div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s ease; color: var(--text-color);">
         <div style="font-size: 3rem; animation: floatUp 1.2s infinite alternate;">🎂</div>
         <p style="margin-top: 1rem; font-weight: 800; font-family: var(--font-heading);">Preparing your sweet surprise... ✨</p>
+    </div>
+
+    <!-- Digital Time Capsule Locked screen overlay (Premium SaaS) -->
+    <div id="capsuleLockedGate" style="display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 600; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; color: var(--text-color); padding: 2rem; text-align: center;">
+        <div style="font-size: 5rem; animation: floatUp 1.8s infinite alternate;">🔒📦</div>
+        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; max-width: 400px; line-height: 1.3;">This Private Birthday Capsule is Time-Locked</h2>
+        <p style="font-size: 0.95rem; opacity: 0.85; max-width: 320px;" id="capsuleUnlockNotice">"This surprise will unlock on the birthday."</p>
+        
+        <!-- Capsule Countdown clock -->
+        <div id="capsuleCountdownBox" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1rem 2rem; display: flex; flex-direction: column; gap: 0.2rem; min-width: 250px;">
+            <span style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; opacity: 0.7; letter-spacing: 0.05em;">Time remaining:</span>
+            <span id="capsuleCountdownText" style="font-size: 1.6rem; font-weight: 900; color: var(--primary-color); letter-spacing: 0.02em;">00d 00h 00m 00s</span>
+        </div>
+        
+        <p style="font-size: 0.75rem; opacity: 0.7; max-width: 280px; line-height: 1.4;">The letters, photos, voice notes, and videos inside this capsule are encrypted and will automatically decrypt at the release timestamp.</p>
     </div>
 
     <!-- Password protected gate overlay -->
@@ -376,6 +401,8 @@
         </form>
     </section>
 
+    <!-- PWA settings -->
+    <script src="src/js/pwa.js"></script>
     <!-- JS Logic loader -->
     <script src="src/js/viewer.js"></script>
 </body>

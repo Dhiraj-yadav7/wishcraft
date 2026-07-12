@@ -12,6 +12,11 @@ let generatorState = {
     aiWishes: [], // Array of { category, text, favorite }
     currentTimelinePhoto: '', // Temp base64 for upload
 
+    // saas parameters
+    themePreset: 'romantic',
+    capsuleLocked: false,
+    unlockDate: null,
+
     mediaRecorder: null,
     audioChunks: [],
     isRecording: false
@@ -44,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Premium setups
     setupAiAssistModule();
     setupTimelineManager();
+    setupCapsuleLockedForm();
     
     // 2. Check if Edit Mode (url query parameter ?id=xxx)
     const params = new URLSearchParams(window.location.search);
@@ -92,7 +98,7 @@ async function loadEditDetails(pageId) {
         const data = await res.json();
         
         if (data.success) {
-            const page = data.data;
+            const page = data.data.page;
             
             // Populate inputs
             document.getElementById('recipientName').value = page.name;
@@ -117,15 +123,28 @@ async function loadEditDetails(pageId) {
             updateTimelineItemsList();
             generatorState.aiWishes = page.aiWishes || [];
 
-            // Sync grid theme selection
-            document.querySelectorAll('.grid-option[data-type="theme"]').forEach(opt => {
-                if (opt.dataset.value === page.theme) {
+            // SaaS Digital Capsule parameters populate
+            const isCapsule = !!page.capsuleLocked;
+            document.getElementById('capsuleLockedToggle').checked = isCapsule;
+            document.getElementById('capsuleTimeBlock').style.display = isCapsule ? 'block' : 'none';
+            if (page.unlockDate) {
+                document.getElementById('capsuleUnlockDate').value = new Date(page.unlockDate).toISOString().slice(0, 16);
+            }
+            generatorState.capsuleLocked = isCapsule;
+
+            // Sync grid theme preset selection
+            document.querySelectorAll('.grid-option[data-type="themePreset"]').forEach(opt => {
+                if (opt.dataset.value === (page.themePreset || 'romantic')) {
                     opt.classList.add('selected');
                 } else {
                     opt.classList.remove('selected');
                 }
             });
-            generatorState.theme = page.theme;
+            generatorState.themePreset = page.themePreset || 'romantic';
+            generatorState.theme = page.themePreset || 'romantic';
+
+            // Set visual body class
+            document.body.className = `theme-${generatorState.themePreset}`;
 
             // Sync photos array
             generatorState.photos = page.photos || [];
@@ -170,13 +189,19 @@ function setupSimulatorSync() {
         document.getElementById(id).addEventListener('change', syncSimulator);
     });
 
-    document.querySelectorAll('.grid-option[data-type="theme"]').forEach(opt => {
+    // Theme Preset click triggers
+    document.querySelectorAll('.grid-option[data-type="themePreset"]').forEach(opt => {
         opt.addEventListener('click', (e) => {
-            document.querySelectorAll('.grid-option[data-type="theme"]').forEach(o => o.classList.remove('selected'));
+            document.querySelectorAll('.grid-option[data-type="themePreset"]').forEach(o => o.classList.remove('selected'));
             const current = e.currentTarget;
             current.classList.add('selected');
             
+            generatorState.themePreset = current.dataset.value;
             generatorState.theme = current.dataset.value;
+            
+            // Set dynamic visual theme live in editor body!
+            document.body.className = `theme-${generatorState.themePreset}`;
+            
             syncSimulator();
         });
     });
@@ -194,7 +219,7 @@ function syncSimulator() {
 
     document.getElementById('simCard').style.fontFamily = font;
     document.getElementById('simMessage').style.fontFamily = font;
-    document.getElementById('simCard').className = `preview-sim-card theme-${generatorState.theme}`;
+    document.getElementById('simCard').className = `preview-sim-card theme-${generatorState.themePreset}`;
 
     const simPhoto = document.getElementById('simPhoto');
     if (generatorState.photos.length > 0) {
@@ -296,7 +321,7 @@ function showTabStep(step) {
         else content.classList.remove('active');
     });
 
-    document.body.className = `theme-${generatorState.theme}`;
+    document.body.className = `theme-${generatorState.themePreset}`;
 }
 
 // Photos file manager
@@ -554,6 +579,28 @@ function updateTimelineItemsList() {
 }
 
 // ========================================================
+// LOCKED DIGITAL TIME CAPSULE CONFIGS
+// ========================================================
+function setupCapsuleLockedForm() {
+    const toggle = document.getElementById('capsuleLockedToggle');
+    const timeBlock = document.getElementById('capsuleTimeBlock');
+
+    toggle.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        timeBlock.style.display = isChecked ? 'block' : 'none';
+        generatorState.capsuleLocked = isChecked;
+        
+        if (isChecked) {
+            // Preset release date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
+            document.getElementById('capsuleUnlockDate').value = tomorrow.toISOString().slice(0,16);
+        }
+    });
+}
+
+// ========================================================
 // GEMINI AI ASSIST DIALOG DRAWER (Premium integration)
 // ========================================================
 function setupAiAssistModule() {
@@ -615,14 +662,14 @@ function setupAiAssistModule() {
             if (data.success) {
                 resultText.value = data.data.text;
                 resultBlock.style.display = 'flex';
-                showToast(data.message, 'success');
+                showToast('Gemini planning completed!', 'success');
             } else {
                 showToast(data.message, 'error');
             }
         } catch (e) {
             shimmer.style.display = 'none';
             generateBtn.style.display = 'block';
-            showToast('Failed to contact AI engine.', 'error');
+            showToast('Failed to contact AI planning assistant.', 'error');
         }
     };
 
@@ -641,7 +688,7 @@ function setupAiAssistModule() {
             document.getElementById('cardMessage').value = text;
             syncSimulator();
             modal.style.display = 'none';
-            showToast('AI wishes copied to message card! 🪄', 'success');
+            showToast('AI content injected to editor! 🪄', 'success');
         }
     });
 
@@ -649,9 +696,8 @@ function setupAiAssistModule() {
         const text = resultText.value.trim();
         const category = categorySelect.value;
         if (text) {
-            // Push to favs list
             generatorState.aiWishes.push({ category, text, favorite: true });
-            showToast('Saved to your AI favorites! ❤️', 'success');
+            showToast('Saved to AI suggestions library! ❤️', 'success');
         }
     });
 }
@@ -687,6 +733,11 @@ async function submitCardData(status) {
     const expiresAtVal = document.getElementById('linkExpiry').value;
     const expiresAt = expiresAtVal ? new Date(expiresAtVal).toISOString() : null;
 
+    // SaaS Capsule locks mappings
+    const capsuleLocked = document.getElementById('capsuleLockedToggle').checked;
+    const unlockDateVal = document.getElementById('capsuleUnlockDate').value;
+    const unlockDate = (capsuleLocked && unlockDateVal) ? new Date(unlockDateVal).toISOString() : null;
+
     const payload = {
         name,
         date,
@@ -696,7 +747,7 @@ async function submitCardData(status) {
         photos: generatorState.photos,
         videoUrl,
         voiceMessage: generatorState.voiceMessage,
-        theme: generatorState.theme,
+        theme: generatorState.themePreset, // Fallback mappings
         background: generatorState.background,
         music,
         font,
@@ -710,7 +761,13 @@ async function submitCardData(status) {
         password,
         expiresAt,
         timeline: generatorState.timeline,
-        aiWishes: generatorState.aiWishes
+        aiWishes: generatorState.aiWishes,
+
+        // SaaS parameters payload
+        capsuleLocked,
+        unlockDate,
+        themePreset: generatorState.themePreset,
+        favoriteTemplate: false
     };
 
     const isEdit = generatorState.pageId !== null;

@@ -8,8 +8,11 @@
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/auth.css">
     <link rel="stylesheet" href="src/css/dashboard.css">
+    <link rel="stylesheet" href="src/css/themes.css">
     <!-- Auth Route Protection Guard in Head -->
     <script src="src/js/auth.js"></script>
+    <!-- PWA settings manifest -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="theme-romantic">
 
@@ -22,7 +25,11 @@
                 <p style="font-size: 0.9rem; opacity: 0.85; margin-top: 0.2rem;" id="userWelcomeText">Hello, Surprise Creator!</p>
             </div>
             
-            <div class="dash-header-actions">
+            <div class="dash-header-actions" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <!-- PWA controls -->
+                <button type="button" class="btn btn-secondary" id="pwaInstallBtn" style="display: none; padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; align-items: center; gap: 0.4rem;" onclick="installPwaApp()">📱 Install App</button>
+                <button type="button" class="btn btn-secondary" id="pwaNotifyBtn" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="requestPushPermissions()">🔔 Enable Alerts</button>
+                
                 <!-- Notifications Bell -->
                 <div class="notif-bell-container" id="notifBell">
                     🔔
@@ -38,7 +45,7 @@
                 </div>
 
                 <!-- Action buttons -->
-                <a href="profile.html" class="btn btn-secondary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; text-decoration: none;">👤 My Profile</a>
+                <a href="profile.html" class="btn btn-secondary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">👤 Profile & Settings</a>
                 <button type="button" id="createNewCardBtn" class="btn btn-primary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold;">➕ Create Surprise</button>
             </div>
         </header>
@@ -130,6 +137,8 @@
         </div>
     </div>
 
+    <!-- PWA scripting -->
+    <script src="src/js/pwa.js"></script>
     <!-- JS Controller implementation -->
     <script src="src/js/dashboard.js"></script>
 </body>
