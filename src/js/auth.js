@@ -95,8 +95,8 @@ const authManager = {
 
     // Guard routes dynamically on page load
     guardRoute: async () => {
-        const isAuthPage = window.location.pathname.includes('login.html');
-        const isPublicPage = window.location.pathname.includes('wish.html');
+        const isAuthPage = window.location.pathname.includes('login') || window.location.pathname.includes('signup');
+        const isPublicPage = window.location.pathname.includes('view') || window.location.pathname.includes('wish');
         
         // Skip checks on public card presentations
         if (isPublicPage) return;
@@ -105,7 +105,7 @@ const authManager = {
 
         if (isAuthPage && authenticated) {
             // Already logged in, redirect home
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.html';
         } else if (!isAuthPage && !authenticated) {
             // Not authenticated, redirect to login
             window.location.href = 'login.html';
@@ -137,6 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
             activeForm.classList.add('active');
         }
     };
+
+    // Auto-toggle view based on path or hash
+    if (window.location.pathname.includes('signup') || window.location.hash === '#signup') {
+        showFormSection('signup-form');
+    }
 
     // Toggle Link click event listeners
     const toSignup = document.getElementById('to-signup');

@@ -1,5 +1,9 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/signup", "destination": "/login.html" },
+    { "source": "/login", "destination": "/login.html" }
+  ],
   "builds": [
     { "src": "api/**/*.js", "use": "@vercel/node" },
     { "src": "api/*.js", "use": "@vercel/node" },
