@@ -1,6 +1,10 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "src/**/*", "use": "@vercel/static" },
+    { "src": "public/**/*", "use": "@vercel/static" }
   ]
 }
