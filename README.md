@@ -1,136 +1,343 @@
-# WishCraft 🪄✨ — Premium Birthday Surprise SaaS Platform
+# 🎉 WishCraft – AI Powered Birthday Surprise Platform
 
-WishCraft is a modern, high-fidelity digital birthday surprise creation platform designed as a complete, recruiter-ready full-stack SaaS. Users can craft elegant, personalized multi-slide birthday surprise experiences with countdown timers, dynamic message cards, responsive HTML5 video & cassette tape voice messages, photo grids, evolutionary timelines, Google Calendar integrations, visitor guestbooks, and downloadable PDF/image offline exports.
+<p align="center">
+  <strong>Create unforgettable digital birthday experiences with AI, beautiful animations, interactive story slides, personalized messages, and premium sharing features.</strong>
+</p>
 
----
+<p align="center">
 
-## 🚀 Key Features
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-success)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-black)
+![Gemini AI](https://img.shields.io/badge/AI-Google_Gemini-orange)
+![Responsive](https://img.shields.io/badge/Responsive-Yes-blueviolet)
+![Status](https://img.shields.io/badge/Status-Production-success)
 
-* **Professional Landing Page & Quick Wizard**: Clean SaaS landing page featuring pricing tiers, accordions, and a live 4-step surprise builder demo that anonymous guests can try before signing up.
-* **Responsive 10-Slide Story Experience**: Presentations are loaded as interactive story decks with keyboard shortcuts (`ArrowLeft` / `ArrowRight` / `Spacebar`) and top progress tracking bars:
-  1. Countdown Hero Section
-  2. Dynamic Birthday Message
-  3. Interactive YouTube & HTML5 Video Player
-  4. Web Audio Cassette Tape Voice Recorder
-  5. Photo Gallery Lightbox Carousel
-  6. Evolutionary Birthday Timeline Nodes
-  7. Luxury Gift Recommendation Suggestions
-  8. Synthesized Web Audio Soundtracks
-  9. Social Sharing Options & QR Codes
-  10. Guestbook Comments (with spam moderation and inline updates)
-* **Connected Accounts Settings**: Form switching toggles (View vs Edit modes) with custom connected brand domain settings, security password update modals, login history activity logs, data backups, and permanent delete confirmation logic.
-* **Offline PDF & PNG Downloads**: Instant high-fidelity PDF documents and PNG snapshots generation utilizing client-side canvas render libraries.
-* **Vercel Serverless Architecture & Fallback DB**: Runs on a hybrid Mongo database connector. If `MONGODB_URI` is undefined, the app automatically maps records to a local JSON file-based database adapter, falling back to writeable `/tmp` folders when running in cloud serverless deployments.
-* **Spam Prevention & Rate Limiting**: Lightweight IP-based rate limiting on serverless entrypoints protects Gemini AI key generation (10 requests/min) and Guestbook comment signatures (8 submissions/min).
+</p>
 
 ---
 
-## 🛠️ Technology Stack
+## 🌐 Live Demo
 
-- **Frontend**: Vanilla HTML5, CSS3 Custom Properties (Glassmorphism & Flexbox), ES6 Javascript modules.
-- **Backend**: Node.js, Vercel Serverless Functions.
-- **Database**: MongoDB (via Mongoose schemas) with local `db.json` file adapter fallback.
-- **Media Upload**: Cloudinary (via SDK configuration) with base64 compressed fallback.
-- **AI Engine**: Google Gemini API (Google Generative Language endpoints).
-- **Libraries**: `html2canvas` (screenshots), `jsPDF` (document compiled records), `bcryptjs` (password hashing), `jsonwebtoken` (session authorizations).
+🔗 **Live Website:** https://birthday-bice-eta.vercel.app/
 
 ---
 
-## 📁 Repository Structure
+# 📖 About the Project
+
+**WishCraft** is a modern AI-powered Birthday Surprise SaaS Platform that allows users to create beautiful, interactive birthday experiences and share them through a unique link.
+
+Unlike traditional greeting cards, WishCraft creates an immersive story-based celebration including countdowns, videos, voice messages, memory galleries, QR code sharing, guestbooks, downloadable PDFs, and AI-generated birthday content.
+
+This project demonstrates full-stack development skills using **JavaScript, Node.js, MongoDB, Serverless Functions, Cloudinary, and Google Gemini AI** while following modern SaaS design principles.
+
+---
+
+# ✨ Features
+
+## 🔐 Authentication
+
+- User Signup & Login
+- JWT Authentication
+- Protected Routes
+- Forgot Password
+- Profile Management
+- Session Management
+
+---
+
+## 🎂 Birthday Surprise Builder
+
+- Create personalized birthday pages
+- Countdown timer
+- Custom birthday message
+- Relationship selection
+- Background themes
+- Voice message support
+- Video support
+- Memory timeline
+- Photo gallery
+- Guestbook
+- Privacy settings
+
+---
+
+## 🎁 Story Experience
+
+Instead of a long scrolling page, WishCraft presents birthdays as an interactive multi-step story:
+
+1. Hero Section
+2. Birthday Message
+3. Video Message
+4. Voice Message
+5. Memory Gallery
+6. Timeline
+7. Music Experience
+8. QR Code & Sharing
+9. Guestbook
+
+---
+
+## 📸 Media Features
+
+- Multiple Image Upload
+- Memory Gallery
+- Responsive Image Grid
+- Lightbox Preview
+- Voice Recording
+- Video Support
+- Background Music
+
+---
+
+## 🤖 AI Features
+
+Powered by **Google Gemini AI**
+
+- AI Birthday Wishes
+- AI Gift Suggestions
+- AI Birthday Messages
+- AI Writing Assistant
+
+---
+
+## 📤 Sharing
+
+- Copy Link
+- WhatsApp
+- Telegram
+- Facebook
+- X (Twitter)
+- Email
+- QR Code Sharing
+- Native Share API
+
+---
+
+## 📄 Export
+
+- Download as PDF
+- Save as Image
+- QR Code Download
+
+---
+
+## 📊 Dashboard
+
+- Birthday Pages
+- Analytics
+- Total Views
+- Guestbook Statistics
+- QR Scan Analytics
+- Public & Private Pages
+- Search & Filters
+
+---
+
+## 👤 Profile Management
+
+- Edit Profile
+- Upload Profile Photo
+- Change Password
+- Notification Preferences
+- Theme Settings
+- Security Settings
+
+---
+
+# 🛠 Tech Stack
+
+### Frontend
+
+- HTML5
+- CSS3
+- JavaScript (ES6)
+- Glassmorphism UI
+- Responsive Design
+
+### Backend
+
+- Node.js
+- Vercel Serverless Functions
+
+### Database
+
+- MongoDB
+- Mongoose
+
+### Authentication
+
+- JWT
+- bcryptjs
+
+### AI
+
+- Google Gemini API
+
+### Media
+
+- Cloudinary
+
+### Deployment
+
+- Vercel
+
+---
+
+# 📁 Project Structure
 
 ```text
-├── api/                   # Vercel Serverless Function handlers
-│   ├── utils/
-│   │   ├── db.js          # Mongoose database models and local JSON DB adapter
-│   │   ├── rateLimiter.js # IP-based serverless memory rate limiter
-│   │   └── response.js    # JSON standard success/error wrappers
-│   ├── ai.js              # Gemini generation & curated fallback template rules
-│   ├── auth.js            # JWT login, signup, forgot/reset password handlers
-│   ├── pages.js           # CRUD pages, analytics, guestbook, duplications
-│   └── profile.js         # Security settings, Connected domains, Cloudinary uploads
-├── src/
-│   ├── css/               # Core styling files
-│   │   ├── auth.css       # Signup, login, & recovery structures
-│   │   ├── dashboard.css  # Creator dashboard metrics grids
-│   │   ├── generator.css  # Surprise creation canvas tabs
-│   │   ├── style.css      # Core global styles & sliding drawers
-│   │   └── themes.css     # Aesthetic gradient color presets
-│   └── js/                # Client scripts
-│       ├── auth.js        # Route guards, anti-flicker overlays & token stores
-│       ├── builder.js     # Landing page interactive wizard script
-│       ├── dashboard.js   # Analytics charts, sorting & page management
-│       ├── generator.js   # Configuration stack undo/redo history controls
-│       ├── pwa.js         # Service Worker registration & notifications
-│       ├── viewer.js      # 10-slide sequential Story controller
-│       └── wish.js        # Envelope reveal script for builder preview
-├── .env.example           # Configurations environment templates
-├── db.json                # Local JSON fallback database storage
-├── vercel.json            # Vercel deployment rewrites and headers clean URLs
-├── sw.js                  # PWA service worker with precaching resources
-├── manifest.json          # Web app installation manifest
-├── LICENSE                # MIT License permissions
-└── package.json           # Scripts and dependency maps
+api/
+├── auth.js
+├── pages.js
+├── profile.js
+├── ai.js
+└── utils/
+
+src/
+├── css/
+├── js/
+├── assets/
+
+manifest.json
+sw.js
+vercel.json
+package.json
+README.md
 ```
 
 ---
 
-## 🔧 Installation & Local Setup
+# ⚙️ Installation
 
-### Prerequisites
-- Node.js (v16.x or newer)
-- npm or yarn
+Clone the repository
 
-### Steps
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Dhiraj-yadav7/brithday-Wishes.git
-   cd birthday-wishes-app
-   ```
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` and adjust the variables:
-   ```bash
-   cp .env.example .env
-   ```
-4. **Start Local Development Server**:
-   Launch Vercel CLI locally to run serverless routes alongside frontend assets:
-   ```bash
-   npm run dev
-   ```
-   Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+```bash
+git clone https://github.com/YOUR_GITHUB_USERNAME/brithday-Wishes.git
+```
 
----
+Move into the project
 
-## 🔌 API Endpoints Summary
+```bash
+cd brithday-Wishes
+```
 
-| Method | Endpoint | Action | Access | Description |
-|---|---|---|---|---|
-| **POST** | `/api/auth?action=signup` | Account Signup | Public | Create new credentials |
-| **POST** | `/api/auth?action=login` | Account Login | Public | Authenticates credentials and logs history |
-| **GET** | `/api/auth?action=user` | Verify JWT | Protected | Validates current user session |
-| **GET** | `/api/pages?action=list` | Fetch Pages | Protected | Fetch cards with analytics counts |
-| **POST** | `/api/pages` | Create Card | Protected | Create new surprise page configuration |
-| **GET** | `/api/pages?action=public` | View Card | Public | Public slide viewer data details |
-| **POST** | `/api/pages?action=comment` | Comment Post | Public | Write new guestbook comment signature |
-| **POST** | `/api/pages?action=duplicate`| Duplicate Layout | Protected | Clone layout structure into a draft |
-| **POST** | `/api/ai` | Gemini Generator| Public/Auth| Creative AI wishes and budgets |
-| **PUT** | `/api/profile` | Update Profile | Protected | Edit creator preferences and email |
-| **POST** | `/api/profile?action=upload-photo` | Edit Photo | Protected | Upload/Remove Cloudinary user profile image |
+Install dependencies
+
+```bash
+npm install
+```
+
+Create `.env`
+
+```env
+MONGODB_URI=
+
+JWT_SECRET=
+
+GEMINI_API_KEY=
+
+CLOUDINARY_CLOUD_NAME=
+
+CLOUDINARY_API_KEY=
+
+CLOUDINARY_API_SECRET=
+```
+
+Run locally
+
+```bash
+npm run dev
+```
 
 ---
 
-## 🚢 Deployment Guide
+# 📡 API Overview
 
-The project is fully pre-configured for Vercel:
-1. Push your changes to your GitHub branch.
-2. Link the repository to your Vercel Dashboard.
-3. Add environment variables (`MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`) to Vercel Project Settings.
-4. Click **Deploy**. Vercel will build and serve serverless paths automatically.
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/auth?action=signup` | Register user |
+| POST | `/api/auth?action=login` | Login |
+| GET | `/api/auth?action=user` | Verify Session |
+| POST | `/api/pages` | Create Birthday Page |
+| GET | `/api/pages?action=list` | Get Pages |
+| POST | `/api/pages?action=comment` | Add Guestbook Wish |
+| POST | `/api/ai` | Generate AI Content |
+| PUT | `/api/profile` | Update Profile |
+
+---
+
+# 🚀 Deployment
+
+This project is deployed on **Vercel**.
+
+Deployment Steps:
+
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables
+4. Deploy
+
+---
+
+# ⚡ Performance
+
+- Lazy Loading
+- Responsive Images
+- Optimized Assets
+- Serverless Architecture
+- Mobile Friendly
+- SEO Friendly
+- PWA Ready
+
+---
+
+# 🚧 Future Improvements
+
+- Mobile App
+- Real-time Guestbook
+- AI Video Generator
+- Multi-language Support
+- Custom Domains
+- Team Collaboration
+- Subscription Plans
+- Template Marketplace
+
+---
+
+# 💡 Why I Built This
+
+I built **WishCraft** to create a modern digital birthday experience that goes beyond traditional greeting cards.
+
+The project showcases my ability to build production-ready full-stack applications with scalable architecture, responsive UI, serverless APIs, AI integration, and cloud-based media management.
+
+---
+
+# 👨‍💻 Author
+
+**Dhiraj Yadav**
+
+Final Year Computer Science Engineering Student
+
+🚀 MERN Stack Developer
+
+🌐 Portfolio: https://dhiraj-portfolio-beta.vercel.app/
+
+💼 LinkedIn: https://www.linkedin.com/in/dhiraj-yadav-cse
+
+🐙 GitHub: https://github.com/Dhiraj-yadav7
+
+---
+
+# ⭐ Support
+
+If you found this project helpful, please consider giving it a **⭐ Star** on GitHub.
+
+It motivates me to build more open-source projects.
 
 ---
 
 ## 📄 License
-This project is licensed under the terms of the [MIT License](LICENSE).
+
+This project is licensed under the **MIT License**.
