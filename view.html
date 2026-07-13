@@ -1237,9 +1237,324 @@
     <canvas id="fireworks-canvas"></canvas>
 
     <!-- Glassmorphic Loading Screen (UX upgrade) -->
-    <div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100001; transition: opacity 0.5s ease; color: var(--text-color);">
-        <div style="font-size: 3rem; animation: floatUp 1.2s infinite alternate;">🎂</div>
-        <p style="margin-top: 1rem; font-weight: 800; font-family: var(--font-heading);">Preparing your sweet surprise... ✨</p>
+    <div id="loadingScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #fbcfe8, #f5d0fe, #fae8ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100001; transition: opacity 0.5s ease; color: var(--text-color); overflow: hidden; font-family: 'Outfit', sans-serif;">
+        
+        <!-- Local styles for isolation -->
+        <style>
+            .premium-loader-card {
+                background: rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                border-radius: 40px;
+                padding: 3rem 2rem;
+                width: 90%;
+                max-width: 440px;
+                box-shadow: 0 30px 60px rgba(244, 63, 94, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                z-index: 10;
+                position: relative;
+                margin: 1.5rem;
+            }
+            .premium-brand-title {
+                font-family: 'Outfit', sans-serif;
+                font-size: 2.2rem;
+                font-weight: 800;
+                color: #ec4899;
+                margin: 1rem 0 0.2rem 0;
+                letter-spacing: -0.02em;
+                background: linear-gradient(135deg, #ec4899, #db2777);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .premium-sub-title {
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.15rem;
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 2rem;
+            }
+            .premium-progress-container {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .premium-progress-bar-track {
+                flex: 1;
+                height: 12px;
+                background: rgba(236, 72, 153, 0.1);
+                border-radius: 100px;
+                overflow: hidden;
+                border: 1px solid rgba(236, 72, 153, 0.05);
+                position: relative;
+            }
+            .premium-progress-bar-fill {
+                width: 0%;
+                height: 100%;
+                background: linear-gradient(90deg, #f472b6, #ec4899);
+                box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
+                border-radius: 100px;
+                transition: width 0.15s ease-out;
+            }
+            .premium-progress-percent {
+                font-family: 'Outfit', sans-serif;
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: #ec4899;
+                min-width: 40px;
+                text-align: right;
+            }
+            .premium-loader-details {
+                font-family: 'Outfit', sans-serif;
+                font-size: 0.9rem;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                margin: 0;
+            }
+            .sparkle-icon {
+                color: #fbbf24;
+                animation: spinSparkle 4s linear infinite;
+                display: inline-block;
+            }
+            .loader-clouds {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 15vh;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 1;
+            }
+            .loader-cloud {
+                position: absolute;
+                bottom: -30px;
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 100px;
+                filter: blur(10px);
+            }
+            .cloud-1 {
+                width: 250px;
+                height: 100px;
+                left: -50px;
+                animation: floatCloud1 12s ease-in-out infinite alternate;
+            }
+            .cloud-2 {
+                width: 350px;
+                height: 120px;
+                right: -100px;
+                background: rgba(255, 255, 255, 0.5);
+                animation: floatCloud2 16s ease-in-out infinite alternate;
+            }
+            .cloud-3 {
+                width: 450px;
+                height: 150px;
+                left: 20%;
+                bottom: -60px;
+                background: rgba(255, 255, 255, 0.7);
+                animation: floatCloud3 20s ease-in-out infinite alternate;
+            }
+            .loader-hearts {
+                position: absolute;
+                inset: 0;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 2;
+            }
+            .loader-heart {
+                position: absolute;
+                font-size: 1.5rem;
+                opacity: 0.6;
+                animation: floatHeart 6s ease-in-out infinite;
+            }
+            .heart-1 {
+                left: 10%;
+                top: 40%;
+                animation-duration: 7s;
+                font-size: 1.8rem;
+            }
+            .heart-2 {
+                right: 15%;
+                top: 25%;
+                animation-duration: 9s;
+                font-size: 1.4rem;
+            }
+            .heart-3 {
+                left: 20%;
+                bottom: 25%;
+                animation-duration: 8s;
+                font-size: 1.2rem;
+            }
+            .heart-4 {
+                right: 25%;
+                bottom: 30%;
+                animation-duration: 6s;
+                font-size: 1.6rem;
+            }
+            @keyframes floatCloud1 {
+                0% { transform: translateX(0) translateY(0); }
+                100% { transform: translateX(20px) translateY(-5px); }
+            }
+            @keyframes floatCloud2 {
+                0% { transform: translateX(0) translateY(0); }
+                100% { transform: translateX(-30px) translateY(-10px); }
+            }
+            @keyframes floatCloud3 {
+                0% { transform: translateX(0) translateY(0); }
+                100% { transform: translateX(10px) translateY(-8px); }
+            }
+            @keyframes floatHeart {
+                0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.2; }
+                50% { transform: translateY(-15px) scale(1.1) rotate(10deg); opacity: 0.6; }
+                100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.2; }
+            }
+            @keyframes spinSparkle {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        </style>
+
+        <!-- Floating clouds in background -->
+        <div class="loader-clouds">
+            <div class="loader-cloud cloud-1"></div>
+            <div class="loader-cloud cloud-2"></div>
+            <div class="loader-cloud cloud-3"></div>
+        </div>
+
+        <!-- Floating hearts in background -->
+        <div class="loader-hearts">
+            <div class="loader-heart heart-1">💖</div>
+            <div class="loader-heart heart-2">❤️</div>
+            <div class="loader-heart heart-3">💕</div>
+            <div class="loader-heart heart-4">💗</div>
+        </div>
+
+        <!-- Glassmorphic Card -->
+        <div class="premium-loader-card">
+            <div class="magic-wand-container">
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.4)); animation: floatWand 3s ease-in-out infinite;">
+                    <style>
+                        @keyframes floatWand {
+                            0%, 100% { transform: translateY(0) rotate(0deg); }
+                            50% { transform: translateY(-8px) rotate(3deg); }
+                        }
+                        @keyframes pulseSparkle {
+                            0%, 100% { transform: scale(0.8); opacity: 0.4; }
+                            50% { transform: scale(1.2); opacity: 1; }
+                        }
+                    </style>
+                    <!-- Wand Stem (Gradient pink) -->
+                    <rect x="35" y="75" width="8" height="50" rx="4" transform="rotate(-45 35 75)" fill="url(#wand-stem-grad)"/>
+                    <!-- Glowing Star at tip -->
+                    <path d="M72.5 25.5C73.5 22.5 77.5 22.5 78.5 25.5L83.5 40.5L98.5 45.5C101.5 46.5 101.5 50.5 98.5 51.5L83.5 56.5L78.5 71.5C77.5 74.5 73.5 74.5 72.5 71.5L67.5 56.5L52.5 51.5C49.5 50.5 49.5 46.5 52.5 45.5L67.5 40.5L72.5 25.5Z" fill="url(#star-grad)"/>
+                    <!-- Star Glow / Aura -->
+                    <circle cx="75.5" cy="48.5" r="28" stroke="url(#star-aura-grad)" stroke-width="2" stroke-dasharray="4 4">
+                        <animateTransform attributeName="transform" type="rotate" from="0 75.5 48.5" to="360 75.5 48.5" dur="10s" repeatCount="indefinite" />
+                    </circle>
+                    
+                    <!-- Sparkles -->
+                    <path d="M42 22L43.5 27L48.5 28.5L43.5 30L42 35L40.5 30L35.5 28.5L40.5 27L42 22Z" fill="#fbbf24" opacity="0.8" style="animation: pulseSparkle 2s infinite;"/>
+                    <path d="M102 78L103 81.5L106.5 82.5L103 83.5L102 87L101 83.5L97.5 82.5L101 81.5L102 78Z" fill="#fbbf24" opacity="0.8" style="animation: pulseSparkle 2.5s infinite 0.5s;"/>
+                    <path d="M96 18L97 21L100 22L97 23L96 26L95 23L92 22L95 21L96 18Z" fill="#fbbf24" opacity="0.8" style="animation: pulseSparkle 1.8s infinite 0.2s;"/>
+                    <path d="M22 62L23 65L26 66L23 67L22 70L21 67L18 66L21 65L22 62Z" fill="#fbbf24" opacity="0.7" style="animation: pulseSparkle 2.2s infinite 0.4s;"/>
+
+                    <defs>
+                        <linearGradient id="wand-stem-grad" x1="39" y1="75" x2="39" y2="125" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#f472b6"/>
+                            <stop offset="1" stop-color="#db2777"/>
+                        </linearGradient>
+                        <linearGradient id="star-grad" x1="51" y1="23" x2="100" y2="72" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#ff9a9e"/>
+                            <stop offset="0.5" stop-color="#fecfef"/>
+                            <stop offset="1" stop-color="#f472b6"/>
+                        </linearGradient>
+                        <linearGradient id="star-aura-grad" x1="47.5" y1="20.5" x2="103.5" y2="76.5" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#fbcfe8" stop-opacity="0.8"/>
+                            <stop offset="1" stop-color="#f472b6" stop-opacity="0.2"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h1 class="premium-brand-title">WishCraft</h1>
+            <h2 class="premium-sub-title">Preparing your surprise...</h2>
+            
+            <!-- Progress Bar Container -->
+            <div class="premium-progress-container">
+                <div class="premium-progress-bar-track">
+                    <div class="premium-progress-bar-fill"></div>
+                </div>
+                <span class="premium-progress-percent">0%</span>
+            </div>
+            
+            <p class="premium-loader-details">
+                <span class="sparkle-icon">✦</span> Loading personalized memories...
+            </p>
+        </div>
+
+        <!-- Subtle Creator Signature -->
+        <div style="position: absolute; bottom: 1.5rem; right: 2rem; font-family: 'Outfit', sans-serif; font-size: 0.75rem; color: #db2777; opacity: 0.5; z-index: 5; pointer-events: none;">
+            Crafted by Dhiraj Yadav ❤️
+        </div>
+
+        <!-- Progress Tracker Driver -->
+        <script>
+            (() => {
+                const loader = document.getElementById('loadingScreen');
+                const progressBar = loader.querySelector('.premium-progress-bar-fill');
+                const progressText = loader.querySelector('.premium-progress-percent');
+                let progressInterval;
+                let currentProgress = 0;
+
+                function startProgress() {
+                    clearInterval(progressInterval);
+                    currentProgress = 0;
+                    if (progressBar) progressBar.style.width = '0%';
+                    if (progressText) progressText.textContent = '0%';
+                    
+                    progressInterval = setInterval(() => {
+                        if (currentProgress < 95) {
+                            currentProgress += Math.random() * 8 + 2;
+                            if (currentProgress > 95) currentProgress = 95;
+                            const progressRounded = Math.round(currentProgress);
+                            if (progressBar) progressBar.style.width = progressRounded + '%';
+                            if (progressText) progressText.textContent = progressRounded + '%';
+                        }
+                    }, 120);
+                }
+
+                function finishProgress() {
+                    clearInterval(progressInterval);
+                    if (progressBar) progressBar.style.width = '100%';
+                    if (progressText) progressText.textContent = '100%';
+                }
+
+                // Start immediately
+                startProgress();
+
+                // Observe loader styling mutations (for show/hide integrations)
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'style') {
+                            const style = window.getComputedStyle(loader);
+                            if (style.opacity === '0' || style.display === 'none') {
+                                finishProgress();
+                            } else if (style.display === 'flex' && style.opacity === '1') {
+                                startProgress();
+                            }
+                        }
+                    });
+                });
+
+                observer.observe(loader, { attributes: true, attributeFilter: ['style'] });
+            })();
+        </script>
     </div>
 
     <!-- Digital Time Capsule Locked screen overlay (Premium SaaS) -->
