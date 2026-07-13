@@ -2,23 +2,22 @@
    SPLIT PANEL LAYOUT FOR WIZARD BUILDER
    ======================================================== */
 
-.generator-container {
-    width: 98%;
-    max-width: 1200px;
-    height: 90vh;
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 1.5rem;
-    z-index: 10;
-    margin: 1rem 0;
+body.scrollable-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-@media (max-width: 992px) {
-    .generator-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        margin: 2rem 0;
-    }
+.generator-container {
+    width: min(1400px, 95vw);
+    height: 82vh;
+    min-height: 600px;
+    display: grid;
+    grid-template-columns: 68% 32%;
+    gap: 1.5rem;
+    z-index: 10;
+    margin: 40px auto;
 }
 
 /* Premium Sticky Header Navbar */
@@ -34,15 +33,38 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 100;
-    width: 98%;
-    max-width: 1200px;
+    width: min(1400px, 95vw);
     margin: 1.5rem auto 0.5rem auto;
     position: sticky;
     top: 1rem;
     transition: all 0.3s ease;
 }
 
-@media (max-width: 992px) {
+/* Tablet Layout (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .generator-container {
+        grid-template-columns: 68% 32%;
+        gap: 0.8rem;
+        height: 80vh;
+        margin: 20px auto;
+    }
+    .config-pane, .preview-pane {
+        padding: 1.2rem;
+        border-radius: 20px;
+    }
+    .generator-tabs {
+        margin-top: -1.2rem;
+        padding-top: 1.2rem;
+    }
+}
+
+/* Mobile Layout (<768px) */
+@media (max-width: 767px) {
+    .generator-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        margin: 1rem auto 2rem auto;
+    }
     .dash-navbar {
         border-radius: 0;
         width: 100%;
@@ -68,7 +90,7 @@
     flex-direction: column;
 }
 
-@media (min-width: 993px) {
+@media (min-width: 768px) {
     .config-pane {
         max-height: 100%;
     }
@@ -90,7 +112,7 @@
     position: relative;
 }
 
-@media (min-width: 993px) {
+@media (min-width: 768px) {
     .preview-pane {
         max-height: 100%;
     }
@@ -114,7 +136,7 @@
     -webkit-backdrop-filter: blur(20px);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 767px) {
     .generator-tabs {
         top: 54px; /* below the sticky navbar on mobile */
         margin-top: -2rem;
@@ -253,7 +275,6 @@ body.theme-cosmic .voice-recorder-block {
 /* Simulated visual preview mock details */
 .preview-sim-card {
     width: 100%;
-    max-width: 320px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
