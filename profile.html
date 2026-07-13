@@ -61,6 +61,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--settings-bg);
+            z-index: 1000;
+            padding-top: 2.5rem;
+            padding-bottom: 1rem;
+            margin-top: -2.5rem;
+            border-bottom: 1px solid var(--settings-border);
         }
         
         .settings-nav-header h1 {
@@ -96,6 +104,8 @@
             box-shadow: var(--settings-shadow);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            position: sticky;
+            top: 110px;
         }
 
         @media (max-width: 900px) {
@@ -104,6 +114,7 @@
                 overflow-x: auto;
                 padding: 0.5rem;
                 border-radius: var(--settings-radius-md);
+                position: static;
             }
         }
 
