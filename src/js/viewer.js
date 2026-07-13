@@ -307,23 +307,134 @@ function setupSurpriseCardUI() {
     setupGiftSuggestions();
     setupGuestbookWidget();
 
-    // Initialize Scroll Reveal after layout renders
-    setTimeout(initScrollReveal, 100);
+    // Setup Story navigation flow
+    setTimeout(initStoryNavigation, 100);
 }
 
-// Dynamic scroll reveal trigger using IntersectionObserver
-function initScrollReveal() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-            }
-        });
-    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+let storyPages = [];
+let currentStoryIdx = 0;
+
+function initStoryNavigation() {
+    // Collect all pages that should be visible
+    const allSections = [
+        document.getElementById('heroSection'),
+        document.getElementById('messageSection'),
+        document.getElementById('videoSection'),
+        document.getElementById('voiceSection'),
+        document.getElementById('gallerySection'),
+        document.getElementById('timelineSection'),
+        document.getElementById('musicSection'),
+        document.getElementById('aiWishesSection'),
+        document.getElementById('giftSection'),
+        document.getElementById('shareSection')
+    ];
     
-    document.querySelectorAll('.apple-section').forEach(section => {
-        observer.observe(section);
+    storyPages = [];
+    allSections.forEach(section => {
+        if (section) {
+            // Check if section is active (not display: none)
+            if (section.style.display !== 'none') {
+                storyPages.push(section);
+                section.classList.remove('active');
+                section.style.display = 'none';
+            }
+        }
     });
+    
+    if (storyPages.length === 0) return;
+    
+    currentStoryIdx = 0;
+    showStoryPage(0);
+    
+    // Bind navigation buttons
+    const prevBtn = document.getElementById('storyPrevBtn');
+    const nextBtn = document.getElementById('storyNextBtn');
+    
+    if (prevBtn) {
+        prevBtn.onclick = () => {
+            if (currentStoryIdx > 0) {
+                currentStoryIdx--;
+                showStoryPage(currentStoryIdx);
+            }
+        };
+    }
+    
+    if (nextBtn) {
+        nextBtn.onclick = () => {
+            if (currentStoryIdx < storyPages.length - 1) {
+                currentStoryIdx++;
+                showStoryPage(currentStoryIdx);
+            }
+        };
+    }
+
+    // Bind Start Celebration button
+    const startBtn = document.getElementById('startCelebrationBtn');
+    if (startBtn) {
+        startBtn.onclick = () => {
+            if (storyPages.length > 1) {
+                currentStoryIdx = 1;
+                showStoryPage(1);
+            }
+        };
+    }
+}
+
+function showStoryPage(idx) {
+    const navBar = document.getElementById('storyNavBar');
+    const progress = document.getElementById('storyProgress');
+    
+    if (idx === 0) {
+        if (navBar) navBar.style.opacity = '0';
+        setTimeout(() => {
+            if (currentStoryIdx === 0 && navBar) navBar.style.display = 'none';
+        }, 300);
+    } else {
+        if (navBar) {
+            navBar.style.display = 'flex';
+            setTimeout(() => {
+                if (currentStoryIdx > 0) navBar.style.opacity = '1';
+            }, 50);
+        }
+    }
+    
+    // Toggle page active transitions
+    storyPages.forEach((page, pIdx) => {
+        if (pIdx === idx) {
+            page.style.display = 'flex';
+            // Force reflow
+            page.getBoundingClientRect();
+            page.classList.add('active');
+        } else {
+            page.classList.remove('active');
+            setTimeout(() => {
+                if (currentStoryIdx !== pIdx) {
+                    page.style.display = 'none';
+                }
+            }, 800);
+        }
+    });
+    
+    // Disable navigation boundaries
+    const prevBtn = document.getElementById('storyPrevBtn');
+    const nextBtn = document.getElementById('storyNextBtn');
+    
+    if (prevBtn) prevBtn.disabled = (idx === 0);
+    if (nextBtn) nextBtn.disabled = (idx === storyPages.length - 1);
+    
+    // Rerender indicators
+    if (progress) {
+        progress.innerHTML = '';
+        storyPages.forEach((_, pIdx) => {
+            const dot = document.createElement('div');
+            dot.className = `story-dot${pIdx === idx ? ' active' : ''}`;
+            dot.onclick = () => {
+                currentStoryIdx = pIdx;
+                showStoryPage(pIdx);
+            };
+            progress.appendChild(dot);
+        });
+    }
 }
 
 // Photo Slider Slide Deck
@@ -639,56 +750,74 @@ function setupQrCodeShare() {
 
 // Memory Gallery Masonry and swipe carousel renderer
 let activeLightboxIdx = 0;
+let activeGalleryIdx = 0;
+
 function setupMemoryGallery() {
     const gallerySection = document.getElementById('gallerySection');
-    const container = document.getElementById('galleryContainer');
-    container.innerHTML = '';
-
     const photos = viewerConfig.photos || [];
+
     if (photos.length === 0) {
         gallerySection.style.display = 'none';
         return;
     }
 
-    gallerySection.style.display = 'block';
-
-    if (window.innerWidth < 768) {
-        // Horizontal swipe carousel on mobile
-        container.className = 'mobile-gallery-carousel';
-        photos.forEach((base64, idx) => {
-            const itemWrap = document.createElement('div');
-            itemWrap.className = 'carousel-item-wrap';
-            
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <img src="${base64}" alt="Memory ${idx + 1}" crossorigin="anonymous" loading="lazy">
-                <div class="gallery-item-overlay">
-                    <span class="gallery-action-badge">🔎 Zoom</span>
-                </div>
-            `;
-            item.onclick = () => openLightbox(idx);
-            itemWrap.appendChild(item);
-            container.appendChild(itemWrap);
-        });
-    } else {
-        // Masonry 3-column grid on desktop
-        container.className = 'gallery-grid';
-        photos.forEach((base64, idx) => {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <img src="${base64}" alt="Memory ${idx + 1}" crossorigin="anonymous" loading="lazy">
-                <div class="gallery-item-overlay">
-                    <span class="gallery-action-badge">🔎 Zoom</span>
-                </div>
-            `;
-            item.onclick = () => openLightbox(idx);
-            container.appendChild(item);
-        });
+    gallerySection.style.display = 'flex';
+    activeGalleryIdx = 0;
+    
+    // Bind buttons
+    const prevBtn = document.getElementById('galleryPrevBtn');
+    const nextBtn = document.getElementById('galleryNextBtn');
+    const zoomBtn = document.getElementById('galleryZoomBtn');
+    const downloadBtn = document.getElementById('galleryDownloadBtn');
+    
+    if (prevBtn) {
+        prevBtn.onclick = (e) => {
+            e.stopPropagation();
+            activeGalleryIdx = (activeGalleryIdx - 1 + photos.length) % photos.length;
+            updateGalleryImage();
+        };
+    }
+    
+    if (nextBtn) {
+        nextBtn.onclick = (e) => {
+            e.stopPropagation();
+            activeGalleryIdx = (activeGalleryIdx + 1) % photos.length;
+            updateGalleryImage();
+        };
+    }
+    
+    if (zoomBtn) {
+        zoomBtn.onclick = (e) => {
+            e.stopPropagation();
+            openLightbox(activeGalleryIdx);
+        };
+    }
+    
+    if (downloadBtn) {
+        downloadBtn.onclick = (e) => {
+            e.stopPropagation();
+            const a = document.createElement('a');
+            a.href = photos[activeGalleryIdx];
+            a.download = `Memory_${activeGalleryIdx + 1}.jpg`;
+            a.click();
+        };
     }
 
+    updateGalleryImage();
     setupLightboxListeners();
+}
+
+function updateGalleryImage() {
+    const photos = viewerConfig.photos || [];
+    const activeImg = document.getElementById('activeGalleryImage');
+    const indexText = document.getElementById('galleryIndexText');
+    
+    if (photos.length > 0 && activeImg) {
+        activeImg.src = photos[activeGalleryIdx];
+        if (indexText) {
+            indexText.textContent = `Photo ${activeGalleryIdx + 1} of ${photos.length}`;
+        }
+    }
 }
 
 function openLightbox(idx) {
@@ -911,13 +1040,27 @@ function renderGiftCards(aiText) {
 
 // Collapsible Floating Guestbook widget toggle
 function setupGuestbookWidget() {
-    const widget = document.getElementById('guestbookCard');
-    const toggleBtn = document.getElementById('guestbookToggleBtn');
-    if (!toggleBtn) return;
-
-    toggleBtn.onclick = () => {
-        widget.classList.toggle('collapsed');
-    };
+    const trigger = document.getElementById('floatingGuestbookTrigger');
+    const modal = document.getElementById('guestbookModal');
+    const closeBtn = document.getElementById('guestbookModalClose');
+    
+    if (trigger && modal && closeBtn) {
+        trigger.onclick = () => {
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        };
+        
+        closeBtn.onclick = () => {
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 400);
+        };
+        
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                closeBtn.click();
+            }
+        };
+    }
 }
 
 // Setup premium actions (PDF downloads, PNG downloads, Calendar events, Social shares)
@@ -1457,23 +1600,20 @@ function setupEnvelopeReveal() {
                 envelope.style.opacity = '0';
                 envelope.style.pointerEvents = 'none';
                 
-                // Show the scrolling card flow smoothly
-                displayCard.style.display = 'flex';
+                // Show the story presentation container smoothly
+                displayCard.style.display = 'block';
                 setTimeout(() => {
                     displayCard.style.opacity = '1';
-                    initScrollReveal();
                 }, 50);
                 
                 triggerGreetingMessage();
                 startFloatingConfetti();
                 
+                // Show floating guestbook button if this is a saved card
                 if (viewerConfig.pageId) {
-                    guestbookCard.style.display = 'block';
-                    setTimeout(() => guestbookCard.style.opacity = '1', 50);
-                    
-                    const splitContainer = document.getElementById('splitViewContainer');
-                    if (splitContainer) {
-                        splitContainer.classList.add('revealed');
+                    const guestbookBtn = document.getElementById('floatingGuestbookTrigger');
+                    if (guestbookBtn) {
+                        guestbookBtn.style.display = 'flex';
                     }
                 }
             }, 1200);

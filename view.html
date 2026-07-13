@@ -1158,8 +1158,8 @@
         <button type="button" class="btn btn-secondary" onclick="window.location.href='login.html'" style="border-radius: 12px; font-weight: bold;">Create your own ➕</button>
     </div>
 
-    <div class="split-view-container" id="splitViewContainer" style="min-height: auto; width: 100%; max-width: 100%; padding: 0; margin: 0;">
-        <div class="surprise-reveal-wrapper" style="width: 100%; max-width: 100%; padding: 0; margin: 0;">
+    <div class="story-container" id="splitViewContainer">
+        <div class="surprise-reveal-wrapper" style="width: 100%; max-width: 100%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center;">
             
             <!-- Animated 3D Gift Box (Step 0 - reveal envelope) -->
             <div id="giftBoxContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s ease; z-index: 15; text-align: center; color: var(--text-color); min-height: 80vh; width: 100%;">
@@ -1175,12 +1175,12 @@
                 <div class="envelope-invitation-text">TAP TO OPEN SURPRISE</div>
             </div>
 
-            <!-- Redesigned Main Display Card (Container representing the Apple-quality scroll flow) -->
-            <div id="displayCard" class="apple-container" style="display: none; opacity: 0; transition: opacity 1s ease;">
+            <!-- Redesigned Main Display Card (Container representing the Apple-quality fullscreen story flow) -->
+            <div id="displayCard" style="display: none; opacity: 0; width: 100%; height: 100vh; position: relative;">
                 
                 <!-- 1️⃣ HERO SECTION -->
-                <section id="heroSection" class="apple-section hero-section">
-                    <div id="birthdayCardHero" class="premium-hero-card">
+                <section id="heroSection" class="story-page">
+                    <div id="birthdayCardHero" class="premium-hero-card" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         
                         <!-- Birthday Countdown Timer -->
                         <div id="countdownBlock" class="premium-countdown-block" style="display: none;">
@@ -1200,30 +1200,33 @@
                         <p id="senderTag" class="premium-sender-tag">From Sender</p>
 
                         <!-- Subtle micro actions inside hero -->
-                        <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem;">
-                            <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks" style="border-radius: 50%; font-size: 1.1rem; width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">🎆</button>
+                        <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center; flex-direction: column;">
+                            <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks" style="border-radius: 50%; font-size: 1.1rem; width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 1rem;">🎆</button>
+                            
+                            <!-- Start Celebration -->
+                            <button type="button" class="btn btn-primary" id="startCelebrationBtn" style="padding: 0.75rem 2rem; border-radius: 50px; font-weight: 800; font-size: 1rem; box-shadow: 0 10px 25px rgba(244, 63, 94, 0.4); text-transform: uppercase; letter-spacing: 0.05em; animation: pulse 2s infinite; width: auto;">Start Celebration 🎁</button>
                         </div>
                     </div>
                 </section>
 
                 <!-- 2️⃣ BIRTHDAY MESSAGE SECTION -->
-                <section id="messageSection" class="apple-section message-section">
-                    <div class="section-content">
+                <section id="messageSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto; text-align: center;">
                         <h2 class="section-title">A Heartfelt Wish 📝</h2>
-                        <div id="wishMessage" class="premium-wish-message"></div>
+                        <div id="wishMessage" class="premium-wish-message" style="max-height: 25vh; overflow-y: auto;"></div>
                         <button type="button" id="readMoreBtn" class="text-btn" style="display: none; margin: 1rem auto 0;">Read More ▾</button>
                         
                         <!-- Interactive Cake Candle blowing out animation -->
-                        <div style="margin-top: 2rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 1.5rem;">
-                            <div id="cakeBox" class="cake-block" style="font-size: 3.8rem;">🎂</div>
+                        <div style="margin-top: 1.5rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 1.2rem;">
+                            <div id="cakeBox" class="cake-block" style="font-size: 4rem;">🎂</div>
                             <p id="candleHint" style="font-size: 0.8rem; opacity: 0.8; font-weight: 700; margin-top: 0.25rem;">Tap candle to blow it out! 🕯️</p>
                         </div>
                     </div>
                 </section>
 
                 <!-- 3️⃣ VIDEO MESSAGE SECTION -->
-                <section id="videoSection" class="apple-section video-section" style="display: none;">
-                    <div class="section-content">
+                <section id="videoSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Video Message 📽️</h2>
                         <div id="videoContainer" class="premium-video-container">
                             <div class="video-wrapper" id="videoWrapper"></div>
@@ -1232,8 +1235,8 @@
                 </section>
 
                 <!-- 4️⃣ VOICE MESSAGE SECTION -->
-                <section id="voiceSection" class="apple-section voice-section" style="display: none;">
-                    <div class="section-content">
+                <section id="voiceSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Voice Capsule 📼</h2>
                         <div id="voiceCard" class="premium-voice-card">
                             <div class="voice-card-header">
@@ -1278,21 +1281,31 @@
                 </section>
 
                 <!-- 5️⃣ MEMORY GALLERY SECTION -->
-                <section id="gallerySection" class="apple-section gallery-section" style="display: none;">
-                    <div class="section-content">
-                        <h2 class="section-title">Memory Gallery 📸</h2>
-                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Moments captured in time.</p>
-                        <div id="galleryContainer" class="premium-gallery-container">
-                            <!-- Dynamically populated Masonry/Carousel via JS -->
+                <section id="gallerySection" class="story-page">
+                    <h2 class="section-title" style="margin-bottom: 0.8rem;">Memory Gallery 📸</h2>
+                    <div class="gallery-slide-show">
+                        <div class="gallery-image-viewport">
+                            <img id="activeGalleryImage" src="" class="gallery-active-img" alt="Birthday Memory" crossorigin="anonymous">
+                        </div>
+                        
+                        <div class="gallery-controls-row">
+                            <button type="button" class="gallery-control-btn" id="galleryPrevBtn">◀ Prev</button>
+                            <span class="gallery-index-indicator" id="galleryIndexText">Photo 1 of 5</span>
+                            <button type="button" class="gallery-control-btn" id="galleryNextBtn">Next ▶</button>
+                        </div>
+                        
+                        <div class="gallery-actions-overlay">
+                            <button type="button" class="gallery-action-icon-btn" id="galleryZoomBtn">🔍 Zoom</button>
+                            <button type="button" class="gallery-action-icon-btn" id="galleryDownloadBtn">📥 Save</button>
                         </div>
                     </div>
                 </section>
 
                 <!-- 6️⃣ MEMORY TIMELINE SECTION -->
-                <section id="timelineSection" class="apple-section timeline-section" style="display: none;">
-                    <div class="section-content">
+                <section id="timelineSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Memory Lane Timeline ⏰</h2>
-                        <div id="timelineContainer" class="premium-timeline-container">
+                        <div id="timelineContainer" class="premium-timeline-container" style="max-height: 52vh; overflow-y: auto; padding-right: 0.5rem;">
                             <div class="timeline-line"></div>
                             <div id="timelineList" class="timeline-list">
                                 <!-- Populated via JS -->
@@ -1302,8 +1315,8 @@
                 </section>
 
                 <!-- 7️⃣ BACKGROUND MUSIC SECTION -->
-                <section id="musicSection" class="apple-section music-section">
-                    <div class="section-content">
+                <section id="musicSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Melody Box 🎵</h2>
                         <div class="premium-music-card">
                             <div class="music-info-row">
@@ -1326,7 +1339,7 @@
                                 <span>🔊</span>
                             </div>
 
-                            <!-- Keep canvas element reference for Web Audio frequency analyzers -->
+                            <!-- Web Audio Canvas Placeholder -->
                             <div style="display: none;">
                                 <canvas id="visualizerCanvas"></canvas>
                             </div>
@@ -1335,10 +1348,10 @@
                 </section>
 
                 <!-- 8️⃣ AI GREETINGS SECTION -->
-                <section id="aiWishesSection" class="apple-section ai-wishes-section">
-                    <div class="section-content">
+                <section id="aiWishesSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">AI Birthday Greetings ✨</h2>
-                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Generate beautiful wishes for different categories using Gemini AI.</p>
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 1rem; text-align: center;">Generate beautiful wishes for different categories using Gemini AI.</p>
                         
                         <div class="ai-tabs-container" id="aiWishesTabs">
                             <button type="button" class="ai-tab active" data-cat="romantic">Romantic</button>
@@ -1351,96 +1364,104 @@
                             <button type="button" class="ai-tab" data-cat="poetic">Poetic</button>
                         </div>
 
-                        <div class="ai-wish-result-card">
-                            <div id="aiWishText" class="ai-wish-text">Loading birthday greetings... ✨</div>
-                            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
-                                <button type="button" class="btn btn-secondary" id="copyAiWishBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; width: auto; font-weight: bold;">📋 Copy Wish</button>
-                                <button type="button" class="btn btn-primary" id="regenerateAiWishBtn" style="padding: 0.5rem 1.2rem; font-size: 0.8rem; border-radius: 10px; width: auto; font-weight: bold;">✨ Regenerate</button>
+                        <div class="ai-wish-result-card" style="margin-top: 1rem;">
+                            <div id="aiWishText" class="ai-wish-text" style="max-height: 18vh; overflow-y: auto;">Loading birthday greetings... ✨</div>
+                            <div style="display: flex; justify-content: center; gap: 0.8rem; margin-top: 1rem;">
+                                <button type="button" class="btn btn-secondary" id="copyAiWishBtn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 10px; width: auto; font-weight: bold;">📋 Copy Wish</button>
+                                <button type="button" class="btn btn-primary" id="regenerateAiWishBtn" style="padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 10px; width: auto; font-weight: bold;">✨ Regenerate</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- 9️⃣ GIFT SUGGESTIONS SECTION -->
-                <section id="giftSection" class="apple-section gift-section">
-                    <div class="section-content">
+                <section id="giftSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Curated Gift Guide 🎁</h2>
-                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Personalized recommendations based on relationship type.</p>
-                        <div class="gift-suggestions-grid" id="giftSuggestionsGrid">
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 1rem; text-align: center;">Recommendations based on relationship type.</p>
+                        <div class="gift-suggestions-grid" id="giftSuggestionsGrid" style="max-height: 38vh; overflow-y: auto; gap: 0.6rem; padding-right: 0.3rem;">
                             <!-- Dynamically loaded via AI -->
                         </div>
-                        <div style="text-align: center; margin-top: 1.5rem;">
-                            <button type="button" class="btn btn-secondary" id="regenerateGiftsBtn" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 12px; width: auto; font-weight: bold;">✨ Refresh Suggestions</button>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button type="button" class="btn btn-secondary" id="regenerateGiftsBtn" style="padding: 0.5rem 1.2rem; font-size: 0.8rem; border-radius: 10px; width: auto; font-weight: bold;">✨ Refresh Suggestions</button>
                         </div>
                     </div>
                 </section>
 
                 <!-- 🔟 SHARE & DOWNLOAD SECTION -->
-                <section id="shareSection" class="apple-section share-section">
-                    <div class="section-content">
+                <section id="shareSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
                         <h2 class="section-title">Save & Share Gifting 💌</h2>
                         
-                        <div class="premium-share-card">
+                        <div class="premium-share-card" style="max-height: 54vh; overflow-y: auto; padding: 1.2rem;">
                             <!-- Downloads -->
                             <div class="share-subsection">
-                                <h4>📥 Offline Backups</h4>
-                                <div class="downloads-grid">
-                                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn">📄 Save PDF Book</button>
-                                    <button type="button" class="btn btn-secondary" id="downloadImgBtn">🖼️ Export Card Image</button>
-                                    <button type="button" class="btn btn-secondary" id="calendarBtn">📅 Add Google Calendar</button>
+                                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem;">📥 Offline Backups</h4>
+                                <div class="downloads-grid" style="gap: 0.4rem;">
+                                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn" style="font-size: 0.75rem; padding: 0.4rem;">📄 Save PDF Book</button>
+                                    <button type="button" class="btn btn-secondary" id="downloadImgBtn" style="font-size: 0.75rem; padding: 0.4rem;">🖼️ Export Image</button>
+                                    <button type="button" class="btn btn-secondary" id="calendarBtn" style="font-size: 0.75rem; padding: 0.4rem;">📅 Add Calendar</button>
                                 </div>
                             </div>
 
                             <!-- Link sharing -->
-                            <div class="share-subsection" style="margin-top: 1.5rem;">
-                                <h4>🔗 Send To Friends</h4>
-                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                                    <input type="text" id="shareUrlInput" class="text-input" readonly style="font-size: 0.85rem;">
-                                    <button type="button" class="btn btn-primary" id="copyLinkBtn" style="width: auto; padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: bold;">Copy</button>
+                            <div class="share-subsection" style="margin-top: 1rem;">
+                                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem;">🔗 Send To Friends</h4>
+                                <div style="display: flex; gap: 0.4rem; margin-bottom: 0.8rem;">
+                                    <input type="text" id="shareUrlInput" class="text-input" readonly style="font-size: 0.8rem; padding: 0.4rem;">
+                                    <button type="button" class="btn btn-primary" id="copyLinkBtn" style="width: auto; padding: 0.4rem 1rem; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">Copy</button>
                                 </div>
                                 
                                 <!-- Native share & Socials -->
-                                <div class="social-share-buttons">
-                                    <button type="button" class="social-btn whatsapp" id="shareWhatsappBtn">WhatsApp</button>
-                                    <button type="button" class="social-btn telegram" id="shareTelegramBtn">Telegram</button>
-                                    <button type="button" class="social-btn facebook" id="shareFacebookBtn">Facebook</button>
-                                    <button type="button" class="social-btn twitter" id="shareTwitterBtn">X / Twitter</button>
-                                    <button type="button" class="social-btn email" id="shareEmailBtn">Email</button>
-                                    <button type="button" class="social-btn native" id="shareNativeBtn">Share...</button>
+                                <div class="social-share-buttons" style="gap: 0.3rem;">
+                                    <button type="button" class="social-btn whatsapp" id="shareWhatsappBtn" style="font-size: 0.75rem; padding: 0.4rem;">WhatsApp</button>
+                                    <button type="button" class="social-btn telegram" id="shareTelegramBtn" style="font-size: 0.75rem; padding: 0.4rem;">Telegram</button>
+                                    <button type="button" class="social-btn facebook" id="shareFacebookBtn" style="font-size: 0.75rem; padding: 0.4rem;">Facebook</button>
+                                    <button type="button" class="social-btn twitter" id="shareTwitterBtn" style="font-size: 0.75rem; padding: 0.4rem;">X</button>
+                                    <button type="button" class="social-btn email" id="shareEmailBtn" style="font-size: 0.75rem; padding: 0.4rem;">Email</button>
+                                    <button type="button" class="social-btn native" id="shareNativeBtn" style="font-size: 0.75rem; padding: 0.4rem;">Share...</button>
                                 </div>
                             </div>
 
                             <!-- QR code share -->
-                            <div class="share-subsection qr-share-section" style="margin-top: 1.5rem; text-align: center;">
-                                <img id="qrCodeImg" src="" alt="QR Code Link" class="premium-qr-code">
-                                <p style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">Scan code to open directly on mobile!</p>
+                            <div class="share-subsection qr-share-section" style="margin-top: 1rem; text-align: center;">
+                                <img id="qrCodeImg" src="" alt="QR Code Link" class="premium-qr-code" style="width: 80px; height: 80px; margin: 0 auto;">
+                                <p style="font-size: 0.7rem; opacity: 0.8; margin-top: 0.3rem;">Scan code to open directly on mobile!</p>
                             </div>
                         </div>
                     </div>
                 </section>
+
+                <!-- Story Bottom Navigation Bar -->
+                <div class="story-navigation-bar" id="storyNavBar" style="display: none; opacity: 0;">
+                    <button type="button" class="story-nav-btn" id="storyPrevBtn">⬅ Previous</button>
+                    <div class="story-progress-dots" id="storyProgress"></div>
+                    <button type="button" class="story-nav-btn" id="storyNextBtn">Next ➜</button>
+                </div>
                 
             </div>
         </div>
 
-        <!-- ====================================================
-             11️⃣ FLOATING COLLAPSIBLE GUESTBOOK WIDGET
-             ==================================================== -->
-        <div id="guestbookCard" class="floating-guestbook-widget collapsed" style="display: none;">
-            <button type="button" id="guestbookToggleBtn" class="guestbook-toggle-btn">
-                <span class="toggle-icon">✍️</span>
-                <span class="toggle-label">Wishes Guestbook</span>
-                <span id="guestCounter" class="guest-count-badge">0</span>
-            </button>
-            
-            <div class="guestbook-content-pane">
-                <div id="guestWishesList" class="guest-wishes-scroll-list"></div>
-                
-                <div id="typingIndicator" class="guestbook-typing" style="display: none;">Somebody is typing a sweet wish... ✍️</div>
+        <!-- Floating Guestbook Action Button -->
+        <button type="button" id="floatingGuestbookTrigger" class="floating-guestbook-trigger" style="display: none;">✍️</button>
 
-                <form id="guestbookForm" class="guestbook-input-form">
-                    <input type="text" id="guestAuthor" class="text-input" placeholder="Your Name" required>
+        <!-- Guestbook Popup Modal Overlay -->
+        <div id="guestbookModal" class="guestbook-modal">
+            <div class="guestbook-modal-content">
+                <button type="button" id="guestbookModalClose" class="guestbook-close-btn">✕</button>
+                <h3 class="wishes-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem; margin-bottom: 0.8rem;">
+                    Wishes Guestbook ✍️
+                    <span id="guestCounter" class="guest-count-badge" style="background: var(--primary-color); font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: bold; color: white;">0</span>
+                </h3>
+                
+                <div id="guestWishesList" style="max-height: 25vh; overflow-y: auto; margin-bottom: 0.8rem;"></div>
+                
+                <div id="typingIndicator" style="display: none; font-size: 0.75rem; opacity: 0.6; font-style: italic; margin-bottom: 0.5rem; text-align: left;">Somebody is typing a sweet wish... ✍️</div>
+
+                <form id="guestbookForm" class="guestbook-input-form" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
+                    <input type="text" id="guestAuthor" class="text-input" placeholder="Your Name" required style="margin-bottom: 0.4rem; padding: 0.4rem;">
                     
-                    <div class="avatar-picker" id="guestAvatarGrid">
+                    <div class="avatar-picker" id="guestAvatarGrid" style="margin-bottom: 0.4rem;">
                         <span class="avatar-pick-option selected" data-emoji="🎈">🎈</span>
                         <span class="avatar-pick-option" data-emoji="🎁">🎁</span>
                         <span class="avatar-pick-option" data-emoji="🥳">🥳</span>
@@ -1449,20 +1470,21 @@
                         <span class="avatar-pick-option" data-emoji="✨">✨</span>
                     </div>
 
-                    <textarea id="guestText" class="text-input" rows="2" maxlength="200" placeholder="Happy Birthday! Have a wonderful day..." required></textarea>
+                    <textarea id="guestText" class="text-input" rows="2" maxlength="200" placeholder="Write a birthday wish..." required style="margin-bottom: 0.4rem; padding: 0.4rem;"></textarea>
                     
-                    <div class="char-count-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; opacity: 0.7; margin-bottom: 0.8rem;">
                         <span>Max 200 characters</span>
                         <span id="charCount">0/200</span>
                     </div>
 
-                    <button type="submit" id="submitGuestbookBtn" class="btn btn-primary btn-full">
+                    <button type="submit" id="submitGuestbookBtn" class="btn btn-primary btn-full" style="padding: 0.5rem;">
                         <span id="submitBtnText">Sign Guestbook ✍️</span>
                         <span id="submitBtnSpinner" style="display: none;">⏳</span>
                     </button>
                 </form>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Lightbox Fullscreen Gallery Modal -->

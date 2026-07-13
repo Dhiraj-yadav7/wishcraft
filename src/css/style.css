@@ -1127,3 +1127,291 @@ body.dark-mode .theme-toggle-floating {
     background: rgba(15, 23, 42, 0.6);
     border-color: rgba(255, 255, 255, 0.1);
 }
+
+/* ========================================================
+   Surprise Story Mode (Fullscreen Carousel Experience)
+   ======================================================== */
+
+/* General overrides to block scrolls */
+body.wish-body {
+    overflow: hidden !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Fullscreen Story Container */
+.story-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Story Page definition */
+.story-page {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.92) translateY(30px);
+    filter: blur(12px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.8s ease;
+    padding: 3rem 1.5rem 6rem;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.story-page.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+    z-index: 10;
+}
+
+/* Story Bottom Navigation bar */
+.story-navigation-bar {
+    position: fixed;
+    bottom: 2.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    padding: 0.6rem 1.4rem;
+    border-radius: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s ease;
+}
+
+.story-nav-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 800;
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.story-nav-btn:hover:not(:disabled) {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.story-nav-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.story-progress-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.story-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-dot.active {
+    background: var(--primary-color, #f43f5e);
+    transform: scale(1.4);
+    box-shadow: 0 0 8px var(--primary-color, #f43f5e);
+}
+
+/* Custom Gallery slide show view */
+.gallery-slide-show {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.gallery-image-viewport {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glass-shadow);
+}
+
+.gallery-active-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.gallery-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 0.5rem;
+}
+
+.gallery-control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.gallery-control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.gallery-index-indicator {
+    font-size: 0.85rem;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.gallery-actions-overlay {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+}
+
+.gallery-action-icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.gallery-action-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Floating guestbook triggers & modal popup style */
+.floating-guestbook-trigger {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.floating-guestbook-trigger:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.guestbook-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    z-index: 11000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.guestbook-modal.show {
+    opacity: 1;
+}
+
+.guestbook-modal-content {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    border-radius: 28px;
+    width: 92%;
+    max-width: 480px;
+    max-height: 85vh;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    position: relative;
+    animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(40px) scale(0.95); }
+    to { transform: translateY(0) scale(1); }
+}
+
+.guestbook-close-btn {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.4rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guestbook-close-btn:hover {
+    opacity: 1;
+}
