@@ -13,4 +13,5 @@ db.json
 Thumbs.db
 .vercel
 .env*
+!.env.example
 scratch/
