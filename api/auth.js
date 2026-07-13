@@ -60,6 +60,39 @@ module.exports = async function handler(req, res) {
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) return error(res, 'Invalid credentials. Please try again.', 401);
 
+            // Log session history details
+            const userAgent = req.headers['user-agent'] || 'Unknown User-Agent';
+            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+            const country = req.headers['x-vercel-ip-country'] || 'US';
+            const city = req.headers['x-vercel-ip-city'] || 'Localhost';
+            
+            let os = 'Unknown OS';
+            if (userAgent.includes('Windows')) os = 'Windows';
+            else if (userAgent.includes('Macintosh')) os = 'macOS';
+            else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+            else if (userAgent.includes('Android')) os = 'Android';
+            else if (userAgent.includes('Linux')) os = 'Linux';
+            
+            let browser = 'Unknown Browser';
+            if (userAgent.includes('Firefox')) browser = 'Firefox';
+            else if (userAgent.includes('Chrome')) browser = 'Chrome';
+            else if (userAgent.includes('Safari')) browser = 'Safari';
+            else if (userAgent.includes('Edge')) browser = 'Edge';
+            
+            const newHistoryItem = {
+                timestamp: new Date().toISOString(),
+                browser,
+                os,
+                ip: clientIp.split(',')[0].trim(),
+                location: `${city}, ${country}`
+            };
+            
+            const history = user.loginHistory || [];
+            history.unshift(newHistoryItem);
+            if (history.length > 10) history.pop();
+            
+            await db.updateUser(user._id.toString(), { loginHistory: history });
+
             const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
             return success(res, {
                 token,

@@ -3,136 +3,1824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surprise Card Builder - Profile & Settings 👤</title>
+    <title>Account Settings — WishCraft 👤</title>
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/auth.css">
+    <link rel="stylesheet" href="src/css/themes.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- PWA Settings manifest -->
     <link rel="manifest" href="manifest.json">
-</head>
-<body class="theme-romantic scrollable-page">
+    
+    <!-- Premium Settings Custom Styles -->
+    <style>
+        :root {
+            --settings-bg: #f8fafc;
+            --settings-card-bg: rgba(255, 255, 255, 0.7);
+            --settings-border: rgba(148, 163, 184, 0.15);
+            --settings-text: #0f172a;
+            --settings-text-muted: #64748b;
+            --settings-accent: #4f46e5;
+            --settings-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
+            --settings-radius-lg: 20px;
+            --settings-radius-md: 12px;
+        }
 
-    <div class="glass-container">
+        body.theme-elegant, body.theme-cosmic {
+            --settings-bg: #090d16;
+            --settings-card-bg: rgba(15, 23, 42, 0.5);
+            --settings-border: rgba(255, 255, 255, 0.08);
+            --settings-text: #f1f5f9;
+            --settings-text-muted: #94a3b8;
+            --settings-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-page-body {
+            background: var(--settings-bg);
+            color: var(--settings-text);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .settings-container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 0 6rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Navbar link back to dashboard */
+        .settings-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         
-        <div class="profile-card" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 1.2rem;">
+        .settings-nav-header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.03em;
+        }
+
+        /* 2 Column Layout */
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Tabs Links */
+        .settings-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            background: var(--settings-card-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: var(--settings-radius-lg);
+            padding: 0.8rem;
+            box-shadow: var(--settings-shadow);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        @media (max-width: 900px) {
+            .settings-sidebar {
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 0.5rem;
+                border-radius: var(--settings-radius-md);
+            }
+        }
+
+        .sidebar-tab-btn {
+            background: transparent;
+            border: none;
+            text-align: left;
+            padding: 0.7rem 1.1rem;
+            border-radius: var(--settings-radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--settings-text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar-tab-btn:hover {
+            color: var(--settings-text);
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .sidebar-tab-btn.active {
+            background: var(--settings-text);
+            color: var(--settings-bg);
+        }
+
+        /* Settings Card Panels */
+        .settings-panel-card {
+            background: var(--settings-card-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: var(--settings-radius-lg);
+            padding: 2.2rem;
+            box-shadow: var(--settings-shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            flex-direction: column;
+            gap: 1.8rem;
+            animation: paneFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .settings-panel-card.active {
+            display: flex;
+        }
+
+        .panel-title-block {
+            border-bottom: 1px solid var(--settings-border);
+            padding-bottom: 0.8rem;
+        }
+
+        .panel-title-block h2 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .panel-title-block p {
+            font-size: 0.8rem;
+            color: var(--settings-text-muted);
+            margin: 0.2rem 0 0 0;
+        }
+
+        /* Forms Layout */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-field label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--settings-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .form-input-text {
+            width: 100%;
+            border: 1px solid var(--settings-border);
+            background: rgba(148, 163, 184, 0.04);
+            border-radius: var(--settings-radius-md);
+            padding: 0.65rem 0.9rem;
+            font-size: 0.85rem;
+            color: var(--settings-text);
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input-text:focus {
+            border-color: var(--settings-accent);
+            background: rgba(255, 255, 255, 0.05);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Drag & Drop Photo Uploader */
+        .photo-settings-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-photo-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--settings-border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            background: rgba(148, 163, 184, 0.1);
+            font-weight: 800;
+        }
+
+        .photo-uploader-box {
+            flex: 1;
+            min-width: 220px;
+            border: 2px dashed var(--settings-border);
+            background: rgba(148, 163, 184, 0.03);
+            border-radius: var(--settings-radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .photo-uploader-box:hover, .photo-uploader-box.dragover {
+            border-color: var(--settings-accent);
+            background: rgba(79, 70, 229, 0.04);
+        }
+
+        /* Modal Cropper Overlay */
+        .cropper-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 1.2rem;
+        }
+
+        .cropper-content {
+            background: var(--settings-card-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: var(--settings-radius-lg);
+            padding: 2rem;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .cropper-canvas-wrap {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--settings-border);
+            position: relative;
+            background: #000;
+        }
+
+        .cropper-slider-control {
+            width: 100%;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Password Strength Meter */
+        .pwd-strength-bar-container {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.4rem;
+        }
+
+        .pwd-strength-bar {
+            flex: 1;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(148, 163, 184, 0.15);
+            transition: background 0.3s;
+        }
+
+        /* Telemetry Active Sessions list */
+        .session-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(148, 163, 184, 0.05);
+            border: 1px solid var(--settings-border);
+            border-radius: var(--settings-radius-md);
+            padding: 0.8rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .session-item-device {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .session-item-device strong {
+            font-size: 0.85rem;
+        }
+
+        .session-item-meta {
+            text-align: right;
+            color: var(--settings-text-muted);
+        }
+
+        /* Preference Toggle Switches */
+        .pref-toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--settings-border);
+            padding-bottom: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .pref-toggle-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .pref-label-desc {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .pref-label-desc strong {
+            font-size: 0.85rem;
+        }
+
+        .pref-label-desc span {
+            font-size: 0.75rem;
+            color: var(--settings-text-muted);
+        }
+
+        /* Custom Switch toggle style */
+        .toggle-switch-input {
+            appearance: none;
+            width: 44px;
+            height: 24px;
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            outline: none;
+        }
+
+        .toggle-switch-input::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .toggle-switch-input:checked {
+            background: #10b981;
+        }
+
+        .toggle-switch-input:checked::after {
+            transform: translateX(20px);
+        }
+
+        /* Theme Accent Selectors */
+        .accent-selectors-row {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .accent-color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+        }
+
+        .accent-color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .accent-color-option.selected {
+            border-color: var(--settings-text);
+        }
+
+        .accent-pink { background: #f43f5e; }
+        .accent-purple { background: #8b5cf6; }
+        .accent-blue { background: #3b82f6; }
+        .accent-green { background: #10b981; }
+        .accent-orange { background: #f97316; }
+
+        /* Danger Zone Styles */
+        .danger-card-border {
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+        .danger-card-border:hover {
+            border-color: #ef4444;
+        }
+
+        @keyframes paneFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="settings-page-body">
+
+    <div class="settings-container">
+        
+        <!-- Premium Navbar Header -->
+        <header class="settings-nav-header">
+            <h1>Account Settings</h1>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'" style="padding: 0.6rem 1.1rem; border-radius: 20px; font-weight: bold;">
+                    Hub Dashboard 🏠
+                </button>
+            </div>
+        </header>
+
+        <!-- Main settings split portal -->
+        <div class="settings-layout">
             
-            <!-- Avatar Circle -->
-            <div class="profile-avatar-container" style="align-self: center;">
-                <div id="profile-avatar" class="profile-avatar">
-                    <span id="profile-avatar-initials">👤</span>
-                </div>
-            </div>
+            <!-- Left Sidebar Navigation -->
+            <aside class="settings-sidebar">
+                <button type="button" class="sidebar-tab-btn active" data-tab="general">👤 General Profile</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="security">🔐 Change Password</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="sessions">🛡 Security Center</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="preferences">🔔 Alerts Preferences</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="appearance">🎨 Layout Theme</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="domains">🌐 Custom Domain</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="overview">📊 Account Overview</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="danger" style="color: #ef4444;">🚨 Danger Zone</button>
+            </aside>
 
-            <h2 id="profile-name" class="profile-name" style="text-align: center; font-family: var(--font-heading);">User Name</h2>
-            <p id="profile-email" class="profile-email" style="text-align: center; opacity: 0.8; margin-top: -0.8rem;">email@domain.com</p>
+            <!-- Right Content Panels Area -->
+            <section class="settings-content-wrapper">
 
-            <!-- Metadata List -->
-            <div class="profile-info-grid">
-                <div class="profile-info-row">
-                    <span class="profile-info-label">Account Status</span>
-                    <span id="profile-status-val" class="profile-info-value" style="color: #10b981; font-weight: bold;">Active ✓</span>
-                </div>
-                <div class="profile-info-row">
-                    <span class="profile-info-label">Member Since</span>
-                    <span id="profile-joined-val" class="profile-info-value">-</span>
-                </div>
-                <div class="profile-info-row">
-                    <span class="profile-info-label">SaaS Subscription</span>
-                    <span class="profile-info-value" style="font-weight: bold; color: var(--primary-color);">Premium Pro Plan 💎</span>
-                </div>
-            </div>
+                <!-- 1. GENERAL TAB -->
+                <div class="settings-panel-card active" id="tab-general">
+                    <div class="panel-title-block">
+                        <h2>Personal Information</h2>
+                        <p>Configure your public developer profile and contact details.</p>
+                    </div>
 
-            <!-- Custom Domain Settings Box -->
-            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.2rem; text-align: left; color: var(--text-color);">
-                <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">🌐 Custom Domains Map</h3>
-                <p style="font-size: 0.75rem; opacity: 0.75; margin-bottom: 0.8rem;">Point your DNS CNAME record to `cname.vercel-dns.com` to host cards on your own brand domain.</p>
-                
-                <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <input type="text" id="saasDomainInput" class="text-input" placeholder="e.g., wish.anshika.com" style="font-size: 0.85rem;">
-                </div>
-                <button type="button" class="btn btn-primary" id="saveSaasDomainBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; width: 100%; border-radius: 10px; font-weight: bold;">Save Brand Domain</button>
-            </div>
+                    <!-- Upload profile photo uploader -->
+                    <div class="photo-settings-row">
+                        <div id="profilePhotoCircle" class="profile-photo-circle">👤</div>
+                        <div class="photo-uploader-box" id="dropArea">
+                            <span style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Drag & Drop profile image</span>
+                            <span style="font-size: 0.75rem; color: var(--settings-text-muted);">or click to select file from desktop</span>
+                            <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
+                        </div>
+                        <button type="button" class="btn btn-secondary text-sm" id="removePhotoBtn" style="padding: 0.5rem 1rem; display: none;">Remove Photo</button>
+                    </div>
 
-            <!-- Notifications Center Settings Box -->
-            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.2rem; text-align: left; color: var(--text-color);">
-                <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">🔔 App & Alerts Setup</h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                    <button type="button" class="btn btn-secondary" id="installPwaSettingsBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; justify-content: center; font-weight: bold; width: 100%;" onclick="installPwaApp()">📱 Install Mobile App</button>
-                    <button type="button" class="btn btn-secondary" id="alertsPwaSettingsBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; justify-content: center; font-weight: bold; width: 100%;" onclick="requestPushPermissions()">🔔 Enable Web Notifications</button>
-                </div>
-            </div>
+                    <!-- Upload progress bar container -->
+                    <div id="uploadProgressContainer" style="display: none; background: rgba(148,163,184,0.1); height: 6px; border-radius: 3px; overflow: hidden; margin-top:-0.5rem;">
+                        <div id="uploadProgressBar" style="background: var(--settings-accent); height:100%; width: 0%;"></div>
+                    </div>
 
-            <!-- Profile Controls -->
-            <div class="btn-container" style="margin-top: 1rem;">
-                <button type="button" id="backToBuilder" class="btn btn-secondary">⬅️ Hub Dashboard</button>
-                <button type="button" id="logoutBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); border: none;">Log Out 🚪</button>
-            </div>
+                    <!-- Personal Information Form fields -->
+                    <form id="profileDetailsForm" class="form-grid-2" style="display: grid; gap: 1.2rem;">
+                        <div class="form-field">
+                            <label>Full Name</label>
+                            <input type="text" id="profileName" class="form-input-text" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Username</label>
+                            <input type="text" id="profileUsername" class="form-input-text" placeholder="e.g. janesmith">
+                        </div>
+                        <div class="form-field">
+                            <label>Email Address</label>
+                            <input type="email" id="profileEmail" class="form-input-text" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Phone Number</label>
+                            <input type="tel" id="profilePhone" class="form-input-text" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <label>Biography</label>
+                            <textarea id="profileBio" class="form-input-text" rows="3" style="resize: none;" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label>Birthday</label>
+                            <input type="date" id="profileBirthday" class="form-input-text">
+                        </div>
+                        <div class="form-field">
+                            <label>Gender</label>
+                            <select id="profileGender" class="form-input-text">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="private">Rather not say</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Country</label>
+                            <input type="text" id="profileCountry" class="form-input-text" placeholder="e.g., United States">
+                        </div>
+                        <div class="form-field">
+                            <label>City</label>
+                            <input type="text" id="profileCity" class="form-input-text" placeholder="e.g., New York">
+                        </div>
+                        <div class="form-field">
+                            <label>Timezone</label>
+                            <select id="profileTimezone" class="form-input-text">
+                                <option value="UTC">UTC (GMT+0)</option>
+                                <option value="EST">EST (GMT-5)</option>
+                                <option value="PST">PST (GMT-8)</option>
+                                <option value="IST">IST (GMT+5:30)</option>
+                                <option value="CET">CET (GMT+1)</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Preferred Language</label>
+                            <select id="profileLanguage" class="form-input-text">
+                                <option value="en">English (US)</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="hi">Hindi</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 0.6rem; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                            <button type="button" class="btn btn-secondary" id="btnCancelProfile" style="width: auto; padding: 0.65rem 1.4rem;">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="btnSaveProfile" style="width: auto; padding: 0.65rem 1.4rem;">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. CHANGE PASSWORD -->
+                <div class="settings-panel-card" id="tab-security">
+                    <div class="panel-title-block">
+                        <h2>Change Account Password</h2>
+                        <p>Keep your login credentials secure by switching passwords regularly.</p>
+                    </div>
+
+                    <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        <div class="form-field">
+                            <label>Current Password</label>
+                            <input type="password" id="currPwd" class="form-input-text" required>
+                        </div>
+                        <div class="form-field">
+                            <label>New Password</label>
+                            <input type="password" id="newPwd" class="form-input-text" required>
+                            
+                            <!-- Password Strength Indicator bars -->
+                            <div class="pwd-strength-bar-container">
+                                <div class="pwd-strength-bar" id="pwd-strength-1"></div>
+                                <div class="pwd-strength-bar" id="pwd-strength-2"></div>
+                                <div class="pwd-strength-bar" id="pwd-strength-3"></div>
+                                <div class="pwd-strength-bar" id="pwd-strength-4"></div>
+                            </div>
+                            <span id="pwdStrengthText" style="font-size: 0.7rem; font-weight: bold; margin-top: 0.15rem; color: var(--settings-text-muted);">Strength: Weak</span>
+                        </div>
+                        <div class="form-field">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmNewPwd" class="form-input-text" required>
+                        </div>
+
+                        <!-- Requirements Checklist -->
+                        <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; font-size: 0.75rem; color: var(--settings-text-muted);">
+                            <strong style="display: block; margin-bottom: 0.4rem;">Password guidelines:</strong>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
+                                <span id="req-len">✗ Min 8 characters</span>
+                                <span id="req-upper">✗ One uppercase letter</span>
+                                <span id="req-lower">✗ One lowercase letter</span>
+                                <span id="req-num">✗ One numeric number</span>
+                                <span id="req-special">✗ One special symbol</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                            <button type="submit" class="btn btn-primary" id="btnUpdatePassword" style="width: auto; padding: 0.65rem 1.4rem;">Update Password</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. SECURITY CENTER & SESSSIONS -->
+                <div class="settings-panel-card" id="tab-sessions">
+                    <div class="panel-title-block">
+                        <h2>Security Center & Sessions</h2>
+                        <p>Review login credentials histories, browser platforms, and active session telemetries.</p>
+                    </div>
+
+                    <!-- 2FA section header (github style) -->
+                    <div style="border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1.4rem; background: rgba(148,163,184,0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                            <strong style="font-size: 0.95rem;">Two-Factor Authentication (2FA)</strong>
+                            <span style="font-size: 0.8rem; color: var(--settings-text-muted);">Secure authorization checks using codes or SMS.</span>
+                        </div>
+                        <span style="font-size: 0.7rem; font-weight: bold; background: rgba(79, 70, 229, 0.15); color: #4f46e5; padding: 0.25rem 0.6rem; border-radius: 12px; letter-spacing: 0.05em; text-transform: uppercase;">Coming Soon</span>
+                    </div>
+
+                    <!-- Active sessions list -->
+                    <div>
+                        <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0 0 0.8rem 0; text-transform: uppercase; letter-spacing: 0.03em; color: var(--settings-text-muted);">Active Devices</h3>
+                        <div class="session-list" id="activeSessionsList">
+                            <!-- Sessions dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Trusted accounts mapping -->
+                    <div>
+                        <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0 0 0.8rem 0; text-transform: uppercase; letter-spacing: 0.03em; color: var(--settings-text-muted);">Connected Accounts</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <!-- Google -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); background: rgba(148,163,184,0.02);">
+                                <div style="display:flex; align-items:center; gap: 0.6rem; font-size: 0.85rem;">
+                                    <span>🌐</span><strong>Google</strong>
+                                </div>
+                                <button type="button" class="btn btn-secondary text-sm" id="googleOauthBtn" style="width: auto; padding: 0.4rem 0.8rem;">Connect Account</button>
+                            </div>
+                            <!-- GitHub -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); background: rgba(148,163,184,0.02);">
+                                <div style="display:flex; align-items:center; gap: 0.6rem; font-size: 0.85rem;">
+                                    <span>💻</span><strong>GitHub</strong>
+                                </div>
+                                <button type="button" class="btn btn-secondary text-sm" id="githubOauthBtn" style="width: auto; padding: 0.4rem 0.8rem;">Connect Account</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. ALERTS PREFERENCES -->
+                <div class="settings-panel-card" id="tab-preferences">
+                    <div class="panel-title-block">
+                        <h2>Notifications Preferences</h2>
+                        <p>Configure what notifications you want to receive on email and browser.</p>
+                    </div>
+
+                    <form id="preferencesForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>Birthday Reminder Emails</strong>
+                                <span>Receive early reminder updates before target birthdays occur.</span>
+                            </div>
+                            <input type="checkbox" id="pref-bday" class="toggle-switch-input" checked>
+                        </div>
+                        
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>Guestbook Wishes Alerts</strong>
+                                <span>Get notified immediately when friends sign card guestbooks.</span>
+                            </div>
+                            <input type="checkbox" id="pref-wishes" class="toggle-switch-input" checked>
+                        </div>
+
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>QR Scan Notifications</strong>
+                                <span>Receive telemetry updates when QR codes are scanned.</span>
+                            </div>
+                            <input type="checkbox" id="pref-qr" class="toggle-switch-input" checked>
+                        </div>
+
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>Share Analytics Alerts</strong>
+                                <span>Receive logs when sharing templates triggers occur.</span>
+                            </div>
+                            <input type="checkbox" id="pref-share" class="toggle-switch-input" checked>
+                        </div>
+
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>Weekly Analytics Summary</strong>
+                                <span>A weekly digest report showing visitor views and comments counts.</span>
+                            </div>
+                            <input type="checkbox" id="pref-weekly" class="toggle-switch-input">
+                        </div>
+
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>System Updates</strong>
+                                <span>Get announcements about platform upgrades and themes releases.</span>
+                            </div>
+                            <input type="checkbox" id="pref-system" class="toggle-switch-input" checked>
+                        </div>
+
+                        <div class="pref-toggle-row">
+                            <div class="pref-label-desc">
+                                <strong>Browser Push Notifications</strong>
+                                <span>Receive warnings directly on mobile browser pushes.</span>
+                            </div>
+                            <input type="checkbox" id="pref-push" class="toggle-switch-input">
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                            <button type="submit" class="btn btn-primary" id="btnSavePreferences" style="width: auto; padding: 0.65rem 1.4rem;">Save Preferences</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 5. LAYOUT APPEARANCE -->
+                <div class="settings-panel-card" id="tab-appearance">
+                    <div class="panel-title-block">
+                        <h2>Layout Appearance</h2>
+                        <p>Change your dashboard themes, colors, and layout text sizes.</p>
+                    </div>
+
+                    <!-- Theme Preset Switcher -->
+                    <div class="form-field">
+                        <label>Appearance Theme</label>
+                        <select id="appearanceTheme" class="form-input-text">
+                            <option value="system">🖥 Follow System Defaults</option>
+                            <option value="light">☀ Clean Light Mode</option>
+                            <option value="dark">🌙 Midnight Dark Mode</option>
+                        </select>
+                    </div>
+
+                    <!-- Accent Colors Row -->
+                    <div class="form-field">
+                        <label>Accent Color Map</label>
+                        <div class="accent-selectors-row" id="accentSelectorsRow">
+                            <div class="accent-color-option accent-pink selected" data-color="pink">✓</div>
+                            <div class="accent-color-option accent-purple" data-color="purple"></div>
+                            <div class="accent-color-option accent-blue" data-color="blue"></div>
+                            <div class="accent-color-option accent-green" data-color="green"></div>
+                            <div class="accent-color-option accent-orange" data-color="orange"></div>
+                        </div>
+                    </div>
+
+                    <!-- Font size selector -->
+                    <div class="form-field">
+                        <label>Font Size</label>
+                        <select id="appearanceFontSize" class="form-input-text">
+                            <option value="small">Small size text</option>
+                            <option value="medium" selected>Standard Medium size</option>
+                            <option value="large">Large text size</option>
+                        </select>
+                    </div>
+
+                    <!-- Layout visual preview widget -->
+                    <div style="background: rgba(148,163,184,0.03); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1.2rem;">
+                        <strong style="font-size: 0.8rem; text-transform: uppercase; letter-spacing:0.03em; color: var(--settings-text-muted); display: block; margin-bottom: 0.6rem;">Live Visual Preview</strong>
+                        <div id="appearancePreviewBox" style="background: var(--settings-bg); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1.2rem; text-align: center; box-shadow: var(--settings-shadow);">
+                            <span class="preview-badge" style="font-size: 0.65rem; background: var(--settings-accent); color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Preview Tag</span>
+                            <h4 id="previewTitle" style="font-size: 1.15rem; font-weight: 800; margin: 0.6rem 0 0.3rem 0;">Happy Birthday! 🎉</h4>
+                            <p style="font-size: 0.8rem; color: var(--settings-text-muted); margin: 0;">This live card demonstrates your appearance preset configurations.</p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                        <button type="button" class="btn btn-primary" id="btnSaveAppearance" style="width: auto; padding: 0.65rem 1.4rem;">Save Appearance</button>
+                    </div>
+                </div>
+
+                <!-- 6. CUSTOM DOMAINS -->
+                <div class="settings-panel-card" id="tab-domains">
+                    <div class="panel-title-block">
+                        <h2>Connected Brand Domain</h2>
+                        <p>Map your own custom domains to access public celebration pages.</p>
+                    </div>
+
+                    <form id="customDomainForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        <div class="form-field">
+                            <label>Domain Name</label>
+                            <input type="text" id="customDomainInput" class="form-input-text" placeholder="e.g. surprise.yourdomain.com">
+                        </div>
+
+                        <!-- DNS record helper -->
+                        <div style="background: rgba(148,163,184,0.03); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1.2rem; font-size: 0.8rem;">
+                            <strong style="display: block; margin-bottom: 0.4rem;">Required DNS configurations:</strong>
+                            <p style="margin: 0 0 0.6rem 0; color: var(--settings-text-muted); font-size: 0.75rem;">To connect the domain, configure the DNS CNAME records at your registrar domain registrar:</p>
+                            <div style="display: grid; grid-template-columns: 80px 140px 1fr; gap: 0.4rem; font-family: monospace; font-size: 0.75rem;">
+                                <strong>Type</strong><strong>Name / Host</strong><strong>Target Value</strong>
+                                <span>CNAME</span><span>@ / surprise</span><span>cname.vercel-dns.com</span>
+                            </div>
+                        </div>
+
+                        <!-- Status mapping -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); font-size: 0.8rem; background: rgba(148,163,184,0.02);">
+                            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                                <strong>Connection Status</strong>
+                                <span id="domainStatusLabel" style="color: var(--settings-text-muted);">Domain not connected.</span>
+                            </div>
+                            <span id="domainStatusDot" style="width: 10px; height: 10px; border-radius: 50%; background: #64748b;"></span>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                            <button type="submit" class="btn btn-primary" id="btnSaveDomain" style="width: auto; padding: 0.65rem 1.4rem;">Connect Domain</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 7. ACCOUNT OVERVIEW TAB -->
+                <div class="settings-panel-card" id="tab-overview">
+                    <div class="panel-title-block">
+                        <h2>Account Overview & Backups</h2>
+                        <p>Analyze subscription details, storage meters, and export/import database backups.</p>
+                    </div>
+
+                    <!-- Statistics grid -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+                        <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; text-align: center;">
+                            <span style="font-size: 0.75rem; font-weight: bold; color: var(--settings-text-muted); text-transform: uppercase;">Total Views</span>
+                            <span style="display: block; font-size: 1.6rem; font-weight: 800; margin-top: 0.2rem;" id="overviewViews">0</span>
+                        </div>
+                        <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; text-align: center;">
+                            <span style="font-size: 0.75rem; font-weight: bold; color: var(--settings-text-muted); text-transform: uppercase;">Wishes Left</span>
+                            <span style="display: block; font-size: 1.6rem; font-weight: 800; margin-top: 0.2rem;" id="overviewWishes">0</span>
+                        </div>
+                        <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; text-align: center;">
+                            <span style="font-size: 0.75rem; font-weight: bold; color: var(--settings-text-muted); text-transform: uppercase;">Total Shares</span>
+                            <span style="display: block; font-size: 1.6rem; font-weight: 800; margin-top: 0.2rem;" id="overviewShares">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Storage usage meters -->
+                    <div>
+                        <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0 0 0.8rem 0; text-transform: uppercase; letter-spacing: 0.03em; color: var(--settings-text-muted);">SaaS Storage Manager</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Progress bar -->
+                            <div style="background: rgba(148,163,184,0.15); height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="storageBarFill" style="background: var(--settings-accent); height: 100%; width: 5%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: bold;">
+                                <span id="storageLabelUsed">Used: 2.4 MB (0.5%)</span>
+                                <span>Limit: 500 MB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backups (Import / Export) -->
+                    <div style="border-top: 1px solid var(--settings-border); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.03em; color: var(--settings-text-muted);">Import & Export Backups</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <!-- Export -->
+                            <div style="border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; text-align: center;">
+                                <span style="font-size: 1.5rem; display: block; margin-bottom: 0.4rem;">📥</span>
+                                <strong style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Export Backup</strong>
+                                <span style="font-size: 0.7rem; color: var(--settings-text-muted); display: block; margin-bottom: 0.8rem;">Download profile pages in JSON/CSV backup formats.</span>
+                                <button type="button" class="btn btn-secondary text-sm" id="btnExportData" style="width: auto; padding: 0.4rem 1rem;">Export JSON</button>
+                            </div>
+                            <!-- Import -->
+                            <div style="border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; text-align: center; position: relative;">
+                                <span style="font-size: 1.5rem; display: block; margin-bottom: 0.4rem;">📤</span>
+                                <strong style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Import Backup</strong>
+                                <span style="font-size: 0.7rem; color: var(--settings-text-muted); display: block; margin-bottom: 0.8rem;">Upload backup files to restore birthday capsule layouts.</span>
+                                <button type="button" class="btn btn-secondary text-sm" id="btnImportDataTrigger" style="width: auto; padding: 0.4rem 1rem;">Import File</button>
+                                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. DANGER ZONE -->
+                <div class="settings-panel-card danger-card-border" id="tab-danger">
+                    <div class="panel-title-block">
+                        <h2 style="color: #ef4444;">Danger Zone</h2>
+                        <p>Permanently remove account credentials, created template capsules, and media uploads.</p>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        <p style="font-size: 0.85rem; margin: 0; line-height: 1.4;">
+                            ⚠️ <strong>Warning:</strong> Deleting your account is completely permanent. Once executed, all active pages, analytics records, guestbook comments, and files saved inside the MongoDB database will be deleted forever.
+                        </p>
+
+                        <div class="form-field">
+                            <label>Confirm Password</label>
+                            <input type="password" id="deleteConfirmPwd" class="form-input-text" placeholder="Type your password..." required>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Type "DELETE" to confirm</label>
+                            <input type="text" id="deleteConfirmText" class="form-input-text" placeholder="Type DELETE..." required>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 1.2rem; margin-top: 0.8rem;">
+                            <button type="button" class="btn" id="btnDeleteAccount" style="width: auto; padding: 0.65rem 1.4rem; background: #ef4444; color: white; border: none; font-weight: bold; opacity: 0.6; cursor: not-allowed;" disabled>
+                                Delete Account Permanently
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
 
         </div>
 
     </div>
 
-    <!-- Core Auth Script Guard -->
+    <!-- Image Cropper Modal popup -->
+    <div class="cropper-modal" id="cropperModal">
+        <div class="cropper-content">
+            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.15rem; font-weight: 800;">Edit Photo 📐</h3>
+            <p style="font-size: 0.75rem; color: var(--settings-text-muted); margin-bottom: 1.2rem;">Zoom and rotate your image to frame your face correctly.</p>
+
+            <div class="cropper-canvas-wrap">
+                <canvas id="cropCanvas" width="200" height="200"></canvas>
+            </div>
+
+            <!-- Controls slider -->
+            <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.3rem; text-align: left;">
+                <label style="font-size: 0.7rem; font-weight: bold; color: var(--settings-text-muted); text-transform: uppercase;">Zoom Scale</label>
+                <input type="range" id="cropZoomSlider" class="cropper-slider-control" min="10" max="30" value="10">
+            </div>
+
+            <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary text-sm" id="btnRotateCrop" style="width: auto; padding: 0.3rem 0.8rem;">Rotate ↺</button>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary" id="btnCancelCrop">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnSaveCrop">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
     <script src="src/js/auth.js"></script>
-    <!-- PWA settings -->
     <script src="src/js/pwa.js"></script>
     
+    <!-- Profile settings logic controllers -->
     <script>
-        // Populate profile screen with verified user details from local storage
+        // Global variables for Cropper Canvas
+        let rawImageObj = null;
+        let cropZoom = 1.0;
+        let cropRotation = 0; // in degrees
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let isDraggingCrop = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let originalCropOffsetX = 0;
+        let originalCropOffsetY = 0;
+
         document.addEventListener('DOMContentLoaded', () => {
-            const user = authManager.getUser();
-            if (user) {
-                document.getElementById('profile-name').textContent = user.name;
-                document.getElementById('profile-email').textContent = user.email;
-                
-                if (user.createdAt) {
-                    const date = new Date(user.createdAt);
-                    document.getElementById('profile-joined-val').textContent = date.toLocaleDateString(undefined, { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+            // Tab portal selectors
+            const tabButtons = document.querySelectorAll('.sidebar-tab-btn');
+            const panelCards = document.querySelectorAll('.settings-panel-card');
+
+            tabButtons.forEach(btn => {
+                btn.onclick = () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    panelCards.forEach(c => c.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                };
+            });
+
+            // Accent color option binders
+            const accentOptions = document.querySelectorAll('.accent-color-option');
+            accentOptions.forEach(opt => {
+                opt.onclick = () => {
+                    accentOptions.forEach(o => {
+                        o.classList.remove('selected');
+                        o.textContent = '';
                     });
-                } else {
-                    document.getElementById('profile-joined-val').textContent = 'Today';
-                }
+                    opt.classList.add('selected');
+                    opt.textContent = '✓';
+                    
+                    // Live Update Preview box style
+                    const color = opt.dataset.color;
+                    const rootStyle = document.documentElement.style;
+                    if (color === 'pink') rootStyle.setProperty('--settings-accent', '#f43f5e');
+                    else if (color === 'purple') rootStyle.setProperty('--settings-accent', '#8b5cf6');
+                    else if (color === 'blue') rootStyle.setProperty('--settings-accent', '#3b82f6');
+                    else if (color === 'green') rootStyle.setProperty('--settings-accent', '#10b981');
+                    else if (color === 'orange') rootStyle.setProperty('--settings-accent', '#f97316');
+                };
+            });
 
-                // Generate Name Initials
-                const initials = user.name
-                    .split(' ')
-                    .map(word => word[0])
-                    .join('')
-                    .toUpperCase()
-                    .substring(0, 2);
-                document.getElementById('profile-avatar-initials').textContent = initials || '👤';
-
-                // Load custom domain if saved in local storage configuration
-                const savedDomain = localStorage.getItem('saas_custom_domain') || '';
-                document.getElementById('saasDomainInput').value = savedDomain;
+            // Live size preview binder
+            const sizeSelector = document.getElementById('appearanceFontSize');
+            const previewText = document.getElementById('previewTitle');
+            if (sizeSelector && previewText) {
+                sizeSelector.addEventListener('change', () => {
+                    const val = sizeSelector.value;
+                    if (val === 'small') previewText.style.fontSize = '0.95rem';
+                    else if (val === 'medium') previewText.style.fontSize = '1.15rem';
+                    else if (val === 'large') previewText.style.fontSize = '1.45rem';
+                });
             }
 
-            // Click handlers
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                authManager.logout();
-            });
-
-            document.getElementById('backToBuilder').addEventListener('click', () => {
-                window.location.href = 'dashboard.html';
-            });
-
-            document.getElementById('saveSaasDomainBtn').addEventListener('click', () => {
-                const domVal = document.getElementById('saasDomainInput').value.trim();
-                localStorage.setItem('saas_custom_domain', domVal);
-                showToast('Brand domain config saved successfully! 🌐', 'success');
-            });
-
-            // Adjust PWA install button in settings page
-            setTimeout(() => {
-                const pwaBtn = document.getElementById('installPwaSettingsBtn');
-                if (window.deferredPrompt) {
-                    pwaBtn.style.display = 'inline-flex';
-                }
-            }, 500);
+            // Fetch and load initial Profile Settings values
+            loadProfileDetails();
+            setupDragAndDrop();
+            setupPasswordMeter();
+            setupDangerZoneValidation();
         });
+
+        // Fetch API settings values
+        async function loadProfileDetails() {
+            const token = authManager.getToken();
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const profile = data.data.profile;
+                    const stats = data.data.stats;
+
+                    // Fill personal info
+                    document.getElementById('profileName').value = profile.name || '';
+                    document.getElementById('profileUsername').value = profile.username || '';
+                    document.getElementById('profileEmail').value = profile.email || '';
+                    document.getElementById('profilePhone').value = profile.phone || '';
+                    document.getElementById('profileBio').value = profile.bio || '';
+                    if (profile.birthday) {
+                        document.getElementById('profileBirthday').value = new Date(profile.birthday).toISOString().substring(0,10);
+                    }
+                    document.getElementById('profileGender').value = profile.gender || '';
+                    document.getElementById('profileCountry').value = profile.country || '';
+                    document.getElementById('profileCity').value = profile.city || '';
+                    document.getElementById('profileTimezone').value = profile.timezone || 'UTC';
+                    document.getElementById('profileLanguage').value = profile.language || 'en';
+
+                    // Avatar check
+                    const circle = document.getElementById('profilePhotoCircle');
+                    const removeBtn = document.getElementById('removePhotoBtn');
+                    if (profile.profilePhoto) {
+                        circle.innerHTML = `<img src="${profile.profilePhoto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                        if (removeBtn) removeBtn.style.display = 'inline-flex';
+                    } else {
+                        const initials = profile.name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+                        circle.textContent = initials || '👤';
+                        if (removeBtn) removeBtn.style.display = 'none';
+                    }
+
+                    // Toggles Preferences checkbox state
+                    const pref = profile.preferences || {};
+                    document.getElementById('pref-bday').checked = pref.birthdayEmails !== false;
+                    document.getElementById('pref-wishes').checked = pref.guestbookNotifications !== false;
+                    document.getElementById('pref-qr').checked = pref.qrScanNotifications !== false;
+                    document.getElementById('pref-share').checked = pref.shareNotifications !== false;
+                    document.getElementById('pref-weekly').checked = !!pref.weeklySummary;
+                    document.getElementById('pref-system').checked = pref.systemUpdates !== false;
+                    document.getElementById('pref-push').checked = !!pref.pushNotifications;
+
+                    // Appearance preset fields
+                    const app = profile.appearance || {};
+                    document.getElementById('appearanceTheme').value = app.theme || 'system';
+                    document.getElementById('appearanceFontSize').value = app.fontSize || 'medium';
+                    
+                    const triggerOpt = document.querySelector(`.accent-color-option[data-color="${app.accentColor || 'pink'}"]`);
+                    if (triggerOpt) triggerOpt.click();
+
+                    // Account stats metrics overview
+                    document.getElementById('overviewViews').textContent = stats.viewsCount || 0;
+                    document.getElementById('overviewWishes').textContent = stats.wishesCount || 0;
+                    document.getElementById('overviewShares').textContent = stats.sharesCount || 0;
+                    
+                    // Storage sizes summary
+                    const storagePct = Math.min((stats.viewsCount * 0.01) + 2, 98); // Mock dynamic size calculations
+                    document.getElementById('storageBarFill').style.width = `${storagePct}%`;
+                    document.getElementById('storageLabelUsed').textContent = `Used: ${(storagePct * 5).toFixed(1)} MB (${storagePct.toFixed(1)}%)`;
+
+                    // Load Session Activities list
+                    loadSecuritySessions(profile.loginHistory || []);
+                    
+                    // Domain Mapping URL
+                    document.getElementById('customDomainInput').value = profile.customDomain || '';
+                    const domainStatus = document.getElementById('domainStatusLabel');
+                    const domainDot = document.getElementById('domainStatusDot');
+                    if (profile.customDomain) {
+                        domainStatus.textContent = profile.customDomainDnsVerified ? `Connected & verified ✅` : `CNAME mapping validation pending ⏳`;
+                        domainDot.style.background = profile.customDomainDnsVerified ? `#10b981` : `#f59e0b`;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Render Security Session Activity list
+        function loadSecuritySessions(history) {
+            const list = document.getElementById('activeSessionsList');
+            list.innerHTML = '';
+
+            if (history.length === 0) {
+                list.innerHTML = `<p style="font-size:0.8rem; opacity:0.65; text-align:center; padding:1rem 0;">No login sessions history found.</p>`;
+                return;
+            }
+
+            history.forEach((session, idx) => {
+                const date = new Date(session.timestamp).toLocaleString();
+                const item = document.createElement('div');
+                item.className = 'session-item';
+                item.innerHTML = `
+                    <div class="session-item-device">
+                        <strong>${session.browser} on ${session.os} ${idx === 0 ? ' (Current Session)' : ''}</strong>
+                        <span style="font-size:0.7rem; color:var(--settings-text-muted);">${session.location} • IP: ${session.ip}</span>
+                    </div>
+                    <div class="session-item-meta">
+                        <span>${date}</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Save general details updates
+        document.getElementById('profileDetailsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const submitBtn = document.getElementById('btnSaveProfile');
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+
+            const body = {
+                name: document.getElementById('profileName').value.trim(),
+                username: document.getElementById('profileUsername').value.trim(),
+                email: document.getElementById('profileEmail').value.trim(),
+                phone: document.getElementById('profilePhone').value.trim(),
+                bio: document.getElementById('profileBio').value.trim(),
+                birthday: document.getElementById('profileBirthday').value || null,
+                gender: document.getElementById('profileGender').value,
+                country: document.getElementById('profileCountry').value.trim(),
+                city: document.getElementById('profileCity').value.trim(),
+                timezone: document.getElementById('profileTimezone').value,
+                language: document.getElementById('profileLanguage').value
+            };
+
+            try {
+                const res = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Personal info saved successfully! 💾', 'success');
+                    
+                    // Update user cookie state in authManager
+                    const savedUser = authManager.getUser();
+                    if (savedUser) {
+                        savedUser.name = data.data.name;
+                        savedUser.email = data.data.email;
+                        localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                    }
+                    loadProfileDetails();
+                } else {
+                    showToast(data.message || 'Failed to update settings.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error saving details.', 'error');
+            } finally {
+                submitBtn.textContent = 'Save Changes';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Save Alert Preferences toggles
+        document.getElementById('preferencesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const saveBtn = document.getElementById('btnSavePreferences');
+            saveBtn.textContent = 'Saving...';
+
+            const body = {
+                birthdayEmails: document.getElementById('pref-bday').checked,
+                guestbookNotifications: document.getElementById('pref-wishes').checked,
+                qrScanNotifications: document.getElementById('pref-qr').checked,
+                shareNotifications: document.getElementById('pref-share').checked,
+                weeklySummary: document.getElementById('pref-weekly').checked,
+                systemUpdates: document.getElementById('pref-system').checked,
+                pushNotifications: document.getElementById('pref-push').checked
+            };
+
+            try {
+                const res = await fetch('/api/profile?action=preferences', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Alert preferences saved! 🔔', 'success');
+                } else {
+                    showToast(data.message || 'Failed to save alerts.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error saving preferences.', 'error');
+            } finally {
+                saveBtn.textContent = 'Save Preferences';
+            }
+        });
+
+        // Save Custom Domain Form mapping
+        document.getElementById('customDomainForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const btn = document.getElementById('btnSaveDomain');
+            btn.textContent = 'Connecting...';
+
+            const customDomain = document.getElementById('customDomainInput').value.trim();
+
+            try {
+                const res = await fetch('/api/profile?action=domain', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ customDomain })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Custom domain mappings saved successfully! 🌐', 'success');
+                    loadProfileDetails();
+                } else {
+                    showToast(data.message || 'Domain connecting failed.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error connecting custom domain.', 'error');
+            } finally {
+                btn.textContent = 'Connect Domain';
+            }
+        });
+
+        // Save appearance styling preferences
+        document.getElementById('btnSaveAppearance').onclick = async () => {
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const btn = document.getElementById('btnSaveAppearance');
+            btn.textContent = 'Saving...';
+
+            const theme = document.getElementById('appearanceTheme').value;
+            const font = document.getElementById('appearanceFontSize').value;
+            const selectedAccentNode = document.querySelector('.accent-color-option.selected');
+            const accent = selectedAccentNode ? selectedAccentNode.dataset.color : 'pink';
+
+            try {
+                const res = await fetch('/api/profile?action=theme', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ theme, accentColor: accent, fontSize: font })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Appearance preset styles saved! 🎨', 'success');
+                } else {
+                    showToast(data.message || 'Styles update failed.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error during theme updates.', 'error');
+            } finally {
+                btn.textContent = 'Save Appearance';
+            }
+        };
+
+        // Export data JSON format
+        document.getElementById('btnExportData').onclick = async () => {
+            const token = authManager.getToken();
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/profile?action=export', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `WishCraft_Profile_Backup_${Date.now()}.json`;
+                    link.click();
+                    showToast('Export JSON downloaded successfully! 📥', 'success');
+                }
+            } catch (err) {
+                showToast('Exporting data failed.', 'error');
+            }
+        };
+
+        // Import backup json trigger
+        const importBtnTrigger = document.getElementById('btnImportDataTrigger');
+        const importFileInput = document.getElementById('importFileInput');
+        if (importBtnTrigger && importFileInput) {
+            importBtnTrigger.onclick = () => importFileInput.click();
+            importFileInput.onchange = async () => {
+                const file = importFileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (!parsed.profile || !parsed.birthdayPages) {
+                            showToast('Invalid backup file formatting.', 'error');
+                            return;
+                        }
+                        
+                        // Execute profile imports
+                        const token = authManager.getToken();
+                        const res = await fetch('/api/profile', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(parsed.profile)
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            showToast('Backup restored successfully! 💾📂', 'success');
+                            loadProfileDetails();
+                        }
+                    } catch (err) {
+                        showToast('Restoring backup failed.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+        }
+
+        // ====================================================
+        // DRAG & DROP PHOTO CROPPER IMPLEMENTATION
+        // ====================================================
+        const dropArea = document.getElementById('dropArea');
+        const photoFileInput = document.getElementById('photoFileInput');
+        
+        function setupDragAndDrop() {
+            if (!dropArea || !photoFileInput) return;
+
+            dropArea.onclick = () => photoFileInput.click();
+            
+            photoFileInput.onchange = () => {
+                const file = photoFileInput.files[0];
+                if (file) handleImageFile(file);
+            };
+
+            // Drag overlays
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropArea.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropArea.classList.remove('dragover');
+                }, false);
+            });
+
+            dropArea.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                if (file) handleImageFile(file);
+            }, false);
+        }
+
+        // Handle uploaded image file
+        function handleImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file type.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    rawImageObj = img;
+                    cropZoom = 1.0;
+                    cropRotation = 0;
+                    cropOffsetX = 0;
+                    cropOffsetY = 0;
+                    
+                    // Open modal
+                    document.getElementById('cropperModal').style.display = 'flex';
+                    document.getElementById('cropZoomSlider').value = 10;
+                    drawCropperCanvas();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Draw image cropper preview canvas
+        function drawCropperCanvas() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas || !rawImageObj) return;
+            const ctx = canvas.getContext('2d');
+            
+            // Clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((cropRotation * Math.PI) / 180);
+            
+            // Calculate scale sizing
+            const scale = Math.max(canvas.width / rawImageObj.width, canvas.height / rawImageObj.height) * cropZoom;
+            const w = rawImageObj.width * scale;
+            const h = rawImageObj.height * scale;
+            
+            ctx.drawImage(rawImageObj, -w / 2 + cropOffsetX, -h / 2 + cropOffsetY, w, h);
+            ctx.restore();
+        }
+
+        // Zoom and rotate slider controls inside modal
+        const cropZoomSlider = document.getElementById('cropZoomSlider');
+        if (cropZoomSlider) {
+            cropZoomSlider.oninput = (e) => {
+                cropZoom = e.target.value / 10;
+                drawCropperCanvas();
+            };
+        }
+
+        const btnRotateCrop = document.getElementById('btnRotateCrop');
+        if (btnRotateCrop) {
+            btnRotateCrop.onclick = () => {
+                cropRotation = (cropRotation + 90) % 360;
+                drawCropperCanvas();
+            };
+        }
+
+        // Drag handlers inside cropping canvas
+        const cropCanvas = document.getElementById('cropCanvas');
+        if (cropCanvas) {
+            cropCanvas.onmousedown = (e) => {
+                isDraggingCrop = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                originalCropOffsetX = cropOffsetX;
+                originalCropOffsetY = cropOffsetY;
+            };
+            
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingCrop) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                
+                // Adjust offsets with rotation math simplified
+                cropOffsetX = originalCropOffsetX + dx;
+                cropOffsetY = originalCropOffsetY + dy;
+                drawCropperCanvas();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDraggingCrop = false;
+            });
+        }
+
+        // Save or Cancel cropped avatar
+        document.getElementById('btnCancelCrop').onclick = () => {
+            document.getElementById('cropperModal').style.display = 'none';
+        };
+
+        document.getElementById('btnSaveCrop').onclick = async () => {
+            document.getElementById('cropperModal').style.display = 'none';
+            const canvas = document.getElementById('cropCanvas');
+            
+            // Compress image using client-side base64 jpeg quality
+            const base64Photo = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Upload base64 compressed to server photo upload endpoint
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const progressContainer = document.getElementById('uploadProgressContainer');
+            const progressBar = document.getElementById('uploadProgressBar');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '30%';
+
+            try {
+                const res = await fetch('/api/profile?action=upload-photo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ photo: base64Photo })
+                });
+                progressBar.style.width = '70%';
+                const data = await res.json();
+                
+                if (data.success) {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 500);
+
+                    showToast('Profile photo updated successfully! 👤✨', 'success');
+                    
+                    // Sync profilePhoto local cached variables inside navbar
+                    const savedUser = authManager.getUser();
+                    if (savedUser) {
+                        savedUser.profilePhoto = data.data.profilePhoto;
+                        localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                    }
+                    loadProfileDetails();
+                } else {
+                    showToast(data.message || 'Profile photo upload failed.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error during photo upload.', 'error');
+            }
+        };
+
+        // Remove Profile Photo action
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        if (removePhotoBtn) {
+            removePhotoBtn.onclick = async () => {
+                const token = authManager.getToken();
+                if (!token) return;
+                
+                const btn = document.getElementById('removePhotoBtn');
+                btn.textContent = 'Removing...';
+
+                try {
+                    const res = await fetch('/api/profile?action=upload-photo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ photo: '' }) // Clear photo string
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Profile photo removed.', 'success');
+                        
+                        const savedUser = authManager.getUser();
+                        if (savedUser) {
+                            delete savedUser.profilePhoto;
+                            localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                        }
+                        loadProfileDetails();
+                    }
+                } catch (e) {
+                    showToast('Failed to remove photo.', 'error');
+                } finally {
+                    btn.textContent = 'Remove Photo';
+                }
+            };
+        }
+
+        // ====================================================
+        // CHANGE PASSWORD COMPLEXITY VALIDATIONS
+        // ====================================================
+        function setupPasswordMeter() {
+            const pwdInput = document.getElementById('newPwd');
+            const confirmInput = document.getElementById('confirmNewPwd');
+            
+            if (!pwdInput) return;
+
+            pwdInput.addEventListener('input', () => {
+                const val = pwdInput.value;
+                
+                // Requirements
+                const checks = {
+                    len: val.length >= 8,
+                    upper: /[A-Z]/.test(val),
+                    lower: /[a-z]/.test(val),
+                    num: /[0-9]/.test(val),
+                    special: /[^A-Za-z0-9]/.test(val)
+                };
+
+                // Render checklist
+                document.getElementById('req-len').innerHTML = checks.len ? '✓ Min 8 characters' : '✗ Min 8 characters';
+                document.getElementById('req-len').style.color = checks.len ? '#10b981' : 'inherit';
+
+                document.getElementById('req-upper').innerHTML = checks.upper ? '✓ One uppercase letter' : '✗ One uppercase letter';
+                document.getElementById('req-upper').style.color = checks.upper ? '#10b981' : 'inherit';
+
+                document.getElementById('req-lower').innerHTML = checks.lower ? '✓ One lowercase letter' : '✗ One lowercase letter';
+                document.getElementById('req-lower').style.color = checks.lower ? '#10b981' : 'inherit';
+
+                document.getElementById('req-num').innerHTML = checks.num ? '✓ One numeric number' : '✗ One numeric number';
+                document.getElementById('req-num').style.color = checks.num ? '#10b981' : 'inherit';
+
+                document.getElementById('req-special').innerHTML = checks.special ? '✓ One special symbol' : '✗ One special symbol';
+                document.getElementById('req-special').style.color = checks.special ? '#10b981' : 'inherit';
+
+                // Strength bar math
+                let passed = 0;
+                for (let k in checks) { if (checks[k]) passed++; }
+
+                const bar1 = document.getElementById('pwd-strength-1');
+                const bar2 = document.getElementById('pwd-strength-2');
+                const bar3 = document.getElementById('pwd-strength-3');
+                const bar4 = document.getElementById('pwd-strength-4');
+                const strengthTxt = document.getElementById('pwdStrengthText');
+
+                // Reset bars
+                [bar1, bar2, bar3, bar4].forEach(b => b.style.background = 'rgba(148, 163, 184, 0.15)');
+
+                if (passed === 0) {
+                    strengthTxt.textContent = 'Strength: Empty';
+                    strengthTxt.style.color = 'inherit';
+                } else if (passed <= 2) {
+                    bar1.style.background = '#ef4444';
+                    strengthTxt.textContent = 'Strength: Weak';
+                    strengthTxt.style.color = '#ef4444';
+                } else if (passed === 3) {
+                    bar1.style.background = '#f59e0b';
+                    bar2.style.background = '#f59e0b';
+                    strengthTxt.textContent = 'Strength: Fair';
+                    strengthTxt.style.color = '#f59e0b';
+                } else if (passed === 4) {
+                    bar1.style.background = '#3b82f6';
+                    bar2.style.background = '#3b82f6';
+                    bar3.style.background = '#3b82f6';
+                    strengthTxt.textContent = 'Strength: Strong';
+                    strengthTxt.style.color = '#3b82f6';
+                } else if (passed === 5) {
+                    bar1.style.background = '#10b981';
+                    bar2.style.background = '#10b981';
+                    bar3.style.background = '#10b981';
+                    bar4.style.background = '#10b981';
+                    strengthTxt.textContent = 'Strength: Excellent!';
+                    strengthTxt.style.color = '#10b981';
+                }
+            });
+        }
+
+        // Submitting password changes
+        document.getElementById('changePasswordForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const token = authManager.getToken();
+            if (!token) return;
+
+            const currentPassword = document.getElementById('currPwd').value;
+            const newPassword = document.getElementById('newPwd').value;
+            const confirmPassword = document.getElementById('confirmNewPwd').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('Password confirmation does not match.', 'error');
+                return;
+            }
+
+            // Verify validations pass
+            const isComplexityMatch = newPassword.length >= 8 && /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword) && /[0-9]/.test(newPassword) && /[^A-Za-z0-9]/.test(newPassword);
+            if (!isComplexityMatch) {
+                showToast('New password does not meet complexity requirements.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnUpdatePassword');
+            btn.textContent = 'Updating...';
+
+            try {
+                const res = await fetch('/api/profile?action=password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Password changed successfully! 🔐', 'success');
+                    document.getElementById('currPwd').value = '';
+                    document.getElementById('newPwd').value = '';
+                    document.getElementById('confirmNewPwd').value = '';
+                } else {
+                    showToast(data.message || 'Failed to change password.', 'error');
+                }
+            } catch (err) {
+                showToast('Password update request failed.', 'error');
+            } finally {
+                btn.textContent = 'Update Password';
+            }
+        };
+
+        // ====================================================
+        // DANGER ZONE DELETION VALIDATION
+        // ====================================================
+        function setupDangerZoneValidation() {
+            const pwdNode = document.getElementById('deleteConfirmPwd');
+            const txtNode = document.getElementById('deleteConfirmText');
+            const deleteBtn = document.getElementById('btnDeleteAccount');
+
+            if (!pwdNode || !txtNode || !deleteBtn) return;
+
+            const checkInputs = () => {
+                const isPwdFilled = pwdNode.value.length > 0;
+                const isTxtDelete = txtNode.value === 'DELETE';
+                
+                if (isPwdFilled && isTxtDelete) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.style.opacity = '1';
+                    deleteBtn.style.cursor = 'pointer';
+                } else {
+                    deleteBtn.disabled = true;
+                    deleteBtn.style.opacity = '0.6';
+                    deleteBtn.style.cursor = 'not-allowed';
+                }
+            };
+
+            pwdNode.addEventListener('input', checkInputs);
+            txtNode.addEventListener('input', checkInputs);
+
+            deleteBtn.onclick = async () => {
+                const confirmVal = confirm('⚠️ FINAL WARNING: Are you absolutely sure you want to permanently delete your account?\nThis action cannot be undone under any circumstances!');
+                if (!confirmVal) return;
+
+                const token = authManager.getToken();
+                if (!token) return;
+
+                deleteBtn.textContent = 'Deleting Account...';
+
+                try {
+                    // First authenticate password check on backend by logging in again or validating
+                    const user = authManager.getUser();
+                    const verifyRes = await fetch('/api/auth?action=login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email, password: pwdNode.value })
+                    });
+                    const verifyData = await verifyRes.json();
+                    
+                    if (!verifyData.success) {
+                        showToast('Authentication check failed. Incorrect password.', 'error');
+                        deleteBtn.textContent = 'Delete Account Permanently';
+                        return;
+                    }
+
+                    // Delete account completely
+                    const res = await fetch('/api/profile', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ deleteConfirm: 'DELETE' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Account permanently deleted. Logging out...', 'success');
+                        setTimeout(() => {
+                            authManager.logout();
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Deletions failed.', 'error');
+                        deleteBtn.textContent = 'Delete Account Permanently';
+                    }
+                } catch (e) {
+                    showToast('Account deletion request failed.', 'error');
+                    deleteBtn.textContent = 'Delete Account Permanently';
+                }
+            };
+        }
     </script>
 </body>
 </html>

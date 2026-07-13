@@ -159,6 +159,7 @@ async function fetchCardDetails(pageId, passwordValue = '') {
             viewerConfig = {
                 ...viewerConfig,
                 ...data.data.page,
+                creator: data.data.creator || null,
                 comments: data.data.comments || [],
                 guestbook: data.data.guestbook || []
             };
@@ -279,6 +280,20 @@ function setupSurpriseCardUI() {
     document.getElementById('relationBadge').textContent = viewerConfig.relationship.toUpperCase();
     document.getElementById('cardTitle').textContent = `Happy Birthday, ${viewerConfig.name}! 🎉`;
     document.getElementById('senderTag').textContent = `From: ${viewerConfig.senderName}`;
+
+    // Populate creator badge
+    const badge = document.getElementById('creatorBadge');
+    if (badge && viewerConfig.creator) {
+        document.getElementById('creatorNameText').textContent = `Created by ${viewerConfig.creator.name}`;
+        const avatar = document.getElementById('creatorAvatar');
+        if (viewerConfig.creator.profilePhoto) {
+            avatar.src = viewerConfig.creator.profilePhoto;
+            avatar.style.display = 'inline-block';
+        } else {
+            avatar.style.display = 'none';
+        }
+        badge.style.display = 'inline-flex';
+    }
 
     // 1. Photos loop on Hero profile photo
     setupPhotosCarousel();

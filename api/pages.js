@@ -119,8 +119,14 @@ module.exports = async function handler(req, res) {
             const comments = await db.findCommentsByPageId(id);
             const guestbook = await db.findGuestbookByPageId(id);
             const analytics = await db.findAnalyticsByPageId(id);
+            const creator = await db.findUserById(page.userId.toString());
+            const creatorData = creator ? {
+                name: creator.name,
+                profilePhoto: creator.profilePhoto || ''
+            } : null;
 
             return success(res, {
+                creator: creatorData,
                 page: {
                     id: page._id,
                     name: page.name,

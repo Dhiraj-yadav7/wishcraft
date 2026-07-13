@@ -18,7 +18,48 @@ const UserSchema = new mongoose.Schema({
     socialId: { type: String },
     resetToken: { type: String },
     resetTokenExpiry: { type: Date },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    
+    // SaaS Account Extension fields
+    username: { type: String, unique: true, sparse: true },
+    profilePhoto: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    bio: { type: String, default: '' },
+    birthday: { type: Date, default: null },
+    gender: { type: String, default: '' },
+    country: { type: String, default: '' },
+    city: { type: String, default: '' },
+    timezone: { type: String, default: 'UTC' },
+    language: { type: String, default: 'en' },
+    
+    // Alert Toggles
+    preferences: {
+        birthdayEmails: { type: Boolean, default: true },
+        guestbookNotifications: { type: Boolean, default: true },
+        qrScanNotifications: { type: Boolean, default: true },
+        shareNotifications: { type: Boolean, default: true },
+        weeklySummary: { type: Boolean, default: false },
+        marketingEmails: { type: Boolean, default: false },
+        systemUpdates: { type: Boolean, default: true },
+        pushNotifications: { type: Boolean, default: false },
+        desktopNotifications: { type: Boolean, default: false }
+    },
+    
+    // Custom Appearance
+    appearance: {
+        theme: { type: String, default: 'system' },
+        accentColor: { type: String, default: 'pink' },
+        fontSize: { type: String, default: 'medium' }
+    },
+    
+    // Sessions and OAuth
+    loginHistory: { type: [Object], default: [] },
+    connectedAccounts: { type: [Object], default: [] },
+    
+    // Custom Domain Mapping
+    customDomain: { type: String, default: '' },
+    customDomainDnsVerified: { type: Boolean, default: false },
+    status: { type: String, default: 'active' }
 });
 
 const BirthdayPageSchema = new mongoose.Schema({
@@ -181,6 +222,16 @@ const dbAdapter = {
             return mapDoc(user);
         }
     },
+    findUserByUsername: async (username) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await UserModel.findOne({ username: username.toLowerCase() });
+        } else {
+            const db = readLocalDb();
+            const user = db.users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
+            return mapDoc(user);
+        }
+    },
     findUserByResetToken: async (token) => {
         if (MONGODB_URI) {
             await connectMongo();
@@ -226,6 +277,30 @@ const dbAdapter = {
             db.users[idx] = { ...db.users[idx], ...updates };
             writeLocalDb(db);
             return mapDoc(db.users[idx]);
+        }
+    },
+    deleteUser: async (id) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            const pages = await BirthdayPageModel.find({ userId: id });
+            for (const p of pages) {
+                await AnalyticsModel.deleteMany({ pageId: p._id });
+                await GuestbookModel.deleteMany({ pageId: p._id });
+            }
+            await BirthdayPageModel.deleteMany({ userId: id });
+            await NotificationModel.deleteMany({ userId: id });
+            return await UserModel.findByIdAndDelete(id);
+        } else {
+            const db = readLocalDb();
+            db.users = db.users.filter(u => u.id !== id);
+            const pages = db.pages.filter(p => p.userId === id);
+            const pageIds = pages.map(p => p.id);
+            db.pages = db.pages.filter(p => p.userId !== id);
+            db.analytics = db.analytics.filter(a => !pageIds.includes(a.pageId));
+            db.guestbook = db.guestbook.filter(g => !pageIds.includes(g.pageId));
+            db.notifications = db.notifications.filter(n => n.userId !== id);
+            writeLocalDb(db);
+            return true;
         }
     },
 
