@@ -1415,3 +1415,79 @@ body.wish-body {
 .guestbook-close-btn:hover {
     opacity: 1;
 }
+
+/* ========================================================
+   Responsive Media Queries for Story Mode
+   ======================================================== */
+
+@media (max-width: 480px) {
+    /* Story Navigation Bar responsive scaling */
+    .story-navigation-bar {
+        bottom: 1.5rem;
+        gap: 0.8rem;
+        padding: 0.5rem 1rem;
+        width: 90%;
+        max-width: 350px;
+        justify-content: space-between;
+    }
+
+    .story-nav-btn {
+        font-size: 0.75rem;
+    }
+
+    .story-progress-dots {
+        gap: 4px;
+    }
+
+    .story-dot {
+        width: 5px;
+        height: 5px;
+    }
+
+    /* Message Page responsiveness */
+    .premium-wish-message {
+        font-size: 1.25rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Gallery Page responsive scaling */
+    .gallery-slide-show {
+        max-width: 290px;
+    }
+    
+    .gallery-image-viewport {
+        aspect-ratio: 1 / 1;
+    }
+
+    .gallery-control-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Short height viewport optimizations (e.g. height < 700px) */
+@media (max-height: 700px) {
+    .premium-profile-carousel {
+        width: 130px;
+        height: 130px;
+        margin-bottom: 1rem;
+    }
+
+    .premium-hero-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .gallery-slide-show {
+        max-width: 260px;
+        gap: 0.6rem;
+    }
+
+    .story-page {
+        padding: 2rem 1rem 5rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 0.8rem;
+    }
+}

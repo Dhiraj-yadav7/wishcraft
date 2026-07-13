@@ -1597,6 +1597,7 @@ function setupEnvelopeReveal() {
             }, 600);
 
             setTimeout(() => {
+                envelope.style.display = 'none';
                 envelope.style.opacity = '0';
                 envelope.style.pointerEvents = 'none';
                 
