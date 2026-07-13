@@ -61,13 +61,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 1200px;
             background: var(--settings-bg);
             z-index: 1000;
             padding-top: 2.5rem;
-            padding-bottom: 1rem;
+            padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--settings-border);
+            box-sizing: border-box;
         }
         
         .settings-nav-header h1 {
@@ -83,6 +88,7 @@
             grid-template-columns: 240px 1fr;
             gap: 2rem;
             align-items: start;
+            margin-top: var(--navbar-height, 100px);
         }
 
         @media (max-width: 900px) {
@@ -104,7 +110,7 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             position: sticky;
-            top: 110px;
+            top: calc(var(--navbar-height, 100px) + 1.5rem);
         }
 
         @media (max-width: 900px) {
@@ -1160,6 +1166,14 @@
     
     <!-- Profile settings logic controllers -->
     <script>
+        function updateNavbarHeight() {
+            const navbar = document.querySelector('.settings-nav-header');
+            if (navbar) {
+                const height = navbar.offsetHeight;
+                document.documentElement.style.setProperty('--navbar-height', `${height}px`);
+            }
+        }
+
         // Global variables for Cropper Canvas
         let rawImageObj = null;
         let cropZoom = 1.0;
@@ -1426,6 +1440,14 @@
             pwdModal.onclick = (e) => {
                 if (e.target === pwdModal) closePwdModal();
             };
+
+            // Adjust layout spacing for fixed navbar dynamically
+            updateNavbarHeight();
+            window.addEventListener('resize', updateNavbarHeight);
+            
+            // Re-run after short delays to ensure fonts/resources are ready
+            setTimeout(updateNavbarHeight, 100);
+            setTimeout(updateNavbarHeight, 500);
 
             // Fetch and load initial Profile Settings values
             loadProfileDetails();
