@@ -17,26 +17,136 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
+        :root {
+            --apple-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+            --card-radius: 24px;
+        }
+
+        /* Apple Scrolling Page Layout */
         .wish-body {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            height: auto !important;
+            background-attachment: fixed;
+            background-size: cover;
+            font-family: var(--apple-font);
+            color: var(--text-color, #ffffff);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            padding: 3rem 0;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+
+        .apple-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 1.2rem 8rem;
+            display: flex;
             flex-direction: column;
-            justify-content: flex-start !important;
-            gap: 2rem;
+            gap: 5rem;
+            box-sizing: border-box;
+        }
+
+        /* Section Layouts */
+        .apple-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
             width: 100%;
         }
 
-        .carousel-deck {
+        .apple-section.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 2.5rem 2rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: var(--font-heading, var(--apple-font));
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Card */
+        .hero-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            box-sizing: border-box;
+        }
+
+        .premium-hero-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 4rem 2rem;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.16);
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Countdown Widget */
+        .premium-countdown-block {
+            margin-bottom: 2rem;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0.6rem 1.5rem;
+        }
+
+        .countdown-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+        }
+
+        .countdown-time {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            letter-spacing: 0.02em;
+        }
+
+        /* Hero Carousel */
+        .premium-profile-carousel {
             position: relative;
             width: 190px;
             height: 190px;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 2rem;
             border-radius: 50%;
             overflow: hidden;
-            border: 4px solid var(--primary-color);
+            border: 5px solid var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             animation: profileGlow 4s infinite alternate;
         }
 
@@ -47,7 +157,7 @@
             height: 100%;
             object-fit: cover;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.6s ease-in-out;
             border-radius: 50%;
         }
 
@@ -55,28 +165,74 @@
             opacity: 1;
         }
 
-        .cassette-block {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 16px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-            display: flex;
+        .premium-relation-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 0.3rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .premium-birthday-title {
+            font-family: var(--font-heading, var(--apple-font));
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0.5rem 0;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .premium-sender-tag {
+            font-size: 1rem;
+            font-weight: 600;
+            opacity: 0.75;
+            margin: 0;
+        }
+
+        /* Heartfelt Wish Message */
+        .premium-wish-message {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            opacity: 0.95;
+            text-align: left;
+            white-space: pre-wrap;
+            max-width: 650px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .text-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: inline-flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.3rem;
+            transition: opacity 0.2s ease;
+        }
+        
+        .text-btn:hover {
+            opacity: 0.8;
         }
 
-        .cassette-tape {
-            font-size: 2.2rem;
-            animation: spin 3s linear infinite paused;
-        }
-
-        .cassette-tape.playing {
-            animation-play-state: running;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
+        /* Responsive Video Container */
+        .premium-video-container {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
         }
 
         .video-wrapper {
@@ -85,9 +241,9 @@
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
-            border-radius: 14px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            margin: 1.5rem 0;
+            border-radius: var(--card-radius);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+            background: #0f172a;
         }
 
         .video-wrapper iframe,
@@ -100,133 +256,859 @@
             border: none;
         }
 
-        .cake-block {
-            font-size: 3.5rem;
-            margin: 1.2rem 0;
-            cursor: pointer;
-            display: inline-block;
-            transition: transform 0.3s ease;
-        }
-        
-        .cake-block:hover {
-            transform: scale(1.1);
-        }
-
-        .guestbook-card {
-            width: 92%;
-            max-width: 480px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            padding: 2.2rem;
-            box-shadow: 0 20px 45px var(--shadow-color);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 10;
-        }
-
-        .wishes-title {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 1.2rem;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding-bottom: 0.5rem;
-            text-align: center;
-        }
-
-        .wish-post {
-            background: rgba(255,255,255,0.4);
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            font-size: 0.9rem;
+        /* Voice Capsule Card */
+        .premium-voice-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 440px;
+            margin: 0 auto;
             display: flex;
-            gap: 0.8rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.02);
-            border: 1px solid rgba(255,255,255,0.5);
+            flex-direction: column;
+            gap: 1.2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .voice-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .voice-icon {
+            font-size: 2rem;
+        }
+
+        .voice-sender-name {
+            display: block;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #ffffff;
             text-align: left;
         }
 
-        body.theme-elegant .wish-post,
-        body.theme-cosmic .wish-post,
-        body.theme-luxury .wish-post,
-        body.theme-royal .wish-post,
-        body.theme-dark .wish-post {
-            background: rgba(15, 23, 42, 0.3);
-            border-color: rgba(255,255,255,0.05);
+        .voice-status {
+            display: block;
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-align: left;
         }
 
-        .wish-post-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .voice-play-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            flex-shrink: 0;
+            margin-left: auto;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .wish-post-author {
-            font-weight: 800;
-            color: var(--text-color);
+        .voice-play-btn:hover {
+            transform: scale(1.1);
         }
 
-        .wish-post-text {
-            margin-top: 0.2rem;
-            opacity: 0.9;
-        }
-
-        .avatar-picker {
+        /* Bouncing Waveform */
+        .voice-waveform {
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 0.6rem;
-            margin-bottom: 1rem;
+            gap: 4px;
+            height: 35px;
+            width: 100%;
         }
 
-        .avatar-pick-option {
-            font-size: 1.4rem;
-            cursor: pointer;
-            padding: 0.3rem;
+        .wave-bar {
+            width: 3px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            transition: height 0.15s ease, background-color 0.3s ease;
+        }
+
+        .voice-waveform.playing .wave-bar {
+            background: var(--primary-color);
+            animation: waveformBounce 0.6s ease infinite alternate;
+        }
+
+        .voice-waveform.playing .wave-bar:nth-child(2n) { animation-delay: 0.15s; }
+        .voice-waveform.playing .wave-bar:nth-child(3n) { animation-delay: 0.3s; }
+        .voice-waveform.playing .wave-bar:nth-child(4n) { animation-delay: 0.08s; }
+
+        @keyframes waveformBounce {
+            0% { height: 6px; }
+            100% { height: 35px; }
+        }
+
+        .voice-progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .voice-progress-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+        }
+
+        .voice-progress-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            border: 2px solid transparent;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .voice-time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        /* Memory Gallery Masonry Grid */
+        .premium-gallery-container {
+            width: 100%;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.06);
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+            opacity: 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 1.2rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-item-overlay {
+            opacity: 1;
+        }
+
+        .gallery-action-badge {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e1b4b;
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        /* Mobile Swipe Carousel */
+        .mobile-gallery-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 1.2rem;
+            padding: 1rem 0;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .mobile-gallery-carousel::-webkit-scrollbar {
+            display: none; /* Safari/Chrome */
+        }
+
+        .carousel-item-wrap {
+            flex: 0 0 82%;
+            scroll-snap-align: center;
+        }
+
+        /* Gallery Lightbox */
+        .gallery-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 14, 0.96);
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: #ffffff;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #ffffff;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .lightbox-nav.prev { left: 1.5rem; }
+        .lightbox-nav.next { right: 1.5rem; }
+
+        .lightbox-media-container {
+            max-width: 80%;
+            max-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .lightbox-media-container img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .lightbox-actions-bar {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lightbox-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .lightbox-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Timeline Memories Section */
+        .premium-timeline-container {
+            position: relative;
+            padding-left: 2rem;
+            text-align: left;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 5px;
+            top: 0.5rem;
+            bottom: 0.5rem;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+            opacity: 0.5;
+        }
+
+        .timeline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .timeline-node-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-node-card:hover {
+            transform: translateX(4px);
+        }
+
+        .timeline-node-dot {
+            position: absolute;
+            left: -2.3rem;
+            top: 1.8rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 4px solid var(--bg-color, #1e1b4b);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .timeline-node-year {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+        }
+
+        .timeline-node-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin: 0.2rem 0 0.5rem;
+            color: #ffffff;
+        }
+
+        .timeline-node-text {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .timeline-node-img {
+            margin-top: 1rem;
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Music Player / Equalizer Visualizer */
+        .premium-music-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .music-info-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .music-play-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .music-play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .equalizer-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 25px;
+            width: 25px;
+        }
+
+        .eq-bar {
+            width: 3px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            transition: height 0.2s ease, background-color 0.3s ease;
+        }
+
+        .equalizer-bars.active .eq-bar {
+            background: var(--primary-color);
+            animation: eqBounce 0.7s ease infinite alternate;
+        }
+
+        .equalizer-bars.active .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+        .equalizer-bars.active .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+        .equalizer-bars.active .eq-bar:nth-child(4) { animation-delay: 0.08s; }
+
+        @keyframes eqBounce {
+            0% { height: 5px; }
+            100% { height: 25px; }
+        }
+
+        .volume-control-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        /* Floating Notes Animation */
+        .floating-note {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            pointer-events: none;
+            z-index: 9999;
+            animation: driftUp 3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes driftUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(-100px) translateX(30px) rotate(45deg); opacity: 0; }
+        }
+
+        /* AI Birthday Wishes Tab Deck */
+        .ai-tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+            scrollbar-width: none;
+        }
+
+        .ai-tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ai-tab {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            padding: 0.5rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
             transition: all 0.2s ease;
         }
 
-        .avatar-pick-option.selected {
-            border-color: var(--accent-color);
-            background: rgba(255, 255, 255, 0.4);
+        .ai-tab.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
         }
 
-        /* Timeline memory styles */
-        .timeline-item-card {
-            background: rgba(255,255,255,0.3);
-            border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
+        .ai-wish-result-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .ai-wish-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            text-align: left;
+            white-space: pre-wrap;
+            min-height: 80px;
+        }
+
+        /* Curated Gift Suggestions */
+        .gift-suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .gift-suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gift-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
             display: flex;
-            gap: 0.8rem;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
         }
 
-        body.theme-elegant .timeline-item-card,
-        body.theme-cosmic .timeline-item-card,
-        body.theme-luxury .timeline-item-card,
-        body.theme-royal .timeline-item-card,
-        body.theme-dark .timeline-item-card {
-            background: rgba(30, 41, 59, 0.4);
-            border-color: rgba(255, 255, 255, 0.05);
+        .gift-card:hover {
+            transform: translateY(-4px);
         }
 
-        .timeline-img {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 2px solid white;
+        .gift-card-icon {
+            font-size: 3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .gift-card-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            color: #ffffff;
+        }
+
+        .gift-card-price {
+            font-weight: 900;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .gift-card-reason {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+            margin-bottom: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .gift-card-buy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .gift-card-buy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Share & Downloads section */
+        .premium-share-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .share-subsection h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .downloads-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .downloads-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .downloads-grid button {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .social-share-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .social-btn {
+            flex: 1 1 calc(33% - 0.6rem);
+            min-width: 100px;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        @media (max-width: 500px) {
+            .social-btn {
+                flex: 1 1 calc(50% - 0.6rem);
+            }
+        }
+
+        .social-btn:hover {
+            opacity: 0.85;
+        }
+
+        .social-btn.whatsapp { background: #25d366; }
+        .social-btn.telegram { background: #0088cc; }
+        .social-btn.facebook { background: #1877f2; }
+        .social-btn.twitter { background: #0f1419; }
+        .social-btn.email { background: #ea4335; }
+        .social-btn.native { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); }
+
+        .premium-qr-code {
+            width: 110px;
+            height: 110px;
+            border-radius: 16px;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Floating Collapsible Guestbook Widget */
+        .floating-guestbook-widget {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 340px;
+            max-height: 80vh;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.4s ease;
+        }
+
+        @media (max-width: 600px) {
+            .floating-guestbook-widget {
+                left: 1rem;
+                right: 1rem;
+                bottom: 0;
+                width: calc(100% - 2rem) !important;
+                border-radius: 24px 24px 0 0;
+                border-bottom: none;
+                max-height: 70vh;
+            }
+        }
+
+        .floating-guestbook-widget.collapsed {
+            width: 200px;
+            max-height: 48px;
+            border-radius: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .floating-guestbook-widget.collapsed {
+                width: calc(100% - 2rem) !important;
+                max-height: 48px;
+                border-radius: 24px 24px 0 0;
+            }
+        }
+
+        .guestbook-toggle-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border: none;
+            color: #ffffff;
+            width: 100%;
+            height: 48px;
+            padding: 0 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
+            flex-shrink: 0;
+            box-sizing: border-box;
+            border-radius: inherit;
+        }
+
+        .toggle-icon {
+            font-size: 1.1rem;
+        }
+
+        .toggle-label {
+            flex: 1;
+            text-align: left;
+        }
+
+        .guest-count-badge {
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 800;
+        }
+
+        .guestbook-content-pane {
+            display: flex;
+            flex-direction: column;
+            padding: 1.2rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            box-sizing: border-box;
+            gap: 1rem;
+        }
+
+        .guest-wishes-scroll-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 0.3rem;
+        }
+
+        /* Custom Scrollbar for wishes list */
+        .guest-wishes-scroll-list::-webkit-scrollbar,
+        .guestbook-content-pane::-webkit-scrollbar {
+            width: 4px;
+        }
+        .guest-wishes-scroll-list::-webkit-scrollbar-thumb,
+        .guestbook-content-pane::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+        }
+
+        .guestbook-typing {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            font-style: italic;
+            text-align: left;
+        }
+
+        .guestbook-input-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 1rem;
+        }
+
+        .char-count-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        /* Typewriter text cursor effect */
+        .typewriter-cursor::after {
+            content: '|';
+            animation: cursorBlink 0.8s infinite;
+            color: var(--primary-color);
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
@@ -239,7 +1121,7 @@
     <canvas id="fireworks-canvas"></canvas>
 
     <!-- Glassmorphic Loading Screen (UX upgrade) -->
-    <div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s ease; color: var(--text-color);">
+    <div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100001; transition: opacity 0.5s ease; color: var(--text-color);">
         <div style="font-size: 3rem; animation: floatUp 1.2s infinite alternate;">🎂</div>
         <p style="margin-top: 1rem; font-weight: 800; font-family: var(--font-heading);">Preparing your sweet surprise... ✨</p>
     </div>
@@ -276,168 +1158,329 @@
         <button type="button" class="btn btn-secondary" onclick="window.location.href='login.html'" style="border-radius: 12px; font-weight: bold;">Create your own ➕</button>
     </div>
 
-    <div class="split-view-container" id="splitViewContainer">
-        <div class="surprise-reveal-wrapper">
+    <div class="split-view-container" id="splitViewContainer" style="min-height: auto; width: 100%; max-width: 100%; padding: 0; margin: 0;">
+        <div class="surprise-reveal-wrapper" style="width: 100%; max-width: 100%; padding: 0; margin: 0;">
             
             <!-- Animated 3D Gift Box (Step 0 - reveal envelope) -->
-            <div id="giftBoxContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s ease; z-index: 15; text-align: center; color: var(--text-color);">
+            <div id="giftBoxContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s ease; z-index: 15; text-align: center; color: var(--text-color); min-height: 80vh; width: 100%;">
                 <div style="font-size: 6rem; animation: floatUp 2s infinite alternate;">🎁</div>
                 <p style="margin-top: 1rem; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">You've received a gift! Tap to open</p>
             </div>
 
             <!-- Sealed envelope card (Step 1 - reveal card) -->
-            <div id="envelope" class="envelope" style="display: none; opacity: 0; transition: opacity 0.5s ease;">
+            <div id="envelope" class="envelope" style="display: none; opacity: 0; transition: opacity 0.5s ease; margin: 10vh auto;">
                 <div class="envelope-flap"></div>
                 <div class="envelope-pocket"></div>
                 <div class="envelope-seal">💌</div>
                 <div class="envelope-invitation-text">TAP TO OPEN SURPRISE</div>
             </div>
 
-            <!-- Main Display Card -->
-            <div id="displayCard" class="display-card">
+            <!-- Redesigned Main Display Card (Container representing the Apple-quality scroll flow) -->
+            <div id="displayCard" class="apple-container" style="display: none; opacity: 0; transition: opacity 1s ease;">
                 
-                <!-- Birthday Countdown Timer -->
-                <div id="countdownBlock" style="margin-bottom: 1rem; display: none;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: bold; background: rgba(255,255,255,0.25); padding: 0.4rem 0.8rem; border-radius: 10px;">
-                        <span>Countdown:</span>
-                        <span id="countdownText" style="color: var(--primary-color);">0d 0h 0m 0s</span>
-                    </div>
-                </div>
-
-                <!-- Photo Slider Carousel -->
-                <div class="carousel-deck" id="photoDeck">
-                    <img id="recipientPhoto" src="" alt="Birthday Portrait" class="carousel-slide active">
-                </div>
-
-                <span id="relationBadge" class="relationship-badge">Friend</span>
-                
-                <h1 id="cardTitle" class="birthday-title">Happy Birthday! 🎉</h1>
-                
-                <p id="senderTag" style="font-size: 0.9rem; font-weight: 700; opacity: 0.8; margin-top: -0.8rem; margin-bottom: 1.5rem;">From Sender</p>
-
-                <!-- Video player container -->
-                <div id="videoContainer" style="display: none;">
-                    <div class="video-wrapper" id="videoWrapper"></div>
-                </div>
-
-                <!-- Voice Tape Cassette Player -->
-                <div id="cassetteContainer" style="display: none;">
-                    <div class="cassette-block">
-                        <span class="cassette-tape" id="cassetteTape">📼</span>
-                        <div style="flex: 1; text-align: left;">
-                            <span style="font-size: 0.85rem; font-weight: 800; display: block;">VOICE MESSAGE FROM SENDER</span>
-                            <span style="font-size: 0.75rem; opacity: 0.7;" id="tapeStatus">Click play button to listen</span>
+                <!-- 1️⃣ HERO SECTION -->
+                <section id="heroSection" class="apple-section hero-section">
+                    <div id="birthdayCardHero" class="premium-hero-card">
+                        
+                        <!-- Birthday Countdown Timer -->
+                        <div id="countdownBlock" class="premium-countdown-block" style="display: none;">
+                            <span class="countdown-label">🎁 Days until birthday:</span>
+                            <span id="countdownText" class="countdown-time">0d 0h 0m 0s</span>
                         </div>
-                        <button type="button" id="tapePlayBtn" class="control-btn" style="border-radius: 50%; width: 36px; height: 36px;">▶️</button>
-                        <audio id="voiceMessageAudio"></audio>
-                    </div>
-                </div>
 
-                <!-- Heartfelt Wish Message -->
-                <div id="wishMessage" class="wish-message"></div>
+                        <!-- Photo Slider Carousel -->
+                        <div class="premium-profile-carousel" id="photoDeck">
+                            <img id="recipientPhoto" src="" alt="Birthday Portrait" class="carousel-slide active">
+                        </div>
 
-                <!-- Memory Lane Timeline vertical view -->
-                <div id="timelineContainer" style="display: none; margin: 2rem 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1.5rem; text-align: left;">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; text-align: center;">Memory Lane Timeline ⏰</h3>
-                    <div id="timelineList">
-                        <!-- Populated via JS -->
-                    </div>
-                </div>
+                        <span id="relationBadge" class="premium-relation-badge">Friend</span>
+                        
+                        <h1 id="cardTitle" class="premium-birthday-title">Happy Birthday! 🎉</h1>
+                        
+                        <p id="senderTag" class="premium-sender-tag">From Sender</p>
 
-                <!-- Interactive Cake Candle blowing out animation -->
-                <div style="margin: 1.5rem 0;">
-                    <div id="cakeBox" class="cake-block">🎂</div>
-                    <p id="candleHint" style="font-size: 0.75rem; opacity: 0.8; font-weight: 700; margin-top: 0.25rem;">Tap candle to blow it out! 🕯️</p>
-                </div>
-
-                <!-- Premium Music Player Visualizer widget -->
-                <div class="music-visualizer-card" id="musicVisualizerCard">
-                    <div class="visualizer-header">
-                        <div class="visualizer-title">🎵 Background Melodies</div>
-                        <button type="button" id="musicBtn" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; border-radius: 8px; width: auto; font-weight: bold;">Play</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div class="volume-slider-container">
-                            <span style="font-size: 0.8rem;">🔈</span>
-                            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
-                            <span style="font-size: 0.8rem;">🔊</span>
+                        <!-- Subtle micro actions inside hero -->
+                        <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem;">
+                            <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks" style="border-radius: 50%; font-size: 1.1rem; width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">🎆</button>
                         </div>
                     </div>
-                    <div class="visualizer-canvas-container">
-                        <canvas id="visualizerCanvas" class="visualizer-canvas"></canvas>
-                    </div>
-                </div>
+                </section>
 
-                <!-- Controls row -->
-                <div class="card-controls">
-                    <button type="button" id="fireworksBtn" class="control-btn" title="Launch Fireworks">🎆</button>
-                </div>
-
-                <!-- Premium Actions Bar (Downloads, QR, Calendars) -->
-                <div id="premiumIntegrationsBlock" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-                    <h3 style="font-size: 1rem; font-weight: 800;">Integrations & Sharing 🎁</h3>
-                    
-                    <div style="display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
-                        <button type="button" class="btn btn-secondary" id="downloadPdfBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">📄 Download PDF</button>
-                        <button type="button" class="btn btn-secondary" id="downloadImgBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">🖼️ Save Image</button>
-                        <button type="button" class="btn btn-secondary" id="calendarBtn" style="font-size: 0.75rem; padding: 0.5rem 0.8rem; width: auto; font-weight: bold; border-radius: 10px;">📅 Add Calendar</button>
+                <!-- 2️⃣ BIRTHDAY MESSAGE SECTION -->
+                <section id="messageSection" class="apple-section message-section">
+                    <div class="section-content">
+                        <h2 class="section-title">A Heartfelt Wish 📝</h2>
+                        <div id="wishMessage" class="premium-wish-message"></div>
+                        <button type="button" id="readMoreBtn" class="text-btn" style="display: none; margin: 1rem auto 0;">Read More ▾</button>
+                        
+                        <!-- Interactive Cake Candle blowing out animation -->
+                        <div style="margin-top: 2rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 1.5rem;">
+                            <div id="cakeBox" class="cake-block" style="font-size: 3.8rem;">🎂</div>
+                            <p id="candleHint" style="font-size: 0.8rem; opacity: 0.8; font-weight: 700; margin-top: 0.25rem;">Tap candle to blow it out! 🕯️</p>
+                        </div>
                     </div>
+                </section>
 
-                    <!-- QR code share -->
-                    <div style="text-align: center; margin-top: 0.5rem;" id="qrCodeContainer">
-                        <img id="qrCodeImg" src="" style="width: 120px; height: 120px; border-radius: 12px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" alt="QR Code Link">
-                        <p style="font-size: 0.7rem; opacity: 0.75; margin-top: 0.3rem;">Scan QR to open card directly!</p>
+                <!-- 3️⃣ VIDEO MESSAGE SECTION -->
+                <section id="videoSection" class="apple-section video-section" style="display: none;">
+                    <div class="section-content">
+                        <h2 class="section-title">Video Message 📽️</h2>
+                        <div id="videoContainer" class="premium-video-container">
+                            <div class="video-wrapper" id="videoWrapper"></div>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                <!-- 4️⃣ VOICE MESSAGE SECTION -->
+                <section id="voiceSection" class="apple-section voice-section" style="display: none;">
+                    <div class="section-content">
+                        <h2 class="section-title">Voice Capsule 📼</h2>
+                        <div id="voiceCard" class="premium-voice-card">
+                            <div class="voice-card-header">
+                                <span class="voice-icon">🎙️</span>
+                                <div style="text-align: left;">
+                                    <strong class="voice-sender-name" id="voiceSenderName">Sender</strong>
+                                    <span class="voice-status" id="tapeStatus">Click play to listen</span>
+                                </div>
+                                <button type="button" id="tapePlayBtn" class="voice-play-btn">▶️</button>
+                            </div>
+                            
+                            <!-- Waveform equalizer animation -->
+                            <div class="voice-waveform" id="voiceWaveform">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+
+                            <!-- Progress Track -->
+                            <div class="voice-progress-container">
+                                <input type="range" id="voiceProgress" class="voice-progress-slider" min="0" max="100" value="0">
+                                <div class="voice-time-info">
+                                    <span id="voiceCurrentTime">00:00</span>
+                                    <span id="voiceDuration">00:00</span>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 0.5rem; text-align: center;">
+                                <button type="button" id="downloadVoiceBtn" class="btn btn-secondary text-btn" style="font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 10px;">📥 Save Voice File</button>
+                            </div>
+                            
+                            <audio id="voiceMessageAudio" style="display: none;"></audio>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5️⃣ MEMORY GALLERY SECTION -->
+                <section id="gallerySection" class="apple-section gallery-section" style="display: none;">
+                    <div class="section-content">
+                        <h2 class="section-title">Memory Gallery 📸</h2>
+                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Moments captured in time.</p>
+                        <div id="galleryContainer" class="premium-gallery-container">
+                            <!-- Dynamically populated Masonry/Carousel via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6️⃣ MEMORY TIMELINE SECTION -->
+                <section id="timelineSection" class="apple-section timeline-section" style="display: none;">
+                    <div class="section-content">
+                        <h2 class="section-title">Memory Lane Timeline ⏰</h2>
+                        <div id="timelineContainer" class="premium-timeline-container">
+                            <div class="timeline-line"></div>
+                            <div id="timelineList" class="timeline-list">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7️⃣ BACKGROUND MUSIC SECTION -->
+                <section id="musicSection" class="apple-section music-section">
+                    <div class="section-content">
+                        <h2 class="section-title">Melody Box 🎵</h2>
+                        <div class="premium-music-card">
+                            <div class="music-info-row">
+                                <div class="equalizer-bars" id="musicEqualizer">
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                </div>
+                                <div style="flex: 1; text-align: left;">
+                                    <span style="font-weight: 800; font-size: 0.95rem; display: block; color: var(--text-color);">Harmonic Soundtrack</span>
+                                    <span style="font-size: 0.75rem; opacity: 0.7;" id="musicSongStyle">Chimes Melody</span>
+                                </div>
+                                <button type="button" id="musicBtn" class="music-play-btn">▶️</button>
+                            </div>
+
+                            <div class="volume-control-row">
+                                <span>🔈</span>
+                                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                                <span>🔊</span>
+                            </div>
+
+                            <!-- Keep canvas element reference for Web Audio frequency analyzers -->
+                            <div style="display: none;">
+                                <canvas id="visualizerCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8️⃣ AI GREETINGS SECTION -->
+                <section id="aiWishesSection" class="apple-section ai-wishes-section">
+                    <div class="section-content">
+                        <h2 class="section-title">AI Birthday Greetings ✨</h2>
+                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Generate beautiful wishes for different categories using Gemini AI.</p>
+                        
+                        <div class="ai-tabs-container" id="aiWishesTabs">
+                            <button type="button" class="ai-tab active" data-cat="romantic">Romantic</button>
+                            <button type="button" class="ai-tab" data-cat="friend">Friend</button>
+                            <button type="button" class="ai-tab" data-cat="brother">Brother</button>
+                            <button type="button" class="ai-tab" data-cat="sister">Sister</button>
+                            <button type="button" class="ai-tab" data-cat="parents">Parents</button>
+                            <button type="button" class="ai-tab" data-cat="funny">Funny</button>
+                            <button type="button" class="ai-tab" data-cat="professional">Work</button>
+                            <button type="button" class="ai-tab" data-cat="poetic">Poetic</button>
+                        </div>
+
+                        <div class="ai-wish-result-card">
+                            <div id="aiWishText" class="ai-wish-text">Loading birthday greetings... ✨</div>
+                            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn btn-secondary" id="copyAiWishBtn" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 10px; width: auto; font-weight: bold;">📋 Copy Wish</button>
+                                <button type="button" class="btn btn-primary" id="regenerateAiWishBtn" style="padding: 0.5rem 1.2rem; font-size: 0.8rem; border-radius: 10px; width: auto; font-weight: bold;">✨ Regenerate</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9️⃣ GIFT SUGGESTIONS SECTION -->
+                <section id="giftSection" class="apple-section gift-section">
+                    <div class="section-content">
+                        <h2 class="section-title">Curated Gift Guide 🎁</h2>
+                        <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.5rem; text-align: center;">Personalized recommendations based on relationship type.</p>
+                        <div class="gift-suggestions-grid" id="giftSuggestionsGrid">
+                            <!-- Dynamically loaded via AI -->
+                        </div>
+                        <div style="text-align: center; margin-top: 1.5rem;">
+                            <button type="button" class="btn btn-secondary" id="regenerateGiftsBtn" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 12px; width: auto; font-weight: bold;">✨ Refresh Suggestions</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🔟 SHARE & DOWNLOAD SECTION -->
+                <section id="shareSection" class="apple-section share-section">
+                    <div class="section-content">
+                        <h2 class="section-title">Save & Share Gifting 💌</h2>
+                        
+                        <div class="premium-share-card">
+                            <!-- Downloads -->
+                            <div class="share-subsection">
+                                <h4>📥 Offline Backups</h4>
+                                <div class="downloads-grid">
+                                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn">📄 Save PDF Book</button>
+                                    <button type="button" class="btn btn-secondary" id="downloadImgBtn">🖼️ Export Card Image</button>
+                                    <button type="button" class="btn btn-secondary" id="calendarBtn">📅 Add Google Calendar</button>
+                                </div>
+                            </div>
+
+                            <!-- Link sharing -->
+                            <div class="share-subsection" style="margin-top: 1.5rem;">
+                                <h4>🔗 Send To Friends</h4>
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                                    <input type="text" id="shareUrlInput" class="text-input" readonly style="font-size: 0.85rem;">
+                                    <button type="button" class="btn btn-primary" id="copyLinkBtn" style="width: auto; padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: bold;">Copy</button>
+                                </div>
+                                
+                                <!-- Native share & Socials -->
+                                <div class="social-share-buttons">
+                                    <button type="button" class="social-btn whatsapp" id="shareWhatsappBtn">WhatsApp</button>
+                                    <button type="button" class="social-btn telegram" id="shareTelegramBtn">Telegram</button>
+                                    <button type="button" class="social-btn facebook" id="shareFacebookBtn">Facebook</button>
+                                    <button type="button" class="social-btn twitter" id="shareTwitterBtn">X / Twitter</button>
+                                    <button type="button" class="social-btn email" id="shareEmailBtn">Email</button>
+                                    <button type="button" class="social-btn native" id="shareNativeBtn">Share...</button>
+                                </div>
+                            </div>
+
+                            <!-- QR code share -->
+                            <div class="share-subsection qr-share-section" style="margin-top: 1.5rem; text-align: center;">
+                                <img id="qrCodeImg" src="" alt="QR Code Link" class="premium-qr-code">
+                                <p style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">Scan code to open directly on mobile!</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 
             </div>
-
         </div>
 
         <!-- ====================================================
-             GUESTBOOK FORM & WISH POSTS LISTING
+             11️⃣ FLOATING COLLAPSIBLE GUESTBOOK WIDGET
              ==================================================== -->
-        <section class="guestbook-card" id="guestbookCard" style="display: none; opacity: 0; transition: opacity 0.8s ease;">
-            <h3 class="wishes-title" style="display: flex; justify-content: space-between; align-items: center;">
-                Wishes Guestbook ✍️
-                <span id="guestCounter" style="background: var(--accent-color); font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: bold; color: white;">0</span>
-            </h3>
+        <div id="guestbookCard" class="floating-guestbook-widget collapsed" style="display: none;">
+            <button type="button" id="guestbookToggleBtn" class="guestbook-toggle-btn">
+                <span class="toggle-icon">✍️</span>
+                <span class="toggle-label">Wishes Guestbook</span>
+                <span id="guestCounter" class="guest-count-badge">0</span>
+            </button>
             
-            <div id="guestWishesList"></div>
-            
-            <!-- Typing Indicator Placeholder -->
-            <div id="typingIndicator" style="display: none; font-size: 0.75rem; opacity: 0.6; font-style: italic; margin-bottom: 0.5rem; text-align: left; padding-left: 0.5rem;">Somebody is typing a sweet wish... ✍️</div>
-
-            <form id="guestbookForm" style="margin-top: 1.8rem; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 1.2rem;">
-                <h4 style="font-size: 0.95rem; font-weight: 800; text-align: center; margin-bottom: 0.8rem;">Write your wish to the star:</h4>
+            <div class="guestbook-content-pane">
+                <div id="guestWishesList" class="guest-wishes-scroll-list"></div>
                 
-                <div class="form-group">
+                <div id="typingIndicator" class="guestbook-typing" style="display: none;">Somebody is typing a sweet wish... ✍️</div>
+
+                <form id="guestbookForm" class="guestbook-input-form">
                     <input type="text" id="guestAuthor" class="text-input" placeholder="Your Name" required>
-                </div>
+                    
+                    <div class="avatar-picker" id="guestAvatarGrid">
+                        <span class="avatar-pick-option selected" data-emoji="🎈">🎈</span>
+                        <span class="avatar-pick-option" data-emoji="🎁">🎁</span>
+                        <span class="avatar-pick-option" data-emoji="🥳">🥳</span>
+                        <span class="avatar-pick-option" data-emoji="🎂">🎂</span>
+                        <span class="avatar-pick-option" data-emoji="💖">💖</span>
+                        <span class="avatar-pick-option" data-emoji="✨">✨</span>
+                    </div>
 
-                <div class="avatar-picker" id="guestAvatarGrid">
-                    <span class="avatar-pick-option selected" data-emoji="🎈">🎈</span>
-                    <span class="avatar-pick-option" data-emoji="🎁">🎁</span>
-                    <span class="avatar-pick-option" data-emoji="🥳">🥳</span>
-                    <span class="avatar-pick-option" data-emoji="🎂">🎂</span>
-                    <span class="avatar-pick-option" data-emoji="💖">💖</span>
-                    <span class="avatar-pick-option" data-emoji="✨">✨</span>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 0.5rem;">
                     <textarea id="guestText" class="text-input" rows="2" maxlength="200" placeholder="Happy Birthday! Have a wonderful day..." required></textarea>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1rem;">
-                    <span>Max 200 characters</span>
-                    <span id="charCount">0/200</span>
-                </div>
+                    
+                    <div class="char-count-row">
+                        <span>Max 200 characters</span>
+                        <span id="charCount">0/200</span>
+                    </div>
 
-                <button type="submit" id="submitGuestbookBtn" class="btn btn-primary btn-full" style="padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: bold; position: relative;">
-                    <span id="submitBtnText">Sign Guestbook ✍️</span>
-                    <span id="submitBtnSpinner" style="display: none; position: absolute; right: 1.5rem; top: 30%; transform: translateY(-50%);">⏳</span>
-                </button>
-            </form>
-        </section>
+                    <button type="submit" id="submitGuestbookBtn" class="btn btn-primary btn-full">
+                        <span id="submitBtnText">Sign Guestbook ✍️</span>
+                        <span id="submitBtnSpinner" style="display: none;">⏳</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Fullscreen Gallery Modal -->
+    <div id="galleryLightbox" class="gallery-lightbox" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+        <span class="lightbox-close" id="lightboxClose">✕</span>
+        <button type="button" class="lightbox-nav prev" id="lightboxPrev">‹</button>
+        <button type="button" class="lightbox-nav next" id="lightboxNext">›</button>
+        
+        <div class="lightbox-media-container">
+            <img id="lightboxImg" src="" alt="Lightbox Memory">
+        </div>
+        
+        <div class="lightbox-actions-bar">
+            <button type="button" class="lightbox-btn" id="lightboxZoomInBtn">🔍 Zoom In</button>
+            <button type="button" class="lightbox-btn" id="lightboxZoomOutBtn">🔍 Zoom Out</button>
+            <button type="button" class="lightbox-btn" id="lightboxDownloadBtn">📥 Download</button>
+            <button type="button" class="lightbox-btn" id="lightboxShareBtn">🔗 Copy Link</button>
+        </div>
     </div>
 
     <!-- PWA settings -->

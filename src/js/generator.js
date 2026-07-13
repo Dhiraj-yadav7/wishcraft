@@ -367,16 +367,43 @@ function handlePhotoFiles(files) {
 
     files.forEach(file => {
         if (!file.type.startsWith('image/')) return;
-        if (file.size > 1.5 * 1024 * 1024) {
-            showToast('Files must be smaller than 1.5MB to save securely.', 'warning');
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('Files must be smaller than 10MB to save securely.', 'warning');
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            generatorState.photos.push(e.target.result);
-            updatePhotoThumbnailsGrid();
-            syncSimulator();
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxDimension = 1024;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Compress image to jpeg at 0.75 quality
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+                generatorState.photos.push(compressedBase64);
+                updatePhotoThumbnailsGrid();
+                syncSimulator();
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     });

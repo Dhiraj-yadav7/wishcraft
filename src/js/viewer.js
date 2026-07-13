@@ -265,6 +265,7 @@ function playMagicalUnlockSequence() {
 }
 
 // Populate card fields, background, media elements, and styles
+// Populate card fields, background, media elements, and styles
 function setupSurpriseCardUI() {
     const currentTheme = viewerConfig.themePreset || viewerConfig.theme || 'romantic';
     document.body.className = `wish-body theme-${currentTheme}`;
@@ -279,13 +280,13 @@ function setupSurpriseCardUI() {
     document.getElementById('cardTitle').textContent = `Happy Birthday, ${viewerConfig.name}! 🎉`;
     document.getElementById('senderTag').textContent = `From: ${viewerConfig.senderName}`;
 
-    // 1. Photos Carousel
+    // 1. Photos loop on Hero profile photo
     setupPhotosCarousel();
 
     // 2. Video Player Embed
     setupVideoEmbed();
 
-    // 3. Voice Message Cassette
+    // 3. Voice Message Cassette & custom player
     setupVoiceMessagePlayer();
 
     // 4. Cake style blowing interaction
@@ -299,6 +300,30 @@ function setupSurpriseCardUI() {
 
     // 7. QR Code Generation
     setupQrCodeShare();
+
+    // 8. New Redesign elements
+    setupMemoryGallery();
+    setupAiWishes();
+    setupGiftSuggestions();
+    setupGuestbookWidget();
+
+    // Initialize Scroll Reveal after layout renders
+    setTimeout(initScrollReveal, 100);
+}
+
+// Dynamic scroll reveal trigger using IntersectionObserver
+function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+            }
+        });
+    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+    
+    document.querySelectorAll('.apple-section').forEach(section => {
+        observer.observe(section);
+    });
 }
 
 // Photo Slider Slide Deck
@@ -322,7 +347,7 @@ function setupPhotosCarousel() {
     if (images.length > 1) {
         let currentSlide = 0;
         setInterval(() => {
-            const slides = document.querySelectorAll('.carousel-slide');
+            const slides = photoDeck.querySelectorAll('.carousel-slide');
             if (slides.length > 0) {
                 slides[currentSlide].classList.remove('active');
                 currentSlide = (currentSlide + 1) % slides.length;
@@ -356,7 +381,7 @@ function generateFallbackPhoto(relation) {
 // Youtube or HTML5 raw MP4 video resolver
 function setupVideoEmbed() {
     const wrapper = document.getElementById('videoWrapper');
-    const container = document.getElementById('videoContainer');
+    const container = document.getElementById('videoSection');
     const url = viewerConfig.videoUrl;
 
     if (!url) {
@@ -389,11 +414,16 @@ function setupVideoEmbed() {
 
 // Voice Tape cassette player controls
 function setupVoiceMessagePlayer() {
-    const container = document.getElementById('cassetteContainer');
+    const container = document.getElementById('voiceSection');
     const playBtn = document.getElementById('tapePlayBtn');
-    const tape = document.getElementById('cassetteTape');
-    const status = document.getElementById('tapeStatus');
     const audio = document.getElementById('voiceMessageAudio');
+    const slider = document.getElementById('voiceProgress');
+    const currentTimeText = document.getElementById('voiceCurrentTime');
+    const durationText = document.getElementById('voiceDuration');
+    const waveform = document.getElementById('voiceWaveform');
+    const downloadBtn = document.getElementById('downloadVoiceBtn');
+    const voiceSenderName = document.getElementById('voiceSenderName');
+    const status = document.getElementById('tapeStatus');
 
     if (!viewerConfig.voiceMessage) {
         container.style.display = 'none';
@@ -402,33 +432,65 @@ function setupVoiceMessagePlayer() {
 
     container.style.display = 'block';
     audio.src = viewerConfig.voiceMessage;
+    voiceSenderName.textContent = viewerConfig.senderName || 'Sender';
 
     playBtn.addEventListener('click', () => {
         if (audio.paused) {
             stopSong();
-            audio.play();
+            audio.play().catch(e => console.error(e));
             playBtn.textContent = '⏸️';
-            tape.classList.add('playing');
-            status.textContent = 'Playing voice note... 🔊';
+            waveform.classList.add('playing');
+            status.textContent = 'Playing voice message... 🔊';
         } else {
             audio.pause();
             playBtn.textContent = '▶️';
-            tape.classList.remove('playing');
-            status.textContent = 'Voice note paused';
+            waveform.classList.remove('playing');
+            status.textContent = 'Voice message paused';
         }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        const progress = (audio.currentTime / audio.duration) * 100 || 0;
+        slider.value = progress;
+        currentTimeText.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+        durationText.textContent = formatTime(audio.duration);
+    });
+
+    slider.addEventListener('input', (e) => {
+        const seekTime = (parseFloat(e.target.value) / 100) * audio.duration;
+        audio.currentTime = seekTime;
     });
 
     audio.addEventListener('ended', () => {
         playBtn.textContent = '▶️';
-        tape.classList.remove('playing');
+        waveform.classList.remove('playing');
         status.textContent = 'Listen again';
+        slider.value = 0;
+        currentTimeText.textContent = '00:00';
         playSong();
     });
+
+    downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = viewerConfig.voiceMessage;
+        a.download = `Voice_from_${viewerConfig.senderName || 'friend'}.webm`;
+        a.click();
+    };
+}
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return '00:00';
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
 }
 
 // Memory Timeline loader (Premium feature)
 function setupTimelineMemoryLane() {
-    const container = document.getElementById('timelineContainer');
+    const container = document.getElementById('timelineSection');
     const list = document.getElementById('timelineList');
     list.innerHTML = '';
 
@@ -441,15 +503,14 @@ function setupTimelineMemoryLane() {
 
     viewerConfig.timeline.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'timeline-item-card';
+        card.className = 'timeline-node-card';
         
         card.innerHTML = `
-            ${item.photo ? `<img src="${item.photo}" class="timeline-img" alt="Memory" crossorigin="anonymous">` : '<div style="font-size:1.8rem; padding: 0.5rem;">📅</div>'}
-            <div style="flex:1;">
-                <span style="font-size:0.75rem; font-weight:800; color:var(--primary-color); display:block; text-transform:uppercase;">${item.date}</span>
-                <strong style="font-size:0.9rem; display:block; margin-top:0.1rem; color:var(--text-color);">${item.title}</strong>
-                <p style="font-size:0.8rem; opacity:0.85; margin-top:0.2rem; line-height:1.3;">${item.text}</p>
-            </div>
+            <div class="timeline-node-dot"></div>
+            <span class="timeline-node-year">${item.date}</span>
+            <h4 class="timeline-node-title">${item.title}</h4>
+            <p class="timeline-node-text">${item.text}</p>
+            ${item.photo ? `<img src="${item.photo}" class="timeline-node-img" alt="Timeline Photo" crossorigin="anonymous" loading="lazy">` : ''}
         `;
         list.appendChild(card);
     });
@@ -576,13 +637,296 @@ function setupQrCodeShare() {
     img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pageUrl)}`;
 }
 
-// Setup premium actions (PDF downloads, PNG downloads, Calendar events)
+// Memory Gallery Masonry and swipe carousel renderer
+let activeLightboxIdx = 0;
+function setupMemoryGallery() {
+    const gallerySection = document.getElementById('gallerySection');
+    const container = document.getElementById('galleryContainer');
+    container.innerHTML = '';
+
+    const photos = viewerConfig.photos || [];
+    if (photos.length === 0) {
+        gallerySection.style.display = 'none';
+        return;
+    }
+
+    gallerySection.style.display = 'block';
+
+    if (window.innerWidth < 768) {
+        // Horizontal swipe carousel on mobile
+        container.className = 'mobile-gallery-carousel';
+        photos.forEach((base64, idx) => {
+            const itemWrap = document.createElement('div');
+            itemWrap.className = 'carousel-item-wrap';
+            
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${base64}" alt="Memory ${idx + 1}" crossorigin="anonymous" loading="lazy">
+                <div class="gallery-item-overlay">
+                    <span class="gallery-action-badge">🔎 Zoom</span>
+                </div>
+            `;
+            item.onclick = () => openLightbox(idx);
+            itemWrap.appendChild(item);
+            container.appendChild(itemWrap);
+        });
+    } else {
+        // Masonry 3-column grid on desktop
+        container.className = 'gallery-grid';
+        photos.forEach((base64, idx) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${base64}" alt="Memory ${idx + 1}" crossorigin="anonymous" loading="lazy">
+                <div class="gallery-item-overlay">
+                    <span class="gallery-action-badge">🔎 Zoom</span>
+                </div>
+            `;
+            item.onclick = () => openLightbox(idx);
+            container.appendChild(item);
+        });
+    }
+
+    setupLightboxListeners();
+}
+
+function openLightbox(idx) {
+    const lightbox = document.getElementById('galleryLightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    activeLightboxIdx = idx;
+
+    lightboxImg.src = viewerConfig.photos[idx];
+    lightboxImg.style.transform = 'scale(1)'; // Reset zoom
+    
+    lightbox.style.display = 'flex';
+    setTimeout(() => lightbox.style.opacity = '1', 50);
+}
+
+function setupLightboxListeners() {
+    const lightbox = document.getElementById('galleryLightbox');
+    const closeBtn = document.getElementById('lightboxClose');
+    const prevBtn = document.getElementById('lightboxPrev');
+    const nextBtn = document.getElementById('lightboxNext');
+    const img = document.getElementById('lightboxImg');
+    const zoomInBtn = document.getElementById('lightboxZoomInBtn');
+    const zoomOutBtn = document.getElementById('lightboxZoomOutBtn');
+    const downloadBtn = document.getElementById('lightboxDownloadBtn');
+    const shareBtn = document.getElementById('lightboxShareBtn');
+
+    let scale = 1;
+
+    closeBtn.onclick = () => {
+        lightbox.style.opacity = '0';
+        setTimeout(() => lightbox.style.display = 'none', 300);
+    };
+
+    prevBtn.onclick = (e) => {
+        e.stopPropagation();
+        const photos = viewerConfig.photos;
+        activeLightboxIdx = (activeLightboxIdx - 1 + photos.length) % photos.length;
+        img.src = photos[activeLightboxIdx];
+        scale = 1;
+        img.style.transform = `scale(${scale})`;
+    };
+
+    nextBtn.onclick = (e) => {
+        e.stopPropagation();
+        const photos = viewerConfig.photos;
+        activeLightboxIdx = (activeLightboxIdx + 1) % photos.length;
+        img.src = photos[activeLightboxIdx];
+        scale = 1;
+        img.style.transform = `scale(${scale})`;
+    };
+
+    zoomInBtn.onclick = (e) => {
+        e.stopPropagation();
+        scale = Math.min(scale + 0.25, 3);
+        img.style.transform = `scale(${scale})`;
+    };
+
+    zoomOutBtn.onclick = (e) => {
+        e.stopPropagation();
+        scale = Math.max(scale - 0.25, 0.5);
+        img.style.transform = `scale(${scale})`;
+    };
+
+    downloadBtn.onclick = (e) => {
+        e.stopPropagation();
+        const a = document.createElement('a');
+        a.href = viewerConfig.photos[activeLightboxIdx];
+        a.download = `Memory_${activeLightboxIdx + 1}.png`;
+        a.click();
+    };
+
+    shareBtn.onclick = (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Card link copied to clipboard! 🔗', 'success');
+    };
+}
+
+// AI Birthday Wishes tab selector
+let activeAiCategory = 'romantic';
+function setupAiWishes() {
+    const tabs = document.getElementById('aiWishesTabs');
+    const text = document.getElementById('aiWishText');
+    const regenBtn = document.getElementById('regenerateAiWishBtn');
+    const copyBtn = document.getElementById('copyAiWishBtn');
+
+    tabs.querySelectorAll('.ai-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            tabs.querySelectorAll('.ai-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            activeAiCategory = tab.getAttribute('data-cat');
+            generateAiWish();
+        });
+    });
+
+    regenBtn.onclick = () => generateAiWish();
+    
+    copyBtn.onclick = () => {
+        navigator.clipboard.writeText(text.textContent);
+        showToast('Wish copied to clipboard! 📋', 'success');
+    };
+
+    generateAiWish();
+}
+
+async function generateAiWish() {
+    const text = document.getElementById('aiWishText');
+    text.textContent = '⏳ WishCraft is channeling the stars to write a beautiful greeting for you...';
+
+    try {
+        const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipientName: viewerConfig.name || 'Recipient',
+                relation: viewerConfig.relationship || 'friend',
+                category: activeAiCategory
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            text.textContent = data.data.text;
+        } else {
+            text.textContent = 'Wishes are currently floating in orbit. Please try again! ✨';
+        }
+    } catch (e) {
+        console.error(e);
+        text.textContent = 'Failed to connect to the wish generator.';
+    }
+}
+
+// Gift Suggestions Section
+function setupGiftSuggestions() {
+    const grid = document.getElementById('giftSuggestionsGrid');
+    const refreshBtn = document.getElementById('regenerateGiftsBtn');
+
+    refreshBtn.onclick = () => generateGiftSuggestions();
+    generateGiftSuggestions();
+}
+
+async function generateGiftSuggestions() {
+    const grid = document.getElementById('giftSuggestionsGrid');
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 0.9rem; opacity: 0.8; padding: 2rem;">⏳ Finding the perfect gifts for your relationship...</div>';
+
+    try {
+        const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipientName: viewerConfig.name || 'Recipient',
+                relation: viewerConfig.relationship || 'friend',
+                category: 'gift'
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            renderGiftCards(data.data.text);
+        } else {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Gift recommendations are currently locking up. 🎁</div>';
+        }
+    } catch (e) {
+        console.error(e);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Failed to fetch gift suggestions.</div>';
+    }
+}
+
+function renderGiftCards(aiText) {
+    const grid = document.getElementById('giftSuggestionsGrid');
+    grid.innerHTML = '';
+
+    const lines = aiText.split('\n');
+    const giftItems = [];
+
+    lines.forEach(line => {
+        const itemMatch = line.match(/^\d+\.\s+(.*?)\s+\[Price:\s*(.*?)\]\s+\(Link:\s*(.*?)\)\s*-\s*(.*)/i);
+        if (itemMatch) {
+            giftItems.push({
+                name: itemMatch[1].trim(),
+                price: itemMatch[2].trim(),
+                link: itemMatch[3].trim(),
+                reason: itemMatch[4].trim()
+            });
+        }
+    });
+
+    if (giftItems.length === 0) {
+        const suggestions = aiText.split(/\d+\.\s+/).filter(Boolean);
+        suggestions.forEach((itemText, idx) => {
+            const parts = itemText.split(' - ');
+            const nameAndDetails = parts[0] || 'Curated Gift Selection';
+            const reason = parts[1] || 'A perfect birthday gift concept.';
+            
+            const priceMatch = nameAndDetails.match(/\[Price:\s*(.*?)\]/i);
+            const price = priceMatch ? priceMatch[1] : '$35 - $60';
+            const nameClean = nameAndDetails.replace(/\[Price:.*?\]/g, '').replace(/\(Link:.*?\)/g, '').trim();
+
+            giftItems.push({
+                name: nameClean,
+                price: price,
+                link: `https://www.amazon.com/s?k=${encodeURIComponent(nameClean)}`,
+                reason: reason.trim()
+            });
+        });
+    }
+
+    const icons = ['🎁', '💎', '🎨', '📸', '🎧', '🍷', '🔋', '📚', '⌚'];
+    giftItems.slice(0, 3).forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'gift-card';
+        const icon = icons[idx % icons.length];
+        card.innerHTML = `
+            <div class="gift-card-icon">${icon}</div>
+            <h3 class="gift-card-title">${item.name}</h3>
+            <div class="gift-card-price">${item.price}</div>
+            <p class="gift-card-reason">${item.reason}</p>
+            <a href="${item.link}" target="_blank" class="gift-card-buy-btn">View Store ↗</a>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Collapsible Floating Guestbook widget toggle
+function setupGuestbookWidget() {
+    const widget = document.getElementById('guestbookCard');
+    const toggleBtn = document.getElementById('guestbookToggleBtn');
+    if (!toggleBtn) return;
+
+    toggleBtn.onclick = () => {
+        widget.classList.toggle('collapsed');
+    };
+}
+
+// Setup premium actions (PDF downloads, PNG downloads, Calendar events, Social shares)
 function setupPremiumActions() {
     const pdfBtn = document.getElementById('downloadPdfBtn');
     const imgBtn = document.getElementById('downloadImgBtn');
     const calendarBtn = document.getElementById('calendarBtn');
 
-    // 1. Download PDF using html2canvas and jsPDF
+    // 1. Download PDF using html2canvas and jsPDF (capturing the core hero card only)
     pdfBtn.addEventListener('click', async () => {
         if (pdfBtn.disabled) return;
         pdfBtn.disabled = true;
@@ -593,7 +937,8 @@ function setupPremiumActions() {
         logShareClick();
 
         try {
-            const canvasEl = await html2canvas(displayCard, {
+            const heroCard = document.getElementById('birthdayCardHero');
+            const canvasEl = await html2canvas(heroCard, {
                 scale: 2,
                 useCORS: true,
                 allowTaint: false,
@@ -604,7 +949,6 @@ function setupPremiumActions() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const imgWidth = 190;
-            const pageHeight = 295;
             let imgHeight = (canvasEl.height * imgWidth) / canvasEl.width;
             
             if (imgHeight > 260) {
@@ -623,7 +967,7 @@ function setupPremiumActions() {
         }
     });
 
-    // 2. Download Image (PNG)
+    // 2. Download Image (PNG) (capturing the core hero card only)
     imgBtn.addEventListener('click', async () => {
         if (imgBtn.disabled) return;
         imgBtn.disabled = true;
@@ -634,7 +978,8 @@ function setupPremiumActions() {
         logShareClick();
 
         try {
-            const canvasEl = await html2canvas(displayCard, {
+            const heroCard = document.getElementById('birthdayCardHero');
+            const canvasEl = await html2canvas(heroCard, {
                 scale: 2,
                 useCORS: true,
                 allowTaint: false,
@@ -669,6 +1014,84 @@ function setupPremiumActions() {
         
         window.open(calUrl, '_blank');
     });
+
+    // 4. Social media direct redirects & native share
+    const shareUrlInput = document.getElementById('shareUrlInput');
+    if (shareUrlInput) {
+        shareUrlInput.value = window.location.href;
+    }
+
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    if (copyLinkBtn) {
+        copyLinkBtn.onclick = () => {
+            navigator.clipboard.writeText(window.location.href);
+            showToast('Card link copied to clipboard! 🔗', 'success');
+            logShareClick();
+        };
+    }
+
+    const msg = `Check out this amazing birthday surprise card for ${viewerConfig.name}! 🎂✨`;
+    const encodedMsg = encodeURIComponent(msg);
+    const encodedUrl = encodeURIComponent(window.location.href);
+
+    const wa = document.getElementById('shareWhatsappBtn');
+    if (wa) {
+        wa.onclick = () => {
+            window.open(`https://api.whatsapp.com/send?text=${encodedMsg}%20${encodedUrl}`, '_blank');
+            logShareClick();
+        };
+    }
+
+    const tg = document.getElementById('shareTelegramBtn');
+    if (tg) {
+        tg.onclick = () => {
+            window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedMsg}`, '_blank');
+            logShareClick();
+        };
+    }
+
+    const fb = document.getElementById('shareFacebookBtn');
+    if (fb) {
+        fb.onclick = () => {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank');
+            logShareClick();
+        };
+    }
+
+    const tw = document.getElementById('shareTwitterBtn');
+    if (tw) {
+        tw.onclick = () => {
+            window.open(`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedMsg}`, '_blank');
+            logShareClick();
+        };
+    }
+
+    const em = document.getElementById('shareEmailBtn');
+    if (em) {
+        em.onclick = () => {
+            window.open(`mailto:?subject=${encodeURIComponent('Happy Birthday Surprise!')}&body=${encodedMsg}%20${encodedUrl}`, '_blank');
+            logShareClick();
+        };
+    }
+
+    const native = document.getElementById('shareNativeBtn');
+    if (native) {
+        native.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `Birthday Surprise for ${viewerConfig.name}`,
+                        text: msg,
+                        url: window.location.href
+                    });
+                    logShareClick();
+                } catch(e) {}
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showToast('Sharing not supported on this device. Link copied! 🔗', 'info');
+            }
+        };
+    }
 }
 
 // Session duration tracking
@@ -1335,6 +1758,31 @@ function playNote(freq, start, duration, style) {
     currentNotes.push(osc);
 }
 
+let noteTimer = null;
+function startFloatingNotes() {
+    if (noteTimer) clearInterval(noteTimer);
+    const notes = ['🎵', '🎶', '♩', '♪', '🔊'];
+    noteTimer = setInterval(() => {
+        if (!isPlaying) return;
+        const note = document.createElement('div');
+        note.className = 'floating-note';
+        note.textContent = notes[Math.floor(Math.random() * notes.length)];
+        
+        const card = document.querySelector('.premium-music-card');
+        if (card) {
+            const rect = card.getBoundingClientRect();
+            note.style.left = `${rect.left + rect.width / 2 + (Math.random() * 80 - 40)}px`;
+            note.style.top = `${rect.top}px`;
+        } else {
+            note.style.left = `${window.innerWidth / 2 + (Math.random() * 200 - 100)}px`;
+            note.style.top = `${window.innerHeight - 200}px`;
+        }
+        
+        document.body.appendChild(note);
+        setTimeout(() => note.remove(), 3000);
+    }, 800);
+}
+
 function playSong() {
     stopSong();
     initAudioNodes();
@@ -1345,6 +1793,10 @@ function playSong() {
     
     isPlaying = true;
     document.getElementById('musicBtn').textContent = 'Pause';
+    
+    const eq = document.getElementById('musicEqualizer');
+    if (eq) eq.classList.add('active');
+    startFloatingNotes();
     
     let time = audioCtx.currentTime + 0.1;
     
@@ -1372,6 +1824,15 @@ function playSong() {
 function stopSong() {
     isPlaying = false;
     document.getElementById('musicBtn').textContent = 'Play';
+    
+    const eq = document.getElementById('musicEqualizer');
+    if (eq) eq.classList.remove('active');
+    
+    if (noteTimer) {
+        clearInterval(noteTimer);
+        noteTimer = null;
+    }
+    
     if (songTimeout) clearTimeout(songTimeout);
     currentNotes.forEach(osc => {
         try { osc.stop(); } catch(e) {}
@@ -1434,10 +1895,14 @@ document.getElementById('musicBtn').addEventListener('click', () => {
     if (isPlaying) {
         stopSong();
     } else {
-        document.getElementById('voiceMessageAudio').pause();
-        document.getElementById('tapePlayBtn').textContent = '▶️';
-        document.getElementById('cassetteTape').classList.remove('playing');
-        document.getElementById('tapeStatus').textContent = 'Voice note paused';
+        const voiceAudio = document.getElementById('voiceMessageAudio');
+        if (voiceAudio) voiceAudio.pause();
+        const tapePlayBtn = document.getElementById('tapePlayBtn');
+        if (tapePlayBtn) tapePlayBtn.textContent = '▶️';
+        const waveform = document.getElementById('voiceWaveform');
+        if (waveform) waveform.classList.remove('playing');
+        const tapeStatus = document.getElementById('tapeStatus');
+        if (tapeStatus) tapeStatus.textContent = 'Voice note paused';
         
         playSong();
     }
