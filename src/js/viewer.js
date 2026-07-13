@@ -341,8 +341,29 @@ function initStoryNavigation() {
         document.getElementById('musicSection'),
         document.getElementById('aiWishesSection'),
         document.getElementById('giftSection'),
-        document.getElementById('shareSection')
+        document.getElementById('shareSection'),
+        document.getElementById('guestbookSection')
     ];
+    
+    // Bind global arrow keyboard shortcuts for slide deck navigation
+    if (!window.hasStoryKeyboardBound) {
+        window.hasStoryKeyboardBound = true;
+        document.addEventListener('keydown', (e) => {
+            const activeTag = document.activeElement ? document.activeElement.tagName : '';
+            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') {
+                return; // User is typing, skip navigating slides
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prevBtn = document.getElementById('storyPrevBtn');
+                if (prevBtn && !prevBtn.disabled) prevBtn.click();
+            } else if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                const nextBtn = document.getElementById('storyNextBtn');
+                if (nextBtn && !nextBtn.disabled) nextBtn.click();
+            }
+        });
+    }
     
     storyPages = [];
     allSections.forEach(section => {
@@ -1306,9 +1327,11 @@ async function logShareClick() {
 // Guestbook Wish list rendering with social features (likes, reactions, delete, colorful avatars)
 function renderGuestbookWishes() {
     const list = document.getElementById('guestWishesList');
+    const listInline = document.getElementById('guestWishesListInline');
     const counter = document.getElementById('guestCounter');
     
-    list.innerHTML = '';
+    if (list) list.innerHTML = '';
+    if (listInline) listInline.innerHTML = '';
     
     // Update guest counter
     if (counter) {
@@ -1316,15 +1339,20 @@ function renderGuestbookWishes() {
     }
 
     if (viewerConfig.guestbook.length === 0) {
-        list.innerHTML = `
+        const emptyStateHtml = `
             <div style="text-align: center; opacity: 0.6; padding: 2rem 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
                 <span style="font-size: 2.5rem;">✍️</span>
                 <p style="font-size: 0.85rem; font-weight: bold;">No one has signed the guestbook yet.</p>
                 <p style="font-size: 0.75rem; opacity: 0.8;">Be the first to leave a sweet wish! 👇</p>
             </div>
         `;
+        if (list) list.innerHTML = emptyStateHtml;
+        if (listInline) listInline.innerHTML = emptyStateHtml;
         return;
     }
+
+    const visitorKey = localStorage.getItem('birthday_visitor_key') || '';
+    const hasToken = !!localStorage.getItem('token');
 
     viewerConfig.guestbook.forEach(wish => {
         const post = document.createElement('div');
@@ -1352,10 +1380,17 @@ function renderGuestbookWishes() {
         const laughCount = reacts['😂'] || 0;
         const celebrateCount = reacts['🎉'] || 0;
         
-        // Owner delete button check
-        const hasToken = !!localStorage.getItem('token');
-        const deleteBtnHtml = hasToken ? `
+        // Delete authorization check
+        const isCommentAuthor = wish.visitorKey && wish.visitorKey === visitorKey;
+        const canDelete = hasToken || isCommentAuthor;
+
+        const deleteBtnHtml = canDelete ? `
             <button class="delete-wish-btn" onclick="deleteGuestbookEntry('${wishId}')" style="background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0.5; transition: opacity 0.2s;" title="Delete Wish">🗑️</button>
+        ` : '';
+
+        // Spam report button html
+        const reportBtnHtml = !canDelete ? `
+            <button class="report-wish-btn" onclick="reportGuestbookEntry('${wishId}')" style="background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0.5; transition: opacity 0.2s;" title="Report Spam">🚩</button>
         ` : '';
 
         post.innerHTML = `
@@ -1366,6 +1401,7 @@ function renderGuestbookWishes() {
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 0.75rem; opacity: 0.6;">${timeStr}</span>
                         ${deleteBtnHtml}
+                        ${reportBtnHtml}
                     </div>
                 </div>
                 <p class="wish-post-text" style="margin-top: 0.2rem; opacity: 0.9; word-break: break-word;">${wish.text}</p>
@@ -1390,7 +1426,9 @@ function renderGuestbookWishes() {
                 </div>
             </div>
         `;
-        list.appendChild(post);
+        
+        if (list) list.appendChild(post);
+        if (listInline) listInline.appendChild(post.cloneNode(true));
     });
 }
 
@@ -1446,6 +1484,7 @@ window.deleteGuestbookEntry = async (entryId) => {
     if (!confirm('Are you sure you want to delete this wish?')) return;
     
     const token = localStorage.getItem('token');
+    const visitorKey = localStorage.getItem('birthday_visitor_key') || '';
     try {
         const res = await fetch('/api/pages?action=deleteGuestbook', {
             method: 'POST',
@@ -1453,7 +1492,7 @@ window.deleteGuestbookEntry = async (entryId) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ entryId, pageId: viewerConfig.pageId })
+            body: JSON.stringify({ entryId, pageId: viewerConfig.pageId, visitorKey })
         });
         const data = await res.json();
         if (data.success) {
@@ -1466,6 +1505,25 @@ window.deleteGuestbookEntry = async (entryId) => {
     } catch(e) {
         console.error('Delete wish error:', e);
         showToast('Failed to delete wish.', 'error');
+    }
+};
+
+window.reportGuestbookEntry = async (entryId) => {
+    if (!confirm('Report this comment for containing spam or inappropriate content?')) return;
+    try {
+        const res = await fetch('/api/pages?action=reportGuestbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entryId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Comment reported. Thank you for making WishCraft safe! 🛡️', 'success');
+        } else {
+            showToast(data.message || 'Failed to report comment.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error reporting comment.', 'error');
     }
 };
 
@@ -1538,6 +1596,12 @@ function setupGuestbookForm() {
         if (btnText) btnText.textContent = 'Signing...';
         if (spinner) spinner.style.display = 'inline-block';
 
+        let visitorKey = localStorage.getItem('birthday_visitor_key');
+        if (!visitorKey) {
+            visitorKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('birthday_visitor_key', visitorKey);
+        }
+
         try {
             const res = await fetch('/api/pages?action=guestbook', {
                 method: 'POST',
@@ -1546,7 +1610,8 @@ function setupGuestbookForm() {
                     pageId: viewerConfig.pageId,
                     author,
                     text,
-                    avatarIndex: selectedEmoji
+                    avatarIndex: selectedEmoji,
+                    visitorKey
                 })
             });
             const data = await res.json();

@@ -1394,46 +1394,59 @@
                     </div>
                 </section>
 
-                <!-- 🔟 SHARE & DOWNLOAD SECTION -->
+                <!-- 9️⃣ QR CODE & OFFLINE DOWNLOADS SECTION -->
                 <section id="shareSection" class="story-page">
-                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto;">
-                        <h2 class="section-title">Save & Share Gifting 💌</h2>
+                    <div class="section-content" style="width: 92%; max-width: 440px; margin: 0 auto; text-align: center;">
+                        <h2 class="section-title">QR Code & Backups 📱</h2>
                         
-                        <div class="premium-share-card" style="max-height: 54vh; overflow-y: auto; padding: 1.2rem;">
+                        <div class="premium-share-card" style="padding: 1.5rem; max-height: 56vh; overflow-y: auto;">
+                            <!-- QR code share -->
+                            <div class="qr-share-section" style="margin-bottom: 1.2rem;">
+                                <img id="qrCodeImg" src="" alt="QR Code Link" class="premium-qr-code" style="width: 120px; height: 120px; margin: 0 auto; border-radius: 12px; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem; font-weight: bold;">Scan this QR code to view on mobile!</p>
+                            </div>
+
                             <!-- Downloads -->
-                            <div class="share-subsection">
-                                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem;">📥 Offline Backups</h4>
-                                <div class="downloads-grid" style="gap: 0.4rem;">
-                                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn" style="font-size: 0.75rem; padding: 0.4rem;">📄 Save PDF Book</button>
-                                    <button type="button" class="btn btn-secondary" id="downloadImgBtn" style="font-size: 0.75rem; padding: 0.4rem;">🖼️ Export Image</button>
-                                    <button type="button" class="btn btn-secondary" id="calendarBtn" style="font-size: 0.75rem; padding: 0.4rem;">📅 Add Calendar</button>
+                            <div class="share-subsection" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-bottom: 1.2rem;">
+                                <h4 style="font-size: 0.85rem; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8;">📥 Offline Backups</h4>
+                                <div class="downloads-grid" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-secondary" id="downloadPdfBtn" style="font-size: 0.75rem; padding: 0.5rem 1rem; width: auto;">📄 Save PDF Book</button>
+                                    <button type="button" class="btn btn-secondary" id="downloadImgBtn" style="font-size: 0.75rem; padding: 0.5rem 1rem; width: auto;">🖼️ Export Image</button>
+                                    <button type="button" class="btn btn-secondary" id="calendarBtn" style="font-size: 0.75rem; padding: 0.5rem 1rem; width: auto;">📅 Add Calendar</button>
                                 </div>
                             </div>
 
                             <!-- Link sharing -->
-                            <div class="share-subsection" style="margin-top: 1rem;">
-                                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem;">🔗 Send To Friends</h4>
+                            <div class="share-subsection" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8;">🔗 Send To Friends</h4>
                                 <div style="display: flex; gap: 0.4rem; margin-bottom: 0.8rem;">
                                     <input type="text" id="shareUrlInput" class="text-input" readonly style="font-size: 0.8rem; padding: 0.4rem;">
                                     <button type="button" class="btn btn-primary" id="copyLinkBtn" style="width: auto; padding: 0.4rem 1rem; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">Copy</button>
                                 </div>
-                                
-                                <!-- Native share & Socials -->
-                                <div class="social-share-buttons" style="gap: 0.3rem;">
-                                    <button type="button" class="social-btn whatsapp" id="shareWhatsappBtn" style="font-size: 0.75rem; padding: 0.4rem;">WhatsApp</button>
-                                    <button type="button" class="social-btn telegram" id="shareTelegramBtn" style="font-size: 0.75rem; padding: 0.4rem;">Telegram</button>
-                                    <button type="button" class="social-btn facebook" id="shareFacebookBtn" style="font-size: 0.75rem; padding: 0.4rem;">Facebook</button>
-                                    <button type="button" class="social-btn twitter" id="shareTwitterBtn" style="font-size: 0.75rem; padding: 0.4rem;">X</button>
-                                    <button type="button" class="social-btn email" id="shareEmailBtn" style="font-size: 0.75rem; padding: 0.4rem;">Email</button>
-                                    <button type="button" class="social-btn native" id="shareNativeBtn" style="font-size: 0.75rem; padding: 0.4rem;">Share...</button>
+                                <div class="social-share-buttons" style="display: flex; gap: 0.3rem; flex-wrap: wrap; justify-content: center;">
+                                    <button type="button" class="social-btn whatsapp" id="shareWhatsappBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">WhatsApp</button>
+                                    <button type="button" class="social-btn telegram" id="shareTelegramBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">Telegram</button>
+                                    <button type="button" class="social-btn facebook" id="shareFacebookBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">Facebook</button>
+                                    <button type="button" class="social-btn twitter" id="shareTwitterBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">X</button>
+                                    <button type="button" class="social-btn email" id="shareEmailBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">Email</button>
+                                    <button type="button" class="social-btn native" id="shareNativeBtn" style="font-size: 0.75rem; padding: 0.4rem 0.6rem; width: auto;">Share...</button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </section>
 
-                            <!-- QR code share -->
-                            <div class="share-subsection qr-share-section" style="margin-top: 1rem; text-align: center;">
-                                <img id="qrCodeImg" src="" alt="QR Code Link" class="premium-qr-code" style="width: 80px; height: 80px; margin: 0 auto;">
-                                <p style="font-size: 0.7rem; opacity: 0.8; margin-top: 0.3rem;">Scan code to open directly on mobile!</p>
-                            </div>
+                <!-- 🔟 INLINE GUESTBOOK SECTION -->
+                <section id="guestbookSection" class="story-page">
+                    <div class="section-content" style="width: 92%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; max-height: 72vh;">
+                        <h2 class="section-title">Wishes Guestbook ✍️</h2>
+                        <div class="premium-share-card" style="flex: 1; display: flex; flex-direction: column; padding: 1.2rem; overflow: hidden; max-height: 58vh;">
+                            <!-- Wishes list container -->
+                            <div id="guestWishesListInline" style="flex: 1; overflow-y: auto; margin-bottom: 0.8rem; padding-right: 0.4rem;"></div>
+                            
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('floatingGuestbookTrigger').click()" style="padding: 0.6rem; border-radius: 12px; font-weight: bold; font-size: 0.85rem; margin-top: 0.2rem; width: 100%;">
+                                Write a Birthday Wish ✍️
+                            </button>
                         </div>
                     </div>
                 </section>

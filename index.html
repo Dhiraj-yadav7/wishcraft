@@ -3,201 +3,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create a Premium Birthday Surprise 🎁</title>
+    <title>WishCraft — Premium Birthday Surprise SaaS Platform 🎁</title>
     <link rel="stylesheet" href="src/css/style.css">
-    <!-- Route Protection Guard -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Route Protection Guard (checks if authenticated, redirect to dashboard) -->
     <script src="src/js/auth.js"></script>
 </head>
-<body class="theme-romantic"> <!-- Default theme class, changes dynamically with steps -->
+<body class="theme-romantic landing-page-body">
 
-    <div class="glass-container">
+    <!-- Premium SaaS Header -->
+    <header class="landing-header">
+        <a href="index.html" class="landing-brand">
+            <span class="landing-logo-dot"></span>
+            <span>WishCraft</span>
+        </a>
+        <nav class="landing-nav">
+            <a href="#features" class="landing-nav-link">Features</a>
+            <a href="#how-it-works" class="landing-nav-link">How It Works</a>
+            <a href="#templates" class="landing-nav-link">Templates</a>
+            <a href="#pricing" class="landing-nav-link">Pricing</a>
+            <a href="#faq" class="landing-nav-link">FAQ</a>
+        </nav>
+        <div class="landing-auth-btns" id="headerAuthBtns">
+            <a href="login.html" class="landing-btn-link">Log In</a>
+            <a href="login.html#signup" class="landing-btn-primary">Sign Up</a>
+        </div>
+    </header>
+
+    <!-- Main Landing Sections -->
+    <main class="landing-main">
         
-        <!-- Header Actions -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <span style="font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);">Surprise Builder</span>
-            <a href="profile.html" style="font-size: 0.9rem; text-decoration: none; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 0.3rem;">👤 My Profile</a>
-        </div>
-
-        <!-- Progress Bar Indicator -->
-        <div class="progress-bar-container">
-            <div id="progressFill" class="progress-fill"></div>
-        </div>
-
-        <!-- STEP 1: Recipient Details -->
-        <div id="step-1" class="step active">
-            <h2 class="step-title">Who is the Birthday Star?</h2>
-            <p class="step-subtitle">Tell us about the person we are celebrating today! ✨</p>
+        <!-- ================= HERO & INTERACTIVE WIZARD ================= -->
+        <section class="landing-hero" id="hero">
+            <div class="hero-left">
+                <h1>Craft Magical Birthday Surprises in Minutes</h1>
+                <p>WishCraft is the ultimate platform for building premium, personalized digital birthday experiences. Combine custom themes, timelines, guestbooks, waveforms, and Spotify soundtracks into a single, breathtaking link.</p>
+                <div class="hero-ctas">
+                    <a href="#demo" class="landing-btn-primary" style="padding: 0.85rem 2rem; font-size: 1.05rem;">Try Free Builder</a>
+                    <a href="login.html" class="landing-btn-link" style="display: flex; align-items: center; gap: 0.4rem; font-weight: bold;">Get Started Pro &rarr;</a>
+                </div>
+            </div>
             
-            <div class="form-group">
-                <label for="recipientName" class="form-label">Their Name</label>
-                <input type="text" id="recipientName" class="text-input" placeholder="Enter name (e.g., Anshika)" required autocomplete="off">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Their Gender</label>
-                <div class="select-grid gender-grid">
-                    <div class="grid-option" data-value="female" data-type="gender">
-                        <span class="emoji">♀️</span>
-                        <span>Female</span>
-                    </div>
-                    <div class="grid-option" data-value="male" data-type="gender">
-                        <span class="emoji">♂️</span>
-                        <span>Male</span>
-                    </div>
-                    <div class="grid-option" data-value="other" data-type="gender">
-                        <span class="emoji">✨</span>
-                        <span>Special</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Your Relationship</label>
-                <div class="relation-selector">
-                    <div class="grid-option" data-value="friend" data-type="relation">
-                        <span class="emoji">🤝</span>
-                        <span>Friend</span>
-                    </div>
-                    <div class="grid-option" data-value="girlfriend" data-type="relation">
-                        <span class="emoji">💖</span>
-                        <span>GF</span>
-                    </div>
-                    <div class="grid-option" data-value="boyfriend" data-type="relation">
-                        <span class="emoji">💙</span>
-                        <span>BF</span>
-                    </div>
-                    <div class="grid-option" data-value="brother" data-type="relation">
-                        <span class="emoji">👦</span>
-                        <span>Brother</span>
-                    </div>
-                    <div class="grid-option" data-value="sister" data-type="relation">
-                        <span class="emoji">👧</span>
-                        <span>Sister</span>
-                    </div>
-                    <div class="grid-option" data-value="father" data-type="relation">
-                        <span class="emoji">👔</span>
-                        <span>Father</span>
-                    </div>
-                    <div class="grid-option" data-value="mother" data-type="relation">
-                        <span class="emoji">👩</span>
-                        <span>Mother</span>
-                    </div>
-                    <div class="grid-option" data-value="other" data-type="relation">
-                        <span class="emoji">💫</span>
-                        <span>Other</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="btn-container">
-                <button type="button" id="next-1" class="btn btn-primary btn-full">Next Step ➡️</button>
-            </div>
-        </div>
-
-        <!-- STEP 2: Photo Selection -->
-        <div id="step-2" class="step">
-            <h2 class="step-title">Add a Beautiful Photo</h2>
-            <p class="step-subtitle">Upload a portrait of them or choose one of our elegant placeholders.</p>
-
-            <div class="form-group">
-                <div id="uploadArea" class="upload-container">
-                    <span class="upload-icon">📸</span>
-                    <p style="font-weight: 600; margin-bottom: 0.25rem;">Drag & drop a photo here</p>
-                    <p style="font-size: 0.8rem; opacity: 0.7;">or click to browse files (JPEG/PNG)</p>
-                    <input type="file" id="photoInput" accept="image/*" style="display: none;">
-                </div>
+            <div class="hero-right" id="demo">
+                <div class="hero-glow"></div>
                 
-                <div id="previewContainer" class="upload-preview-container" style="display: none;">
-                    <img id="uploadPreview" src="" alt="Preview" class="preview-image">
-                    <button type="button" id="removePhoto" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 8px;">Remove Photo</button>
+                <!-- Core Wizard Container (Preserved exactly for builder.js to bind to) -->
+                <div class="glass-container" style="width: 100%; max-width: 480px; padding: 2rem 1.8rem; margin: 0; box-shadow: 0 25px 50px rgba(168, 85, 247, 0.15);">
+                    
+                    <!-- Progress Bar Indicator -->
+                    <div class="progress-bar-container" style="margin-bottom: 1.5rem;">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+
+                    <!-- STEP 1: Recipient Details -->
+                    <div id="step-1" class="step active">
+                        <h2 class="step-title" style="font-size: 1.4rem; margin-bottom: 0.3rem;">Who is the Birthday Star?</h2>
+                        <p class="step-subtitle" style="font-size: 0.85rem; margin-bottom: 1.2rem;">Tell us about the person we are celebrating today! ✨</p>
+                        
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="recipientName" class="form-label" style="font-size: 0.85rem;">Their Name</label>
+                            <input type="text" id="recipientName" class="text-input" placeholder="Enter name (e.g., Anshika)" required autocomplete="off" style="padding: 0.6rem 0.8rem; font-size: 0.9rem;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label class="form-label" style="font-size: 0.85rem;">Their Gender</label>
+                            <div class="select-grid gender-grid" style="gap: 0.5rem;">
+                                <div class="grid-option" data-value="female" data-type="gender" style="padding: 0.5rem;">
+                                    <span class="emoji" style="font-size: 1.1rem;">♀️</span>
+                                    <span style="font-size: 0.8rem;">Female</span>
+                                </div>
+                                <div class="grid-option" data-value="male" data-type="gender" style="padding: 0.5rem;">
+                                    <span class="emoji" style="font-size: 1.1rem;">♂️</span>
+                                    <span style="font-size: 0.8rem;">Male</span>
+                                </div>
+                                <div class="grid-option" data-value="other" data-type="gender" style="padding: 0.5rem;">
+                                    <span class="emoji" style="font-size: 1.1rem;">✨</span>
+                                    <span style="font-size: 0.8rem;">Special</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.2rem;">
+                            <label class="form-label" style="font-size: 0.85rem;">Your Relationship</label>
+                            <div class="relation-selector" style="gap: 0.4rem; grid-template-columns: repeat(4, 1fr);">
+                                <div class="grid-option" data-value="friend" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">🤝</span>
+                                    <span style="font-size: 0.7rem;">Friend</span>
+                                </div>
+                                <div class="grid-option" data-value="girlfriend" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">💖</span>
+                                    <span style="font-size: 0.7rem;">GF</span>
+                                </div>
+                                <div class="grid-option" data-value="boyfriend" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">💙</span>
+                                    <span style="font-size: 0.7rem;">BF</span>
+                                </div>
+                                <div class="grid-option" data-value="brother" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">👦</span>
+                                    <span style="font-size: 0.7rem;">Brother</span>
+                                </div>
+                                <div class="grid-option" data-value="sister" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">👧</span>
+                                    <span style="font-size: 0.7rem;">Sister</span>
+                                </div>
+                                <div class="grid-option" data-value="father" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">👔</span>
+                                    <span style="font-size: 0.7rem;">Father</span>
+                                </div>
+                                <div class="grid-option" data-value="mother" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">👩</span>
+                                    <span style="font-size: 0.7rem;">Mother</span>
+                                </div>
+                                <div class="grid-option" data-value="other" data-type="relation" style="padding: 0.4rem; flex-direction: column;">
+                                    <span class="emoji" style="font-size: 1rem;">💫</span>
+                                    <span style="font-size: 0.7rem;">Other</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-container">
+                            <button type="button" id="next-1" class="btn btn-primary btn-full" style="padding: 0.65rem;">Next Step ➡️</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Photo Selection -->
+                    <div id="step-2" class="step">
+                        <h2 class="step-title" style="font-size: 1.4rem; margin-bottom: 0.3rem;">Add a Beautiful Photo</h2>
+                        <p class="step-subtitle" style="font-size: 0.85rem; margin-bottom: 1.2rem;">Upload a portrait of them or choose one of our elegant placeholders.</p>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <div id="uploadArea" class="upload-container" style="padding: 1.5rem 1rem;">
+                                <span class="upload-icon" style="font-size: 1.8rem; margin-bottom: 0.3rem;">📸</span>
+                                <p style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.1rem;">Drag & drop photo here</p>
+                                <p style="font-size: 0.75rem; opacity: 0.7;">or click to browse files</p>
+                                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                            </div>
+                            
+                            <div id="previewContainer" class="upload-preview-container" style="display: none; padding: 0.5rem; text-align: center;">
+                                <img id="uploadPreview" src="" alt="Preview" class="preview-image" style="max-height: 120px; border-radius: 12px; margin-bottom: 0.5rem;">
+                                <button type="button" id="removePhoto" class="btn btn-secondary" style="padding: 0.35rem 0.8rem; font-size: 0.75rem; border-radius: 8px;">Remove</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group avatar-presets" id="avatarPresetsBlock" style="margin-bottom: 1.2rem;">
+                            <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.4rem;">Or choose an avatar template</label>
+                            <div class="avatar-grid" id="avatarGrid" style="gap: 0.4rem;">
+                                <!-- Dynamic avatar choices based on gender loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="btn-container" style="gap: 0.5rem;">
+                            <button type="button" id="prev-2" class="btn btn-secondary" style="padding: 0.65rem;">⬅️ Back</button>
+                            <button type="button" id="next-2" class="btn btn-primary" style="padding: 0.65rem; flex-grow: 1;">Next Step ➡️</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Theme & Message -->
+                    <div id="step-3" class="step">
+                        <h2 class="step-title" style="font-size: 1.4rem; margin-bottom: 0.3rem;">Theme & Thoughts</h2>
+                        <p class="step-subtitle" style="font-size: 0.85rem; margin-bottom: 1.2rem;">Select their favorite theme style and personalize the thoughts.</p>
+
+                        <div class="form-group" style="margin-bottom: 0.8rem;">
+                            <label class="form-label" style="font-size: 0.85rem;">Select Visual Theme</label>
+                            <div class="select-grid theme-grid" style="gap: 0.4rem;">
+                                <div class="grid-option selected" data-value="romantic" data-type="theme" style="padding: 0.4rem;">
+                                    <span class="emoji" style="font-size: 1rem;">💖</span>
+                                    <span style="font-size: 0.75rem;">Romantic</span>
+                                </div>
+                                <div class="grid-option" data-value="playful" data-type="theme" style="padding: 0.4rem;">
+                                    <span class="emoji" style="font-size: 1rem;">🎈</span>
+                                    <span style="font-size: 0.75rem;">Playful</span>
+                                </div>
+                                <div class="grid-option" data-value="elegant" data-type="theme" style="padding: 0.4rem;">
+                                    <span class="emoji" style="font-size: 1rem;">👑</span>
+                                    <span style="font-size: 0.75rem;">Elegant</span>
+                                </div>
+                                <div class="grid-option" data-value="cosmic" data-type="theme" style="padding: 0.4rem;">
+                                    <span class="emoji" style="font-size: 1rem;">🌌</span>
+                                    <span style="font-size: 0.75rem;">Cosmic</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0.8rem;">
+                            <label for="birthdate" class="form-label" style="font-size: 0.85rem;">Birthday Date</label>
+                            <input type="date" id="birthdate" class="text-input" required style="padding: 0.6rem 0.8rem; font-size: 0.85rem;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0.8rem;">
+                            <label class="form-label" style="font-size: 0.85rem;">Choose a Thought Template</label>
+                            <div id="presetMessages" class="message-presets" style="max-height: 80px; gap: 0.3rem;">
+                                <!-- Dynamic presets based on relationship -->
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.2rem;">
+                            <label for="customMessage" class="form-label" style="font-size: 0.85rem;">Customize Your Message</label>
+                            <textarea id="customMessage" class="text-input" rows="3" placeholder="Write wishes here..." style="padding: 0.6rem 0.8rem; font-size: 0.85rem;"></textarea>
+                        </div>
+
+                        <div class="btn-container" style="gap: 0.5rem;">
+                            <button type="button" id="prev-3" class="btn btn-secondary" style="padding: 0.65rem;">⬅️ Back</button>
+                            <button type="button" id="next-3" class="btn btn-primary" style="padding: 0.65rem; flex-grow: 1;">Preview Card ➡️</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Live Preview & Generate Link -->
+                    <div id="step-4" class="step">
+                        <h2 class="step-title" style="font-size: 1.4rem; margin-bottom: 0.3rem;">Review & Launch!</h2>
+                        <p class="step-subtitle" style="font-size: 0.85rem; margin-bottom: 1.2rem;">Here is a quick look at the card. Click generate to prepare the surprise!</p>
+
+                        <div class="card-preview-container" style="margin-bottom: 1.2rem; min-height: 150px;">
+                            <div class="mini-card-preview" id="miniCard" style="padding: 1.2rem;">
+                                <img id="miniAvatar" src="" alt="Avatar" class="mini-avatar" style="width: 50px; height: 50px; border-width: 2px;">
+                                <h3 id="miniName" class="mini-name" style="font-size: 1.1rem; margin-top: 0.4rem;">Anshika</h3>
+                                <span id="miniTag" class="mini-tag" style="font-size: 0.65rem; padding: 0.1rem 0.5rem;">GIRLFRIEND</span>
+                                <p id="miniMessage" class="mini-message-snippet" style="font-size: 0.75rem; margin-top: 0.4rem; line-height: 1.4; max-height: 40px;">Happy birthday my love...</p>
+                            </div>
+                        </div>
+
+                        <div class="btn-container" style="gap: 0.5rem;">
+                            <button type="button" id="prev-4" class="btn btn-secondary" style="padding: 0.65rem;">⬅️ Edit Card</button>
+                            <button type="button" id="generateSurprise" class="btn btn-primary" style="padding: 0.65rem; flex-grow: 1;">Launch Surprise 🎁</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= FEATURES GRID SECTION ================= -->
+        <section class="landing-section" id="features">
+            <div class="section-header">
+                <h2>Packed with Premium SaaS Features</h2>
+                <p>Everything you need to craft an unforgettable, rich, and highly interactive digital birthday gift.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⏳</span>
+                    <h3>Digital Time Capsules</h3>
+                    <p>Lock your page with an unlock countdown timer. Content stays securely encrypted until the birthday date arrives.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🎙️</span>
+                    <h3>Waveform Audio Messages</h3>
+                    <p>Record voice notes directly in the browser. Renders a custom premium audio waveform player with adjustable speeds.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🎵</span>
+                    <h3>Spotify Mini-Player</h3>
+                    <p>Set the vibe with background music. Connect a song and render a floating mini-player with loop controls.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">✍️</span>
+                    <h3>Realtime Guestbooks</h3>
+                    <p>Let family and friends sign the guestbook, drop emojis, and leave warm birthday wishes in a sliding panel.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3>QR Code Tracking</h3>
+                    <p>Every page automatically generates an HD QR code. Track scanning analytics, visitor locations, and total views.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📥</span>
+                    <h3>PDF & Image Export</h3>
+                    <p>Export the high-fidelity surprise card as a printable PDF document or save the screenshot image to your device.</p>
                 </div>
             </div>
+        </section>
 
-            <div class="form-group avatar-presets" id="avatarPresetsBlock">
-                <label class="form-label">Or choose an avatar template</label>
-                <div class="avatar-grid" id="avatarGrid">
-                    <!-- Dynamic avatar choices based on gender loaded here -->
+        <!-- ================= HOW IT WORKS SECTION ================= -->
+        <section class="landing-section" id="how-it-works">
+            <div class="section-header">
+                <h2>Simple & Elegant Builder Flow</h2>
+                <p>Follow three simple steps to prepare the ultimate celebration experience.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h3>Provide Basics</h3>
+                    <p>Enter the birthday star's name, upload a photo, select a visual theme, and type or choose custom wishes.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h3>Add Media Lanes</h3>
+                    <p>Upload video embeds, record customized voice messages, design a chronological memory timeline, and add gift cards.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h3>Share Globally</h3>
+                    <p>Launch the page! Get a secure HTTPS link and print out the custom QR Code to share via WhatsApp, Telegram, or Email.</p>
                 </div>
             </div>
+        </section>
 
-            <div class="btn-container">
-                <button type="button" id="prev-2" class="btn btn-secondary">⬅️ Back</button>
-                <button type="button" id="next-2" class="btn btn-primary">Next Step ➡️</button>
+        <!-- ================= TEMPLATES PREVIEWS SECTION ================= -->
+        <section class="landing-section" id="templates">
+            <div class="section-header">
+                <h2>Tailored Aesthetic Presets</h2>
+                <p>Choose from our meticulously crafted layout presets matching their personality.</p>
             </div>
+            <div class="templates-grid">
+                <div class="template-card t-romantic">
+                    <span class="template-emoji">💖</span>
+                    <h3>Sweet Romance</h3>
+                    <p>Soft roses, delicate pink gradients, cursive typography, and heart confetti cascades.</p>
+                </div>
+                <div class="template-card t-playful">
+                    <span class="template-emoji">🎈</span>
+                    <h3>Playful Carnival</h3>
+                    <p>Vibrant colors, active balloons, modern rounded sans-serif font, and burst fireworks.</p>
+                </div>
+                <div class="template-card t-elegant">
+                    <span class="template-emoji">👑</span>
+                    <h3>Midnight Luxury</h3>
+                    <p>Deep charcoal backgrounds, gold border accents, elegant serif headings, and stardust falls.</p>
+                </div>
+                <div class="template-card t-cosmic">
+                    <span class="template-emoji">🌌</span>
+                    <h3>Neon Galaxy</h3>
+                    <p>Dark violet gradients, glowing neon shadows, space-age typography, and comet drifts.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TESTIMONIALS SECTION ================= -->
+        <section class="landing-section" id="testimonials">
+            <div class="section-header">
+                <h2>Loved by Creators Worldwide</h2>
+                <p>Read how WishCraft helps people send beautiful birthday greetings across the globe.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"I created a time capsule page for my boyfriend. He was stunned when the clock hit zero and unlocked his voice message and timeline. The layout looked so premium!"</p>
+                    <div class="testimonial-user">
+                        <img class="testimonial-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces" alt="Avatar">
+                        <div class="testimonial-meta">
+                            <h4>Jessica Miller</h4>
+                            <p>GF & Creative Designer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"The guestbook slider is amazing. Our whole friend group signed it and uploaded emojis. Having scan analytics showing my brother opened it in London was super cool!"</p>
+                    <div class="testimonial-user">
+                        <img class="testimonial-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" alt="Avatar">
+                        <div class="testimonial-meta">
+                            <h4>David K.</h4>
+                            <p>Software Engineer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"Exporting the custom wish card as a high-quality PDF let me print and frame it as a physical gift alongside the online link. Highly recommend WishCraft!"</p>
+                    <div class="testimonial-user">
+                        <img class="testimonial-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Avatar">
+                        <div class="testimonial-meta">
+                            <h4>Elena Rostova</h4>
+                            <p>Content Creator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PRICING TIERS SECTION ================= -->
+        <section class="landing-section" id="pricing">
+            <div class="section-header">
+                <h2>Simple, Transparent Pricing</h2>
+                <p>Choose the tier that fits your birthday surprise aspirations.</p>
+            </div>
+            <div class="pricing-grid">
+                <!-- Free Tier -->
+                <div class="pricing-card">
+                    <h3>Basic Wish</h3>
+                    <div class="pricing-price">$0 <span>/ card</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ 1 Recipient Portrait</li>
+                        <li>✅ Romantic Theme Layout</li>
+                        <li>✅ Standard Wish Message</li>
+                        <li>❌ Custom Audio Messages</li>
+                        <li>❌ Multi-photo Gallery</li>
+                        <li>❌ QR scan / visitor analytics</li>
+                    </ul>
+                    <a href="#demo" class="pricing-btn btn-outline">Start Free</a>
+                </div>
+                <!-- Pro Tier -->
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Premium Surprise</h3>
+                    <div class="pricing-price">$9 <span>/ card</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ 5 Gallery Photo Slots</li>
+                        <li>✅ All Premium Themes (Luxury, Cosmic...)</li>
+                        <li>✅ Voice Messages & YouTube Embeds</li>
+                        <li>✅ Timeline Lane & Gift Cards</li>
+                        <li>✅ Interactive Guestbook with Emojis</li>
+                        <li>✅ Views & QR Scan Analytics</li>
+                    </ul>
+                    <a href="login.html#signup" class="pricing-btn landing-btn-primary">Go Premium</a>
+                </div>
+                <!-- Enterprise Tier -->
+                <div class="pricing-card">
+                    <h3>Surprise Studio</h3>
+                    <div class="pricing-price">$29 <span>/ lifetime</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ Unlimited Birthday Pages</li>
+                        <li>✅ Custom Domain Mapping (DNS)</li>
+                        <li>✅ Ad-free White Label Links</li>
+                        <li>✅ Advanced CSV Data Exports</li>
+                        <li>✅ Priority Support & Backups</li>
+                        <li>✅ Collaborative co-authoring</li>
+                    </ul>
+                    <a href="login.html#signup" class="pricing-btn btn-outline">Sign Up Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= FAQ SECTION ================= -->
+        <section class="landing-section" id="faq">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+                <p>Have questions about time capsules, media formats, or sharing? We have answers.</p>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does the Digital Time Capsule work?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        When creating a surprise card, you can toggle the "Digital Time Capsule" lock and set an unlock date/time. Before this date, any visitor visiting the link will only see a countdown clock and title. All images, timelines, videos, and guestbook entries are redacted/hidden until the clock hits zero.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I upload my own background music?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! WishCraft has built-in high-quality ambient soundtracks (romantic chimes, piano, birthday synth). Premium accounts can also embed Spotify playlists/songs directly into a mini Spotify-style player.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do people sign the guestbook?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Any visitor visiting the shared link can click the floating "Sign Guestbook" button on the bottom right. A modern panel slides out where they can type their name, write a message, choose a reaction emoji, and submit it. The list updates in realtime.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I map my own domain to the page?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, our Studio Plan supports custom domain mapping. You can configure CNAME/A records in your DNS dashboard to point your surprise link to a custom domain (e.g. `surprise.anshika.com`).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CTA BLOCK ================= -->
+        <section class="landing-section" style="margin-bottom: 4rem;">
+            <div class="landing-cta-block">
+                <h2>Ready to Make Someone Smile?</h2>
+                <p>Create a gorgeous digital memory card today. Build the layout, write a card, add photos, and send a beautiful surprise link in seconds.</p>
+                <a href="#demo" class="landing-btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;">Create Birthday Surprise Now 🎁</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="landing-footer">
+        <div class="footer-left">
+            <span class="landing-logo-dot"></span>
+            <span>WishCraft</span>
         </div>
+        <p class="footer-copy">&copy; 2026 WishCraft Inc. All rights reserved. Crafted by Full Stack Architects.</p>
+    </footer>
 
-        <!-- STEP 3: Theme & Message -->
-        <div id="step-3" class="step">
-            <h2 class="step-title">Theme & Thoughts</h2>
-            <p class="step-subtitle">Select their favorite theme style and personalize the birthday thoughts.</p>
+    <!-- Interactive FAQ Toggler & Auth State Button Toggler scripts -->
+    <script>
+        // FAQ Accordion logic
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                if (!isOpen) {
+                    item.classList.add('open');
+                }
+            });
+        });
 
-            <div class="form-group">
-                <label class="form-label">Select Visual Theme</label>
-                <div class="select-grid theme-grid">
-                    <div class="grid-option selected" data-value="romantic" data-type="theme">
-                        <span class="emoji">💖</span>
-                        <span>Romantic</span>
-                    </div>
-                    <div class="grid-option" data-value="playful" data-type="theme">
-                        <span class="emoji">🎈</span>
-                        <span>Playful</span>
-                    </div>
-                    <div class="grid-option" data-value="elegant" data-type="theme">
-                        <span class="emoji">👑</span>
-                        <span>Elegant</span>
-                    </div>
-                    <div class="grid-option" data-value="cosmic" data-type="theme">
-                        <span class="emoji">🌌</span>
-                        <span>Cosmic</span>
-                    </div>
-                </div>
-            </div>
+        // Dynamic Header Actions based on Auth State
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('birthdaySurpriseAuthToken');
+            if (token) {
+                const headerAuthBtns = document.getElementById('headerAuthBtns');
+                if (headerAuthBtns) {
+                    headerAuthBtns.innerHTML = `
+                        <a href="dashboard.html" class="landing-btn-primary" style="background: var(--text-color); box-shadow: none;">Go to Dashboard</a>
+                    `;
+                }
+            }
+        });
+    </script>
 
-            <div class="form-group">
-                <label for="birthdate" class="form-label">Birthday Date</label>
-                <input type="date" id="birthdate" class="text-input" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Choose a Thought Template</label>
-                <div id="presetMessages" class="message-presets">
-                    <!-- Dynamic presets based on relationship -->
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="customMessage" class="form-label">Customize Your Message</label>
-                <textarea id="customMessage" class="text-input" rows="4" placeholder="Write your heartfelt birthday wishes here..."></textarea>
-            </div>
-
-            <div class="btn-container">
-                <button type="button" id="prev-3" class="btn btn-secondary">⬅️ Back</button>
-                <button type="button" id="next-3" class="btn btn-primary">Preview Card ➡️</button>
-            </div>
-        </div>
-
-        <!-- STEP 4: Live Preview & Generate Link -->
-        <div id="step-4" class="step">
-            <h2 class="step-title">Review & Launch!</h2>
-            <p class="step-subtitle">Here is a quick look at the card. Click generate to prepare the surprise!</p>
-
-            <div class="card-preview-container">
-                <div class="mini-card-preview" id="miniCard">
-                    <img id="miniAvatar" src="" alt="Avatar" class="mini-avatar">
-                    <h3 id="miniName" class="mini-name">Anshika</h3>
-                    <span id="miniTag" class="mini-tag">GIRLFRIEND</span>
-                    <p id="miniMessage" class="mini-message-snippet">Happy birthday my love...</p>
-                </div>
-            </div>
-
-            <div class="btn-container">
-                <button type="button" id="prev-4" class="btn btn-secondary">⬅️ Edit Card</button>
-                <button type="button" id="generateSurprise" class="btn btn-primary">Launch Surprise 🎁</button>
-            </div>
-        </div>
-
-    </div>
-
+    <!-- Load Auth Logic & Builder Logic -->
+    <script src="src/js/auth.js"></script>
     <script src="src/js/builder.js"></script>
 </body>
 </html>

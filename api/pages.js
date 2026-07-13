@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const db = require('./utils/db');
 const { success, error } = require('./utils/response');
+const { checkRateLimit } = require('./utils/rateLimiter');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 
@@ -224,13 +225,17 @@ module.exports = async function handler(req, res) {
         // ====================================================
         else if (action === 'guestbook') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { pageId, author, text, avatarIndex } = req.body;
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown-ip';
+            if (!checkRateLimit(ip, 8)) {
+                return error(res, 'Too many comments posted. Please try again in a minute.', 429);
+            }
+            const { pageId, author, text, avatarIndex, visitorKey } = req.body;
             if (!pageId || !author || !text) return error(res, 'Missing wish book inputs.', 400);
 
             const page = await db.findPageById(pageId);
             if (!page) return error(res, 'Birthday page not found.', 404);
 
-            const entry = await db.createGuestbookEntry({ pageId, author, text, avatarIndex });
+            const entry = await db.createGuestbookEntry({ pageId, author, text, avatarIndex, visitorKey });
             await db.createNotification({
                 userId: page.userId.toString(),
                 title: 'New Guestbook Wish ✍️',
@@ -243,7 +248,7 @@ module.exports = async function handler(req, res) {
         else if (action === 'likeGuestbook') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
             const { entryId } = req.body;
-            if (!entryId) return error(res, 'Missing entry ID.', 400);
+            if (!entryId) return error(res, 'Missing parameters.', 400);
 
             const entry = await db.likeGuestbookEntry(entryId);
             if (!entry) return error(res, 'Guestbook entry not found.', 404);
@@ -254,31 +259,49 @@ module.exports = async function handler(req, res) {
         else if (action === 'reactGuestbook') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
             const { entryId, reaction } = req.body;
-            if (!entryId || !reaction) return error(res, 'Missing reaction fields.', 400);
+            if (!entryId || !reaction) return error(res, 'Missing parameters.', 400);
 
             const entry = await db.reactGuestbookEntry(entryId, reaction);
             if (!entry) return error(res, 'Guestbook entry not found.', 404);
 
-            return success(res, entry, 'Reaction updated.', 200);
+            return success(res, entry, 'Guestbook entry reaction saved.', 200);
+        }
+
+        else if (action === 'reportGuestbook') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { entryId } = req.body;
+            if (!entryId) return error(res, 'Missing parameters.', 400);
+
+            const entry = await db.reportGuestbookEntry(entryId);
+            if (!entry) return error(res, 'Guestbook entry not found.', 404);
+
+            return success(res, entry, 'Guestbook entry reported for spam.', 200);
         }
 
         else if (action === 'deleteGuestbook') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { entryId, pageId } = req.body;
+            const { entryId, pageId, visitorKey } = req.body;
             if (!entryId || !pageId) return error(res, 'Missing parameters.', 400);
 
-            let isOwner = false;
+            let isAuthorized = false;
             try {
                 const decoded = authenticate(req);
                 const page = await db.findPageById(pageId);
                 if (page && page.userId.toString() === decoded.userId) {
-                    isOwner = true;
+                    isAuthorized = true;
                 }
             } catch (e) {
-                // Not authenticated or error
+                // Not authenticated as owner
             }
 
-            if (!isOwner) {
+            if (!isAuthorized && visitorKey) {
+                const entry = await db.findGuestbookEntryById(entryId);
+                if (entry && entry.visitorKey === visitorKey) {
+                    isAuthorized = true;
+                }
+            }
+
+            if (!isAuthorized) {
                 return error(res, 'Unauthorized to delete this guestbook entry.', 403);
             }
 

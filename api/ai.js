@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { success, error } = require('./utils/response');
+const { checkRateLimit } = require('./utils/rateLimiter');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -65,6 +66,11 @@ const fallbackTemplates = {
 module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
         return error(res, 'Method not allowed', 405);
+    }
+
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown-ip';
+    if (!checkRateLimit(ip, 10)) {
+        return error(res, 'Too many requests. Please wait a minute before generating again.', 429);
     }
 
     const { recipientName, relation, category } = req.body || {};

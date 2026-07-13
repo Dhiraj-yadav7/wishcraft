@@ -31,6 +31,19 @@
                 <button type="button" class="tab-btn" data-tab="tab-effects">4. Effects</button>
             </nav>
 
+            <!-- Undo / Redo SaaS States Controllers -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.2rem; border-bottom: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.25); gap: 0.8rem;">
+                <span style="font-size: 0.75rem; font-weight: 800; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color);">History Backups</span>
+                <div style="display: flex; gap: 0.4rem;">
+                    <button type="button" class="btn btn-secondary" id="btnUndoState" style="padding: 0.35rem 0.7rem; font-size: 0.75rem; border-radius: 8px; width: auto; font-weight: bold; opacity: 0.5; display: inline-flex; align-items: center; gap: 0.2rem; border-color: rgba(0,0,0,0.15);" disabled>
+                        ↩️ Undo
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnRedoState" style="padding: 0.35rem 0.7rem; font-size: 0.75rem; border-radius: 8px; width: auto; font-weight: bold; opacity: 0.5; display: inline-flex; align-items: center; gap: 0.2rem; border-color: rgba(0,0,0,0.15);" disabled>
+                        ↪️ Redo
+                    </button>
+                </div>
+            </div>
+
             <form id="generatorForm" style="display: flex; flex-direction: column; flex: 1;">
                 
                 <!-- STEP 1: BASICS FORM -->

@@ -211,12 +211,8 @@ const authManager = {
         // Validate session with the backend
         const authenticated = await authManager.verifySession();
 
-        if (isIndex) {
-            if (authenticated) {
-                window.location.href = '/dashboard';
-            } else {
-                window.location.href = '/login';
-            }
+        if (isIndex && authenticated) {
+            window.location.href = '/dashboard';
             return;
         }
 

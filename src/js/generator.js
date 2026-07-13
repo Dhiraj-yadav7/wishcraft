@@ -59,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loadEditDetails(id);
     } else {
         document.getElementById('birthdate').value = new Date().toISOString().split('T')[0];
+        saveHistoryState();
     }
+    
+    // 3. Setup history control actions
+    setupHistoryStateControllers();
 });
 
 // Render presets
@@ -78,6 +82,7 @@ function renderBackgroundPresets() {
             option.classList.add('selected');
             generatorState.background = preset.value;
             document.getElementById('previewPane').style.background = preset.value;
+            saveHistoryState();
         });
 
         list.appendChild(option);
@@ -177,6 +182,7 @@ async function loadEditDetails(pageId) {
             });
 
             syncSimulator();
+            saveHistoryState();
         } else {
             showToast(data.message, 'error');
         }
@@ -207,6 +213,7 @@ function setupSimulatorSync() {
             document.body.className = `theme-${generatorState.themePreset}`;
             
             syncSimulator();
+            saveHistoryState();
         });
     });
 }
@@ -402,6 +409,7 @@ function handlePhotoFiles(files) {
                 generatorState.photos.push(compressedBase64);
                 updatePhotoThumbnailsGrid();
                 syncSimulator();
+                saveHistoryState();
             };
             img.src = e.target.result;
         };
@@ -428,6 +436,7 @@ function updatePhotoThumbnailsGrid() {
             generatorState.photos.splice(removeIdx, 1);
             updatePhotoThumbnailsGrid();
             syncSimulator();
+            saveHistoryState();
         });
 
         list.appendChild(wrap);
@@ -482,6 +491,7 @@ function setupVoiceRecorder() {
                         recordBtn.className = 'rec-btn has-audio';
                         recordBtn.textContent = '🎵';
                         recStatus.textContent = 'Voice message recorded successfully! click to test.';
+                        saveHistoryState();
                     };
                     reader.readAsDataURL(audioBlob);
                 });
@@ -507,6 +517,7 @@ function setupVoiceRecorder() {
         recordBtn.className = 'rec-btn idle';
         recordBtn.textContent = '🎤';
         recStatus.textContent = 'Click icon to start microphone recording';
+        saveHistoryState();
     });
 }
 
@@ -573,6 +584,7 @@ function setupTimelineManager() {
 
         updateTimelineItemsList();
         showToast('Memory node added to timeline! ⏰', 'success');
+        saveHistoryState();
     });
 }
 
@@ -603,6 +615,7 @@ function updateTimelineItemsList() {
             const removeIdx = parseInt(e.target.dataset.idx);
             generatorState.timeline.splice(removeIdx, 1);
             updateTimelineItemsList();
+            saveHistoryState();
         });
 
         container.appendChild(div);
@@ -827,4 +840,202 @@ async function submitCardData(status) {
     } catch (e) {
         showToast('Network error saving surprise card.', 'error');
     }
+}
+
+// ========================================================
+// SAAS UNDO / REDO HISTORY CONTROLLERS
+// ========================================================
+let historyStack = [];
+let redoStack = [];
+const MAX_HISTORY = 30;
+
+function captureFormState() {
+    return {
+        recipientName: document.getElementById('recipientName').value,
+        birthdate: document.getElementById('birthdate').value,
+        relationship: document.getElementById('relationship').value,
+        senderName: document.getElementById('senderName').value,
+        cardMessage: document.getElementById('cardMessage').value,
+        videoUrl: document.getElementById('videoUrl').value,
+        font: document.getElementById('fontSelect').value,
+        music: document.getElementById('musicSelect').value,
+        confettiStyle: document.getElementById('confettiSelect').value,
+        fireworksStyle: document.getElementById('fireworksSelect').value,
+        cakeStyle: document.getElementById('cakeSelect').value,
+        greetingStyle: document.getElementById('greetingSelect').value,
+        password: document.getElementById('linkPassword').value,
+        expiresAt: document.getElementById('linkExpiry').value,
+        
+        photos: [...generatorState.photos],
+        voiceMessage: generatorState.voiceMessage,
+        timeline: JSON.parse(JSON.stringify(generatorState.timeline || [])),
+        aiWishes: JSON.parse(JSON.stringify(generatorState.aiWishes || [])),
+        themePreset: generatorState.themePreset,
+        theme: generatorState.theme,
+        background: generatorState.background,
+        capsuleLocked: generatorState.capsuleLocked,
+        unlockDate: document.getElementById('capsuleUnlockDate').value
+    };
+}
+
+function applyFormState(state) {
+    if (!state) return;
+    
+    document.getElementById('recipientName').value = state.recipientName || '';
+    document.getElementById('birthdate').value = state.birthdate || '';
+    document.getElementById('relationship').value = state.relationship || 'friend';
+    document.getElementById('senderName').value = state.senderName || '';
+    document.getElementById('cardMessage').value = state.cardMessage || '';
+    document.getElementById('videoUrl').value = state.videoUrl || '';
+    document.getElementById('fontSelect').value = state.font || 'Outfit';
+    document.getElementById('musicSelect').value = state.music || 'chimes';
+    document.getElementById('confettiSelect').value = state.confettiStyle || 'hearts';
+    document.getElementById('fireworksSelect').value = state.fireworksStyle || 'burst';
+    document.getElementById('cakeSelect').value = state.cakeStyle || 'animated';
+    document.getElementById('greetingSelect').value = state.greetingStyle || 'typewriter';
+    document.getElementById('linkPassword').value = state.password || '';
+    document.getElementById('linkExpiry').value = state.expiresAt || '';
+    document.getElementById('capsuleUnlockDate').value = state.unlockDate || '';
+    
+    generatorState.photos = [...state.photos];
+    generatorState.voiceMessage = state.voiceMessage || '';
+    generatorState.timeline = JSON.parse(JSON.stringify(state.timeline || []));
+    generatorState.aiWishes = JSON.parse(JSON.stringify(state.aiWishes || []));
+    generatorState.themePreset = state.themePreset || 'romantic';
+    generatorState.theme = state.theme || 'romantic';
+    generatorState.background = state.background || (backgroundPresets[0] ? backgroundPresets[0].value : '');
+    generatorState.capsuleLocked = !!state.capsuleLocked;
+    
+    updatePhotoThumbnailsGrid();
+    updateTimelineItemsList();
+    
+    const previewEl = document.getElementById('voicePreview');
+    if (generatorState.voiceMessage) {
+        previewEl.src = generatorState.voiceMessage;
+        document.getElementById('audioPlayContainer').style.display = 'block';
+        document.getElementById('recordBtn').className = 'rec-btn has-audio';
+        document.getElementById('recStatus').textContent = 'Voice message loaded 🎧';
+    } else {
+        previewEl.src = '';
+        document.getElementById('audioPlayContainer').style.display = 'none';
+        document.getElementById('recordBtn').className = 'rec-btn idle';
+        document.getElementById('recStatus').textContent = 'Click icon to start microphone recording';
+    }
+
+    document.getElementById('capsuleLockedToggle').checked = generatorState.capsuleLocked;
+    document.getElementById('capsuleTimeBlock').style.display = generatorState.capsuleLocked ? 'block' : 'none';
+
+    document.querySelectorAll('.grid-option[data-type="themePreset"]').forEach(opt => {
+        if (opt.dataset.value === generatorState.themePreset) {
+            opt.classList.add('selected');
+        } else {
+            opt.classList.remove('selected');
+        }
+    });
+
+    document.body.className = `theme-${generatorState.themePreset}`;
+    document.getElementById('previewPane').style.background = generatorState.background;
+    
+    document.querySelectorAll('.bg-preset-option').forEach(opt => {
+        if (opt.dataset.val === generatorState.background) {
+            opt.classList.add('selected');
+        } else {
+            opt.classList.remove('selected');
+        }
+    });
+
+    syncSimulator();
+}
+
+function saveHistoryState() {
+    const stateCopy = captureFormState();
+    
+    if (historyStack.length > 0) {
+        const lastState = historyStack[historyStack.length - 1];
+        if (JSON.stringify(lastState) === JSON.stringify(stateCopy)) {
+            return;
+        }
+    }
+    
+    historyStack.push(stateCopy);
+    if (historyStack.length > MAX_HISTORY) {
+        historyStack.shift();
+    }
+    
+    redoStack = [];
+    updateHistoryButtons();
+}
+
+function updateHistoryButtons() {
+    const undoBtn = document.getElementById('btnUndoState');
+    const redoBtn = document.getElementById('btnRedoState');
+    
+    if (undoBtn) {
+        const canUndo = historyStack.length > 1;
+        undoBtn.disabled = !canUndo;
+        undoBtn.style.opacity = canUndo ? '1' : '0.5';
+    }
+    
+    if (redoBtn) {
+        const canRedo = redoStack.length > 0;
+        redoBtn.disabled = !canRedo;
+        redoBtn.style.opacity = canRedo ? '1' : '0.5';
+    }
+}
+
+function executeUndo() {
+    if (historyStack.length <= 1) return;
+    
+    const currentState = historyStack.pop();
+    redoStack.push(currentState);
+    
+    const prevState = historyStack[historyStack.length - 1];
+    applyFormState(prevState);
+    updateHistoryButtons();
+    showToast('State undone ↩️', 'info');
+}
+
+function executeRedo() {
+    if (redoStack.length === 0) return;
+    
+    const nextState = redoStack.pop();
+    historyStack.push(nextState);
+    
+    applyFormState(nextState);
+    updateHistoryButtons();
+    showToast('State redone ↪️', 'info');
+}
+
+function setupHistoryStateControllers() {
+    const undoBtn = document.getElementById('btnUndoState');
+    const redoBtn = document.getElementById('btnRedoState');
+    
+    if (undoBtn) undoBtn.onclick = executeUndo;
+    if (redoBtn) redoBtn.onclick = executeRedo;
+    
+    const textInputs = [
+        'recipientName', 'birthdate', 'relationship', 'senderName', 
+        'cardMessage', 'videoUrl', 'fontSelect', 'musicSelect', 
+        'confettiSelect', 'fireworksSelect', 'cakeSelect', 'greetingSelect',
+        'linkPassword', 'linkExpiry', 'capsuleUnlockDate'
+    ];
+    
+    textInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('blur', saveHistoryState);
+            el.addEventListener('change', saveHistoryState);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            executeUndo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            executeRedo();
+        }
+    });
 }

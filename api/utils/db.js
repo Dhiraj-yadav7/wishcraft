@@ -127,6 +127,9 @@ const GuestbookSchema = new mongoose.Schema({
     avatarIndex: { type: String, default: '🎈' },
     likes: { type: Number, default: 0 },
     reactions: { type: Map, of: Number, default: {} },
+    visitorKey: { type: String, default: '' },
+    reported: { type: Boolean, default: false },
+    reportsCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -137,6 +140,12 @@ const NotificationSchema = new mongoose.Schema({
     read: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
+
+// Compile database indexes for production MongoDB performance
+BirthdayPageSchema.index({ userId: 1 });
+AnalyticsSchema.index({ pageId: 1 });
+GuestbookSchema.index({ pageId: 1 });
+NotificationSchema.index({ userId: 1 });
 
 let UserModel, BirthdayPageModel, AnalyticsModel, CommentModel, GuestbookModel, NotificationModel;
 
@@ -653,6 +662,16 @@ const dbAdapter = {
             return pageEntries.map(mapDoc);
         }
     },
+    findGuestbookEntryById: async (id) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await GuestbookModel.findById(id);
+        } else {
+            const db = readLocalDb();
+            const entry = db.guestbook.find(g => g.id === id || g._id === id);
+            return mapDoc(entry);
+        }
+    },
     createGuestbookEntry: async (entryData) => {
         if (MONGODB_URI) {
             await connectMongo();
@@ -662,7 +681,10 @@ const dbAdapter = {
                 text: entryData.text,
                 avatarIndex: entryData.avatarIndex || '🎈',
                 likes: 0,
-                reactions: {}
+                reactions: {},
+                visitorKey: entryData.visitorKey || '',
+                reported: false,
+                reportsCount: 0
             });
             return await entry.save();
         } else {
@@ -675,11 +697,30 @@ const dbAdapter = {
                 avatarIndex: entryData.avatarIndex || '🎈',
                 likes: 0,
                 reactions: {},
+                visitorKey: entryData.visitorKey || '',
+                reported: false,
+                reportsCount: 0,
                 createdAt: new Date().toISOString()
             };
             db.guestbook.push(newEntry);
             writeLocalDb(db);
             return mapDoc(newEntry);
+        }
+    },
+    reportGuestbookEntry: async (id) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await GuestbookModel.findByIdAndUpdate(id, { $inc: { reportsCount: 1 }, $set: { reported: true } }, { new: true });
+        } else {
+            const db = readLocalDb();
+            const idx = db.guestbook.findIndex(g => g.id === id || g._id === id);
+            if (idx !== -1) {
+                db.guestbook[idx].reportsCount = (db.guestbook[idx].reportsCount || 0) + 1;
+                db.guestbook[idx].reported = true;
+                writeLocalDb(db);
+                return mapDoc(db.guestbook[idx]);
+            }
+            return null;
         }
     },
     likeGuestbookEntry: async (id) => {
