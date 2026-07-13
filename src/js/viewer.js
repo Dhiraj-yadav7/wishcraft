@@ -530,7 +530,7 @@ function generateFallbackPhoto(relation) {
     return canvas.toDataURL('image/png');
 }
 
-// Youtube or HTML5 raw MP4 video resolver
+// Youtube, Instagram, Vimeo or HTML5 raw MP4 video resolver
 function setupVideoEmbed() {
     const wrapper = document.getElementById('videoWrapper');
     const container = document.getElementById('videoSection');
@@ -542,7 +542,9 @@ function setupVideoEmbed() {
     }
 
     container.style.display = 'block';
-    
+    wrapper.innerHTML = '';
+
+    // 1. YouTube Player
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
@@ -550,17 +552,85 @@ function setupVideoEmbed() {
         if (match && match[2].length === 11) {
             videoId = match[2];
         }
-        
         wrapper.innerHTML = `
             <iframe src="https://www.youtube.com/embed/${videoId}" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen>
             </iframe>
         `;
-    } else {
+    } 
+    // 2. Vimeo Player
+    else if (url.includes('vimeo.com')) {
+        let videoId = '';
+        const vimeoRegex = /(?:vimeo\.com)\/(?:video\/)?([0-9]+)/i;
+        const match = url.match(vimeoRegex);
+        if (match) {
+            videoId = match[1];
+        }
+        wrapper.innerHTML = `
+            <iframe src="https://player.vimeo.com/video/${videoId}" 
+                    allow="autoplay; fullscreen; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        `;
+    } 
+    // 3. Instagram Reels / Posts Fallback Card
+    else if (url.includes('instagram.com') || url.includes('instagr.am')) {
+        const igRegex = /(?:instagram\.com)\/(?:p|reel|tv)\/([a-zA-Z0-9_\-]+)/i;
+        const match = url.match(igRegex);
+        const shortcode = match ? match[1] : '';
+        const thumbUrl = shortcode ? `https://www.instagram.com/p/${shortcode}/media/?size=l` : '';
+
+        wrapper.innerHTML = `
+            <div class="instagram-fallback-card" id="igFallback" style="background-image: url('${thumbUrl}');">
+                <div class="instagram-fallback-overlay"></div>
+                <div class="instagram-fallback-content">
+                    <div class="instagram-icon-badge">📸</div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: #ffffff;">Instagram Reel Surprise</h3>
+                    <p style="font-size: 0.9rem; opacity: 0.85; margin: 0 0 0.5rem 0; line-height: 1.4; color: #ffffff;">Due to platform limits, this Reel must be viewed directly on Instagram.</p>
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-instagram">
+                        Open on Instagram ➜
+                    </a>
+                </div>
+            </div>
+        `;
+
+        // If the cover image fails to load, gracefully clear the background image
+        const img = new Image();
+        img.src = thumbUrl;
+        img.onerror = () => {
+            const igFallback = document.getElementById('igFallback');
+            if (igFallback) igFallback.style.backgroundImage = 'none';
+        };
+    } 
+    // 4. Raw MP4 / Direct Video Files
+    else {
         wrapper.innerHTML = `
             <video src="${url}" controls preload="metadata"></video>
         `;
+    }
+
+    // 5. Add Shimmer Loading Effect for Iframe and Video tags
+    const iframe = wrapper.querySelector('iframe');
+    const video = wrapper.querySelector('video');
+
+    if (iframe || video) {
+        const loader = document.createElement('div');
+        loader.className = 'video-loading-placeholder';
+        loader.innerHTML = '<span style="font-weight: 600; font-size: 0.95rem; opacity: 0.85; animation: floatUp 1.2s infinite alternate;">Loading Surprise Player... 📽️</span>';
+        wrapper.appendChild(loader);
+
+        if (iframe) {
+            iframe.onload = () => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            };
+        } else if (video) {
+            video.onloadeddata = () => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            };
+        }
     }
 }
 

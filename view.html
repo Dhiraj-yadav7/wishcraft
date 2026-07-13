@@ -228,22 +228,24 @@
             opacity: 0.8;
         }
 
-        /* Responsive Video Container */
+        /* Improved Responsive Video Container */
         .premium-video-container {
             width: 100%;
-            max-width: 650px;
+            max-width: 700px; /* ~700px wide on desktop */
             margin: 0 auto;
+            padding: 0 1rem;
         }
 
         .video-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
             height: 0;
             overflow: hidden;
-            border-radius: var(--card-radius);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.15);
-            background: #0f172a;
+            border-radius: 20px; /* 20px rounded corners */
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); /* soft shadow */
+            background: #090d16;
+            transition: all 0.3s ease;
         }
 
         .video-wrapper iframe,
@@ -254,6 +256,114 @@
             width: 100%;
             height: 100%;
             border: none;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .premium-video-container {
+                padding: 0 0.5rem;
+                max-width: 100%;
+            }
+            .video-wrapper {
+                border-radius: 16px;
+            }
+            .video-wrapper iframe,
+            .video-wrapper video {
+                border-radius: 16px;
+            }
+        }
+
+        /* Shimmer Loading Animation */
+        .video-loading-placeholder {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            border-radius: 20px;
+            color: #ffffff;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Instagram Fallback Card styling */
+        .instagram-fallback-card {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+            padding: 2rem;
+            z-index: 10;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .instagram-fallback-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(236, 72, 153, 0.45) 50%, rgba(244, 63, 94, 0.9) 100%);
+            z-index: 1;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .instagram-fallback-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            max-width: 400px;
+        }
+
+        .instagram-icon-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 24px rgba(220, 39, 67, 0.4);
+            animation: pulsePlay 2s infinite;
+        }
+
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            padding: 0.8rem 2rem;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 25px rgba(220, 39, 67, 0.35);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-instagram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(220, 39, 67, 0.5);
         }
 
         /* Voice Capsule Card */
@@ -997,6 +1107,12 @@
             }
         }
 
+        @media (max-width: 767px) {
+            .floating-guestbook-widget {
+                display: none !important;
+            }
+        }
+
         .floating-guestbook-widget.collapsed {
             width: 200px;
             max-height: 48px;
@@ -1528,5 +1644,8 @@
     <script src="src/js/pwa.js"></script>
     <!-- JS Logic loader -->
     <script src="src/js/viewer.js"></script>
+    <footer style="position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 0.75rem; color: #94a3b8; opacity: 0.65; font-family: 'Outfit', sans-serif; z-index: 9999; pointer-events: none;">
+        Crafted by Dhiraj Yadav ❤️
+    </footer>
 </body>
 </html>

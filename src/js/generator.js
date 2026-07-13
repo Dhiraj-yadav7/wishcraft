@@ -333,6 +333,13 @@ function showTabStep(step) {
     });
 
     document.body.className = `theme-${generatorState.themePreset}`;
+
+    // Auto-scroll back to top of config-pane (desktop) and window (mobile)
+    const configPane = document.querySelector('.config-pane');
+    if (configPane) {
+        configPane.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Photos file manager

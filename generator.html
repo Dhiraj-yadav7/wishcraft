@@ -14,7 +14,21 @@
     <!-- PWA Settings manifest -->
     <link rel="manifest" href="manifest.json">
 </head>
-<body class="theme-romantic">
+<body class="theme-romantic scrollable-page">
+
+    <!-- Premium Navigation Header -->
+    <header class="dash-navbar">
+        <div class="dash-brand" style="display: flex; align-items: center; gap: 0.6rem;">
+            <img src="public/logo.png" alt="WishCraft Logo" style="height: 28px; width: 28px; object-fit: contain;">
+            <span class="brand-name" style="font-size: 1.25rem; font-weight: 800; color: var(--text-color); font-family: var(--font-heading);">WishCraft</span>
+            <span class="brand-badge" style="font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(79, 70, 229, 0.1); color: #4f46e5; padding: 0.15rem 0.4rem; border-radius: 6px;">SaaS</span>
+        </div>
+        <div class="dash-nav-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'" style="padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 0.85rem; width: auto; display: inline-flex; align-items: center; gap: 0.3rem;">
+                Hub Dashboard 🏠
+            </button>
+        </div>
+    </header>
 
     <div class="generator-container">
         
@@ -344,6 +358,10 @@
         </div>
 
     </div>
+
+    <footer style="text-align: center; padding: 2rem 0; font-size: 0.85rem; color: var(--text-color, #94a3b8); opacity: 0.7; font-family: 'Outfit', sans-serif; clear: both; width: 100%;">
+        Crafted by Dhiraj Yadav ❤️
+    </footer>
 
     <!-- Gemini AI Assist Modal Dialog overlay -->
     <div id="aiAssistModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200;">
