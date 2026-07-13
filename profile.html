@@ -1574,12 +1574,11 @@
                     showToast('Personal info saved successfully! 💾', 'success');
                     
                     // Update user cookie state in authManager
-                    const savedUser = authManager.getUser();
-                    if (savedUser) {
-                        savedUser.name = data.data.name;
-                        savedUser.email = data.data.email;
-                        localStorage.setItem('birthday_user', JSON.stringify(savedUser));
-                    }
+                    const savedUser = authManager.getUser() || { name: data.data.name, email: data.data.email };
+                    savedUser.name = data.data.name;
+                    savedUser.email = data.data.email;
+                    localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                    authManager.setUser(savedUser);
                     toggleEditMode(false);
                     loadProfileDetails();
                 } else {
@@ -1942,11 +1941,10 @@
                     showToast('Profile photo updated successfully! 👤✨', 'success');
                     
                     // Sync profilePhoto local cached variables inside navbar
-                    const savedUser = authManager.getUser();
-                    if (savedUser) {
-                        savedUser.profilePhoto = data.data.profilePhoto;
-                        localStorage.setItem('birthday_user', JSON.stringify(savedUser));
-                    }
+                    const savedUser = authManager.getUser() || {};
+                    savedUser.profilePhoto = data.data.profilePhoto;
+                    localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                    authManager.setUser(savedUser);
                     loadProfileDetails();
                 } else {
                     showToast(data.message || 'Profile photo upload failed.', 'error');
@@ -1979,11 +1977,10 @@
                     if (data.success) {
                         showToast('Profile photo removed.', 'success');
                         
-                        const savedUser = authManager.getUser();
-                        if (savedUser) {
-                            delete savedUser.profilePhoto;
-                            localStorage.setItem('birthday_user', JSON.stringify(savedUser));
-                        }
+                        const savedUser = authManager.getUser() || {};
+                        delete savedUser.profilePhoto;
+                        localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                        authManager.setUser(savedUser);
                         loadProfileDetails();
                     }
                 } catch (e) {

@@ -6,6 +6,16 @@ const LIMIT_WINDOW = 60 * 1000; // 1 minute
 
 function checkRateLimit(ip, limit = 15) {
     const now = Date.now();
+    
+    // Prune expired entries to prevent RAM leak
+    if (ipCache.size > 1000) {
+        for (const [key, val] of ipCache.entries()) {
+            if (now > val.resetTime) {
+                ipCache.delete(key);
+            }
+        }
+    }
+
     if (!ipCache.has(ip)) {
         ipCache.set(ip, { count: 1, resetTime: now + LIMIT_WINDOW });
         return true;

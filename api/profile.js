@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345
 // Configure Cloudinary if credentials are provided
 if (process.env.CLOUDINARY_URL || (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET)) {
     cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_URL.split('@')[1].split('/')[0],
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || (process.env.CLOUDINARY_URL ? process.env.CLOUDINARY_URL.split('@')[1].split('/')[0] : ''),
         api_key: process.env.CLOUDINARY_API_KEY,
         api_secret: process.env.CLOUDINARY_API_SECRET
     });

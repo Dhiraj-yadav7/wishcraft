@@ -2,7 +2,6 @@ const CACHE_NAME = 'surprise-saas-cache-v1';
 const PRE_CACHE_RESOURCES = [
   '/',
   '/login.html',
-  '/signup.html',
   '/dashboard.html',
   '/generator.html',
   '/view.html',

@@ -122,7 +122,12 @@ async function fetchCardDetails(pageId, passwordValue = '') {
             url += `&ref=${encodeURIComponent(ref)}`;
         }
 
-        const res = await fetch(url);
+        const token = localStorage.getItem('birthdaySurpriseAuthToken') || localStorage.getItem('token');
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const res = await fetch(url, { headers });
         
         // Handle expiration (Vercel returns 410 for expired pages)
         if (res.status === 410) {
@@ -540,10 +545,10 @@ function setupVideoEmbed() {
     
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
-        if (url.includes('v=')) {
-            videoId = url.split('v=')[1].split('&')[0];
-        } else if (url.includes('youtu.be/')) {
-            videoId = url.split('youtu.be/')[1].split('?')[0];
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        if (match && match[2].length === 11) {
+            videoId = match[2];
         }
         
         wrapper.innerHTML = `
@@ -581,8 +586,11 @@ function setupVoiceMessagePlayer() {
     audio.src = viewerConfig.voiceMessage;
     voiceSenderName.textContent = viewerConfig.senderName || 'Sender';
 
+    let wasMusicPlayingBeforeVoice = false;
+
     playBtn.addEventListener('click', () => {
         if (audio.paused) {
+            wasMusicPlayingBeforeVoice = isPlaying;
             stopSong();
             audio.play().catch(e => console.error(e));
             playBtn.textContent = '⏸️';
@@ -617,7 +625,9 @@ function setupVoiceMessagePlayer() {
         status.textContent = 'Listen again';
         slider.value = 0;
         currentTimeText.textContent = '00:00';
-        playSong();
+        if (wasMusicPlayingBeforeVoice) {
+            playSong();
+        }
     });
 
     downloadBtn.onclick = () => {
@@ -1107,6 +1117,14 @@ function setupPremiumActions() {
 
     // 1. Download PDF using html2canvas and jsPDF (capturing the core hero card only)
     pdfBtn.addEventListener('click', async () => {
+        if (typeof html2canvas === 'undefined') {
+            showToast('Image capture library (html2canvas) is not loaded yet. Check your connection.', 'error');
+            return;
+        }
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            showToast('PDF export library (jsPDF) is not loaded yet. Check your connection.', 'error');
+            return;
+        }
         if (pdfBtn.disabled) return;
         pdfBtn.disabled = true;
         const originalText = pdfBtn.textContent;
@@ -1148,6 +1166,10 @@ function setupPremiumActions() {
 
     // 2. Download Image (PNG) (capturing the core hero card only)
     imgBtn.addEventListener('click', async () => {
+        if (typeof html2canvas === 'undefined') {
+            showToast('Image capture library (html2canvas) is not loaded yet. Check your connection.', 'error');
+            return;
+        }
         if (imgBtn.disabled) return;
         imgBtn.disabled = true;
         const originalText = imgBtn.textContent;
@@ -1352,7 +1374,7 @@ function renderGuestbookWishes() {
     }
 
     const visitorKey = localStorage.getItem('birthday_visitor_key') || '';
-    const hasToken = !!localStorage.getItem('token');
+    const hasToken = !!(localStorage.getItem('birthdaySurpriseAuthToken') || localStorage.getItem('token'));
 
     viewerConfig.guestbook.forEach(wish => {
         const post = document.createElement('div');
@@ -1483,7 +1505,7 @@ window.reactToEntry = async (entryId, reaction, event) => {
 window.deleteGuestbookEntry = async (entryId) => {
     if (!confirm('Are you sure you want to delete this wish?')) return;
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('birthdaySurpriseAuthToken') || localStorage.getItem('token');
     const visitorKey = localStorage.getItem('birthday_visitor_key') || '';
     try {
         const res = await fetch('/api/pages?action=deleteGuestbook', {

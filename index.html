@@ -512,12 +512,18 @@
                         <a href="dashboard.html" class="landing-btn-primary" style="background: var(--text-color); box-shadow: none;">Go to Dashboard</a>
                     `;
                 }
+                const heroCtas = document.querySelector('.hero-ctas');
+                if (heroCtas) {
+                    heroCtas.innerHTML = `
+                        <a href="dashboard.html" class="landing-btn-primary" style="padding: 0.85rem 2rem; font-size: 1.05rem;">Go to Dashboard</a>
+                        <a href="generator.html" class="landing-btn-link" style="display: flex; align-items: center; gap: 0.4rem; font-weight: bold;">Create Surprise Card &rarr;</a>
+                    `;
+                }
             }
         });
     </script>
 
-    <!-- Load Auth Logic & Builder Logic -->
-    <script src="src/js/auth.js"></script>
+    <!-- Load Builder Logic (Auth Logic is already loaded in <head>) -->
     <script src="src/js/builder.js"></script>
 </body>
 </html>

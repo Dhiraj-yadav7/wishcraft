@@ -764,6 +764,11 @@ async function submitCardData(status) {
     const relationship = document.getElementById('relationship').value;
     const senderName = document.getElementById('senderName').value.trim();
     const message = document.getElementById('cardMessage').value.trim();
+
+    if (!name || !date || !relationship || !senderName || !message) {
+        showToast('Please fill in all core birthday details (Name, Date, Relationship, Creator, and Message) first! 🎂', 'warning');
+        return;
+    }
     const videoUrl = document.getElementById('videoUrl').value.trim();
     const font = document.getElementById('fontSelect').value;
     const music = document.getElementById('musicSelect').value;

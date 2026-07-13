@@ -480,7 +480,14 @@ module.exports = async function handler(req, res) {
 
     } catch (err) {
         console.error(`Pages API error on action ${action}:`, err.message);
-        if (err.message.includes('Unauthenticated') || err.message.includes('token')) {
+        const errMsgObj = err.message || '';
+        if (
+            errMsgObj.includes('Unauthenticated') || 
+            errMsgObj.includes('token') || 
+            errMsgObj.toLowerCase().includes('jwt') ||
+            err.name === 'JsonWebTokenError' || 
+            err.name === 'TokenExpiredError'
+        ) {
             return error(res, err.message, 401);
         }
         return error(res, 'Internal server error.', 500);
