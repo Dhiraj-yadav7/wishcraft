@@ -1,17 +1,5 @@
-// PWA Service Worker & Notification Handler
+// PWA Navigation Handler (Service worker registration removed to bypass cache conflicts)
 let deferredPrompt;
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => {
-        console.log('Surprise SaaS Service Worker registered successfully: ', reg.scope);
-      })
-      .catch(err => {
-        console.error('Service Worker registration failed: ', err);
-      });
-  });
-}
 
 // Intercept PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -63,12 +51,14 @@ async function requestPushPermissions() {
 }
 
 function simulateLocalPush() {
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.ready.then(reg => {
-      reg.showNotification('Welcome to Surprise SaaS! 🎈', {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification('Welcome to WishCraft! 🎈', {
         body: 'You will receive notifications for new guest wishes and comments here.',
         icon: 'https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=SurpriseApp'
       });
-    });
+    } catch (e) {
+      console.warn('Fallback Notification failed:', e);
+    }
   }
 }

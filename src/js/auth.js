@@ -1,4 +1,17 @@
 // ========================================================
+// SERVICE WORKER CLEANUP (Rescues browsers from cache traps)
+// ========================================================
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+            registration.unregister().then(() => {
+                console.log('Stuck Service Worker cleaned up successfully.');
+            });
+        }
+    }).catch(err => console.error('SW unregister error:', err));
+}
+
+// ========================================================
 // ANTI-FLICKER & LOADING STATE OVERLAY
 // ========================================================
 let antiFlickerStyle = null;
