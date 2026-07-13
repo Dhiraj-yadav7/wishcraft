@@ -153,7 +153,7 @@ async function loadEditDetails(pageId) {
             generatorState.theme = page.themePreset || 'romantic';
 
             // Set visual body class
-            document.body.className = `theme-${generatorState.themePreset}`;
+            document.body.className = `theme-${generatorState.themePreset} scrollable-page`;
 
             // Sync photos array
             generatorState.photos = page.photos || [];
@@ -210,7 +210,7 @@ function setupSimulatorSync() {
             generatorState.theme = current.dataset.value;
             
             // Set dynamic visual theme live in editor body!
-            document.body.className = `theme-${generatorState.themePreset}`;
+            document.body.className = `theme-${generatorState.themePreset} scrollable-page`;
             
             syncSimulator();
             saveHistoryState();
@@ -332,7 +332,7 @@ function showTabStep(step) {
         else content.classList.remove('active');
     });
 
-    document.body.className = `theme-${generatorState.themePreset}`;
+    document.body.className = `theme-${generatorState.themePreset} scrollable-page`;
 
     // Auto-scroll back to top of config-pane (desktop) and window (mobile)
     const configPane = document.querySelector('.config-pane');
@@ -945,7 +945,7 @@ function applyFormState(state) {
         }
     });
 
-    document.body.className = `theme-${generatorState.themePreset}`;
+    document.body.className = `theme-${generatorState.themePreset} scrollable-page`;
     document.getElementById('previewPane').style.background = generatorState.background;
     
     document.querySelectorAll('.bg-preset-option').forEach(opt => {
