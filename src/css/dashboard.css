@@ -4,7 +4,7 @@
 
 .dashboard-container {
     width: 95%;
-    max-width: 1080px;
+    max-width: 1300px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 28px;

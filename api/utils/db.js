@@ -82,7 +82,9 @@ const GuestbookSchema = new mongoose.Schema({
     pageId: { type: mongoose.Schema.Types.ObjectId, ref: 'BirthdayPage', required: true },
     author: { type: String, required: true },
     text: { type: String, required: true },
-    avatarIndex: { type: Number, default: 0 },
+    avatarIndex: { type: String, default: '🎈' },
+    likes: { type: Number, default: 0 },
+    reactions: { type: Map, of: Number, default: {} },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -543,7 +545,14 @@ const dbAdapter = {
     createGuestbookEntry: async (entryData) => {
         if (MONGODB_URI) {
             await connectMongo();
-            const entry = new GuestbookModel(entryData);
+            const entry = new GuestbookModel({
+                pageId: entryData.pageId,
+                author: entryData.author,
+                text: entryData.text,
+                avatarIndex: entryData.avatarIndex || '🎈',
+                likes: 0,
+                reactions: {}
+            });
             return await entry.save();
         } else {
             const db = readLocalDb();
@@ -552,12 +561,58 @@ const dbAdapter = {
                 pageId: entryData.pageId,
                 author: entryData.author,
                 text: entryData.text,
-                avatarIndex: entryData.avatarIndex || 0,
+                avatarIndex: entryData.avatarIndex || '🎈',
+                likes: 0,
+                reactions: {},
                 createdAt: new Date().toISOString()
             };
             db.guestbook.push(newEntry);
             writeLocalDb(db);
             return mapDoc(newEntry);
+        }
+    },
+    likeGuestbookEntry: async (id) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await GuestbookModel.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
+        } else {
+            const db = readLocalDb();
+            const idx = db.guestbook.findIndex(g => g.id === id || g._id === id);
+            if (idx !== -1) {
+                db.guestbook[idx].likes = (db.guestbook[idx].likes || 0) + 1;
+                writeLocalDb(db);
+                return mapDoc(db.guestbook[idx]);
+            }
+            return null;
+        }
+    },
+    reactGuestbookEntry: async (id, reaction) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            const update = {};
+            update[`reactions.${reaction}`] = 1;
+            return await GuestbookModel.findByIdAndUpdate(id, { $inc: update }, { new: true });
+        } else {
+            const db = readLocalDb();
+            const idx = db.guestbook.findIndex(g => g.id === id || g._id === id);
+            if (idx !== -1) {
+                if (!db.guestbook[idx].reactions) db.guestbook[idx].reactions = {};
+                db.guestbook[idx].reactions[reaction] = (db.guestbook[idx].reactions[reaction] || 0) + 1;
+                writeLocalDb(db);
+                return mapDoc(db.guestbook[idx]);
+            }
+            return null;
+        }
+    },
+    deleteGuestbookEntry: async (id) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await GuestbookModel.findByIdAndDelete(id);
+        } else {
+            const db = readLocalDb();
+            db.guestbook = db.guestbook.filter(g => g.id !== id && g._id !== id);
+            writeLocalDb(db);
+            return true;
         }
     },
 

@@ -117,7 +117,9 @@ async function loadEditDetails(pageId) {
             // Premium inputs populate
             document.getElementById('linkPassword').value = page.password || '';
             if (page.expiresAt) {
-                document.getElementById('linkExpiry').value = new Date(page.expiresAt).toISOString().slice(0, 16);
+                const date = new Date(page.expiresAt);
+                const localVal = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById('linkExpiry').value = localVal;
             }
             generatorState.timeline = page.timeline || [];
             updateTimelineItemsList();
@@ -128,7 +130,9 @@ async function loadEditDetails(pageId) {
             document.getElementById('capsuleLockedToggle').checked = isCapsule;
             document.getElementById('capsuleTimeBlock').style.display = isCapsule ? 'block' : 'none';
             if (page.unlockDate) {
-                document.getElementById('capsuleUnlockDate').value = new Date(page.unlockDate).toISOString().slice(0, 16);
+                const date = new Date(page.unlockDate);
+                const localVal = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById('capsuleUnlockDate').value = localVal;
             }
             generatorState.capsuleLocked = isCapsule;
 

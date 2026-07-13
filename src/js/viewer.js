@@ -32,6 +32,41 @@ let viewerConfig = {
     guestbook: []
 };
 
+// Local Toast Notification system
+function showToast(message, type = 'info') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    else if (type === 'error') icon = '❌';
+    else if (type === 'warning') icon = '⚠️';
+
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger transition reflow
+    setTimeout(() => toast.classList.add('show'), 50);
+
+    // Auto-remove toast after 4s
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
+
 // Analytics tracks
 let sessionStartTime = null;
 
@@ -67,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupGuestbookForm();
     setupPremiumActions();
     setupSessionTracker();
+    setupThemeToggleFloating();
 });
 
 // Load Card Settings from API (supporting password gate & capsule gates check)
@@ -276,6 +312,7 @@ function setupPhotosCarousel() {
 
     images.forEach((base64, idx) => {
         const slide = document.createElement('img');
+        slide.crossOrigin = "anonymous";
         slide.src = base64;
         slide.className = `carousel-slide ${idx === 0 ? 'active' : ''}`;
         slide.alt = `Slide ${idx + 1}`;
@@ -407,7 +444,7 @@ function setupTimelineMemoryLane() {
         card.className = 'timeline-item-card';
         
         card.innerHTML = `
-            ${item.photo ? `<img src="${item.photo}" class="timeline-img" alt="Memory">` : '<div style="font-size:1.8rem; padding: 0.5rem;">📅</div>'}
+            ${item.photo ? `<img src="${item.photo}" class="timeline-img" alt="Memory" crossorigin="anonymous">` : '<div style="font-size:1.8rem; padding: 0.5rem;">📅</div>'}
             <div style="flex:1;">
                 <span style="font-size:0.75rem; font-weight:800; color:var(--primary-color); display:block; text-transform:uppercase;">${item.date}</span>
                 <strong style="font-size:0.9rem; display:block; margin-top:0.1rem; color:var(--text-color);">${item.title}</strong>
@@ -534,6 +571,7 @@ function setupQrCodeShare() {
     const img = document.getElementById('qrCodeImg');
     const pageUrl = window.location.href;
     
+    img.crossOrigin = "anonymous";
     // Use public QR Code generator API
     img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pageUrl)}`;
 }
@@ -546,18 +584,32 @@ function setupPremiumActions() {
 
     // 1. Download PDF using html2canvas and jsPDF
     pdfBtn.addEventListener('click', async () => {
+        if (pdfBtn.disabled) return;
+        pdfBtn.disabled = true;
+        const originalText = pdfBtn.textContent;
+        pdfBtn.textContent = '⏳ Preparing...';
+
         showToast('Preparing PDF download...', 'info');
         logShareClick();
 
         try {
-            const canvasEl = await html2canvas(displayCard, { scale: 2 });
+            const canvasEl = await html2canvas(displayCard, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                logging: false
+            });
             const imgData = canvasEl.toDataURL('image/png');
             
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const imgWidth = 190;
             const pageHeight = 295;
-            const imgHeight = (canvasEl.height * imgWidth) / canvasEl.width;
+            let imgHeight = (canvasEl.height * imgWidth) / canvasEl.width;
+            
+            if (imgHeight > 260) {
+                imgHeight = 260;
+            }
             
             pdf.addImage(imgData, 'PNG', 10, 15, imgWidth, imgHeight);
             pdf.save(`Surprise_${viewerConfig.name}.pdf`);
@@ -565,16 +617,29 @@ function setupPremiumActions() {
         } catch (e) {
             console.error('PDF export error:', e);
             showToast('PDF download failed. Try again.', 'error');
+        } finally {
+            pdfBtn.disabled = false;
+            pdfBtn.textContent = originalText;
         }
     });
 
     // 2. Download Image (PNG)
     imgBtn.addEventListener('click', async () => {
+        if (imgBtn.disabled) return;
+        imgBtn.disabled = true;
+        const originalText = imgBtn.textContent;
+        imgBtn.textContent = '⏳ Saving...';
+
         showToast('Saving wish card image...', 'info');
         logShareClick();
 
         try {
-            const canvasEl = await html2canvas(displayCard, { scale: 2 });
+            const canvasEl = await html2canvas(displayCard, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                logging: false
+            });
             const link = document.createElement('a');
             link.download = `Surprise_${viewerConfig.name}.png`;
             link.href = canvasEl.toDataURL('image/png');
@@ -583,6 +648,9 @@ function setupPremiumActions() {
         } catch (e) {
             console.error('Image capture error', e);
             showToast('Image download failed.', 'error');
+        } finally {
+            imgBtn.disabled = false;
+            imgBtn.textContent = originalText;
         }
     });
 
@@ -654,13 +722,26 @@ async function logShareClick() {
     } catch(e) {}
 }
 
-// Guestbook Wish list rendering
+// Guestbook Wish list rendering with social features (likes, reactions, delete, colorful avatars)
 function renderGuestbookWishes() {
     const list = document.getElementById('guestWishesList');
+    const counter = document.getElementById('guestCounter');
+    
     list.innerHTML = '';
+    
+    // Update guest counter
+    if (counter) {
+        counter.textContent = viewerConfig.guestbook.length;
+    }
 
     if (viewerConfig.guestbook.length === 0) {
-        list.innerHTML = `<p style="font-size: 0.8rem; text-align: center; opacity: 0.6; padding: 1.5rem 0;">No one has signed the guestbook yet. Be the first! ✍️</p>`;
+        list.innerHTML = `
+            <div style="text-align: center; opacity: 0.6; padding: 2rem 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 2.5rem;">✍️</span>
+                <p style="font-size: 0.85rem; font-weight: bold;">No one has signed the guestbook yet.</p>
+                <p style="font-size: 0.75rem; opacity: 0.8;">Be the first to leave a sweet wish! 👇</p>
+            </div>
+        `;
         return;
     }
 
@@ -668,15 +749,162 @@ function renderGuestbookWishes() {
         const post = document.createElement('div');
         post.className = 'wish-post';
         
+        // Random avatar color based on name hash
+        const hash = wish.author.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const gradients = [
+            'linear-gradient(135deg, #ff007f 0%, #ff7f00 100%)',
+            'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+            'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)',
+            'linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)',
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
+        ];
+        const gradient = gradients[hash % gradients.length];
+        
+        const wishId = wish._id || wish.id;
+        const timeStr = wish.createdAt ? new Date(wish.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
+        
+        // Check reactions map
+        const reacts = wish.reactions || {};
+        const thumbsCount = reacts['👍'] || 0;
+        const heartCount = reacts['❤️'] || 0;
+        const laughCount = reacts['😂'] || 0;
+        const celebrateCount = reacts['🎉'] || 0;
+        
+        // Owner delete button check
+        const hasToken = !!localStorage.getItem('token');
+        const deleteBtnHtml = hasToken ? `
+            <button class="delete-wish-btn" onclick="deleteGuestbookEntry('${wishId}')" style="background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0.5; transition: opacity 0.2s;" title="Delete Wish">🗑️</button>
+        ` : '';
+
         post.innerHTML = `
-            <div class="wish-post-avatar">${wish.avatarIndex || '🎈'}</div>
-            <div style="flex: 1;">
-                <span class="wish-post-author">${wish.author}</span>
-                <p class="wish-post-text">${wish.text}</p>
+            <div class="wish-post-avatar" style="background: ${gradient}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; color: white;">${wish.avatarIndex || '🎈'}</div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="wish-post-author" style="font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">${wish.author}</span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 0.75rem; opacity: 0.6;">${timeStr}</span>
+                        ${deleteBtnHtml}
+                    </div>
+                </div>
+                <p class="wish-post-text" style="margin-top: 0.2rem; opacity: 0.9; word-break: break-word;">${wish.text}</p>
+                
+                <div class="wish-post-actions" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap;">
+                    <button class="action-like-btn" onclick="likeGuestbookEntry('${wishId}', event)" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 0.2rem 0.6rem; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: all 0.2s; color: inherit;">
+                        ❤️ <span class="like-count">${wish.likes || 0}</span>
+                    </button>
+                    
+                    <button class="reaction-bubble" onclick="reactToEntry('${wishId}', '👍', event)" style="cursor: pointer; font-size: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 0.2rem 0.5rem; display: flex; align-items: center; gap: 0.2rem; color: inherit;">
+                        👍 <span class="react-count">${thumbsCount}</span>
+                    </button>
+                    <button class="reaction-bubble" onclick="reactToEntry('${wishId}', '❤️', event)" style="cursor: pointer; font-size: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 0.2rem 0.5rem; display: flex; align-items: center; gap: 0.2rem; color: inherit;">
+                        ❤️ <span class="react-count">${heartCount}</span>
+                    </button>
+                    <button class="reaction-bubble" onclick="reactToEntry('${wishId}', '😂', event)" style="cursor: pointer; font-size: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 0.2rem 0.5rem; display: flex; align-items: center; gap: 0.2rem; color: inherit;">
+                        😂 <span class="react-count">${laughCount}</span>
+                    </button>
+                    <button class="reaction-bubble" onclick="reactToEntry('${wishId}', '🎉', event)" style="cursor: pointer; font-size: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 0.2rem 0.5rem; display: flex; align-items: center; gap: 0.2rem; color: inherit;">
+                        🎉 <span class="react-count">${celebrateCount}</span>
+                    </button>
+                </div>
             </div>
         `;
         list.appendChild(post);
     });
+}
+
+// Social interactions callbacks bound to window scope for HTML inline calls
+window.likeGuestbookEntry = async (entryId, event) => {
+    spawnFloatingHeart(event.clientX, event.clientY);
+    
+    try {
+        const res = await fetch('/api/pages?action=likeGuestbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entryId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const entry = viewerConfig.guestbook.find(g => (g._id || g.id) === entryId);
+            if (entry) {
+                entry.likes = data.data.likes;
+                const countEl = event.currentTarget.querySelector('.like-count');
+                if (countEl) countEl.textContent = data.data.likes;
+            }
+        }
+    } catch(e) {
+        console.error('Like wish error:', e);
+    }
+};
+
+window.reactToEntry = async (entryId, reaction, event) => {
+    try {
+        const res = await fetch('/api/pages?action=reactGuestbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entryId, reaction })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const entry = viewerConfig.guestbook.find(g => (g._id || g.id) === entryId);
+            if (entry) {
+                entry.reactions = data.data.reactions;
+                const countEl = event.currentTarget.querySelector('.react-count');
+                if (countEl) {
+                    const reacts = data.data.reactions || {};
+                    countEl.textContent = reacts[reaction] || 0;
+                }
+            }
+        }
+    } catch(e) {
+        console.error('Reaction wish error:', e);
+    }
+};
+
+window.deleteGuestbookEntry = async (entryId) => {
+    if (!confirm('Are you sure you want to delete this wish?')) return;
+    
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch('/api/pages?action=deleteGuestbook', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ entryId, pageId: viewerConfig.pageId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Wish deleted from guestbook.', 'success');
+            viewerConfig.guestbook = viewerConfig.guestbook.filter(g => (g._id || g.id) !== entryId);
+            renderGuestbookWishes();
+        } else {
+            showToast(data.message || 'Failed to delete wish.', 'error');
+        }
+    } catch(e) {
+        console.error('Delete wish error:', e);
+        showToast('Failed to delete wish.', 'error');
+    }
+};
+
+function spawnFloatingHeart(x, y) {
+    const heart = document.createElement('div');
+    heart.textContent = '❤️';
+    heart.style.position = 'fixed';
+    heart.style.left = `${x}px`;
+    heart.style.top = `${y}px`;
+    heart.style.fontSize = '1.8rem';
+    heart.style.pointerEvents = 'none';
+    heart.style.zIndex = '9999';
+    heart.style.transition = 'all 0.8s ease-out';
+    document.body.appendChild(heart);
+    
+    setTimeout(() => {
+        heart.style.transform = 'translateY(-120px) scale(1.5)';
+        heart.style.opacity = '0';
+    }, 50);
+    setTimeout(() => heart.remove(), 900);
 }
 
 // Guestbook signatures POST
@@ -693,13 +921,41 @@ function setupGuestbookForm() {
         });
     });
 
+    // Character counter validation listener
+    const textInput = document.getElementById('guestText');
+    const charCount = document.getElementById('charCount');
+    if (textInput && charCount) {
+        textInput.addEventListener('input', () => {
+            const len = textInput.value.length;
+            charCount.textContent = `${len}/200`;
+            
+            // local typing indicator simulator
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                if (len > 0) {
+                    indicator.style.display = 'block';
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+        });
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const author = document.getElementById('guestAuthor').value.trim();
         const text = document.getElementById('guestText').value.trim();
+        const submitBtn = document.getElementById('submitGuestbookBtn');
+        const btnText = document.getElementById('submitBtnText');
+        const spinner = document.getElementById('submitBtnSpinner');
 
         if (!author || !text || !viewerConfig.pageId) return;
+
+        // Prevent duplicates
+        submitBtn.disabled = true;
+        if (btnText) btnText.textContent = 'Signing...';
+        if (spinner) spinner.style.display = 'inline-block';
 
         try {
             const res = await fetch('/api/pages?action=guestbook', {
@@ -716,14 +972,33 @@ function setupGuestbookForm() {
             
             if (data.success) {
                 document.getElementById('guestText').value = '';
+                if (charCount) charCount.textContent = '0/200';
                 
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) indicator.style.display = 'none';
+
+                // Confetti blast on first submit
+                createBurst(window.innerWidth * 0.5, window.innerHeight * 0.4);
+                startFloatingConfetti();
+
                 viewerConfig.guestbook.unshift(data.data);
                 renderGuestbookWishes();
                 
                 showToast('Wishes signed in guestbook! ✍️', 'success');
+                
+                // Auto scroll to top of guestbook list (newest first)
+                const list = document.getElementById('guestWishesList');
+                if (list) list.scrollTop = 0;
+            } else {
+                showToast(data.message || 'Failed to sign guestbook.', 'error');
             }
         } catch (err) {
             console.error('Submit guestbook error:', err);
+            showToast('Something went wrong. Try again.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            if (btnText) btnText.textContent = 'Sign Guestbook ✍️';
+            if (spinner) spinner.style.display = 'none';
         }
     });
 }
@@ -766,6 +1041,11 @@ function setupEnvelopeReveal() {
                 if (viewerConfig.pageId) {
                     guestbookCard.style.display = 'block';
                     setTimeout(() => guestbookCard.style.opacity = '1', 50);
+                    
+                    const splitContainer = document.getElementById('splitViewContainer');
+                    if (splitContainer) {
+                        splitContainer.classList.add('revealed');
+                    }
                 }
             }, 1200);
         }
@@ -988,12 +1268,15 @@ document.getElementById('fireworksBtn').addEventListener('click', () => {
 });
 
 // ========================================================
-// WEB AUDIO INSTRUMENT SYNTHESIZER
+// WEB AUDIO INSTRUMENT SYNTHESIZER with Volume & Visualizer
 // ========================================================
 let audioCtx = null;
+let gainNode = null;
+let analyserNode = null;
 let currentNotes = [];
 let isPlaying = false;
 let songTimeout = null;
+let currentVolume = 0.5;
 
 const noteFreqs = {
     'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
@@ -1007,14 +1290,30 @@ const melody = [
     { note: 'A#4', dur: 0.5 }, { note: 'A#4', dur: 0.5 }, { note: 'A4', dur: 1 }, { note: 'F4', dur: 1 }, { note: 'G4', dur: 1 }, { note: 'F4', dur: 2 }
 ];
 
+function initAudioNodes() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (!gainNode) {
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(currentVolume, audioCtx.currentTime);
+    }
+    if (!analyserNode) {
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 64;
+    }
+    gainNode.connect(analyserNode);
+    analyserNode.connect(audioCtx.destination);
+}
+
 function playNote(freq, start, duration, style) {
     if (!audioCtx) return;
     
     const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const noteGain = audioCtx.createGain();
     
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    osc.connect(noteGain);
+    noteGain.connect(gainNode);
     
     if (style === 'piano') {
         osc.type = 'sine';
@@ -1026,9 +1325,9 @@ function playNote(freq, start, duration, style) {
     
     osc.frequency.value = freq;
     
-    gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(style === 'happy' ? 0.12 : 0.22, start + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, start + duration - 0.04);
+    noteGain.gain.setValueAtTime(0, start);
+    noteGain.gain.linearRampToValueAtTime(style === 'happy' ? 0.08 : 0.15, start + 0.04);
+    noteGain.gain.exponentialRampToValueAtTime(0.001, start + duration - 0.04);
     
     osc.start(start);
     osc.stop(start + duration);
@@ -1038,17 +1337,14 @@ function playNote(freq, start, duration, style) {
 
 function playSong() {
     stopSong();
-    
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    initAudioNodes();
     
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
     
     isPlaying = true;
-    document.getElementById('musicBtn').textContent = '🔇';
+    document.getElementById('musicBtn').textContent = 'Pause';
     
     let time = audioCtx.currentTime + 0.1;
     
@@ -1063,6 +1359,8 @@ function playSong() {
         time += duration + 0.04;
     });
     
+    drawVisualizer();
+    
     const totalDuration = time - audioCtx.currentTime;
     songTimeout = setTimeout(() => {
         if (isPlaying) {
@@ -1073,13 +1371,64 @@ function playSong() {
 
 function stopSong() {
     isPlaying = false;
-    document.getElementById('musicBtn').textContent = '🎵';
+    document.getElementById('musicBtn').textContent = 'Play';
     if (songTimeout) clearTimeout(songTimeout);
     currentNotes.forEach(osc => {
         try { osc.stop(); } catch(e) {}
     });
     currentNotes = [];
 }
+
+function drawVisualizer() {
+    if (!analyserNode || !isPlaying) return;
+    
+    const canvas = document.getElementById('visualizerCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const bufferLength = analyserNode.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    const render = () => {
+        if (!isPlaying) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        requestAnimationFrame(render);
+        
+        analyserNode.getByteFrequencyData(dataArray);
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        const barWidth = (canvas.width / bufferLength) * 1.5;
+        let barHeight;
+        let x = 0;
+        
+        for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i] / 2.5;
+            
+            const grad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+            grad.addColorStop(0, '#ec4899');
+            grad.addColorStop(1, '#a855f7');
+            
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+            
+            x += barWidth;
+        }
+    };
+    
+    render();
+}
+
+// Attach listener to volume slider
+document.getElementById('volumeSlider').addEventListener('input', (e) => {
+    currentVolume = parseFloat(e.target.value);
+    if (gainNode) {
+        gainNode.gain.setValueAtTime(currentVolume, audioCtx.currentTime);
+    }
+});
 
 document.getElementById('musicBtn').addEventListener('click', () => {
     if (isPlaying) {
@@ -1093,3 +1442,29 @@ document.getElementById('musicBtn').addEventListener('click', () => {
         playSong();
     }
 });
+
+function setupThemeToggleFloating() {
+    const btn = document.getElementById('themeToggleFloating');
+    if (!btn) return;
+    
+    const savedMode = localStorage.getItem('themeMode');
+    if (savedMode === 'dark') {
+        document.body.classList.add('dark-mode');
+        btn.textContent = '☀️';
+    } else {
+        document.body.classList.remove('dark-mode');
+        btn.textContent = '🌙';
+    }
+    
+    btn.addEventListener('click', () => {
+        if (document.body.classList.contains('dark-mode')) {
+            document.body.classList.remove('dark-mode');
+            btn.textContent = '🌙';
+            localStorage.setItem('themeMode', 'light');
+        } else {
+            document.body.classList.add('dark-mode');
+            btn.textContent = '☀️';
+            localStorage.setItem('themeMode', 'dark');
+        }
+    });
+}

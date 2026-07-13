@@ -117,6 +117,8 @@ function renderPages() {
             day: 'numeric' 
         });
 
+        const pageId = page._id || page.id;
+
         const card = document.createElement('div');
         card.className = 'birthday-card-item';
         card.innerHTML = `
@@ -129,36 +131,47 @@ function renderPages() {
             
             <div class="card-actions-bar">
                 <!-- Preview -->
-                <button type="button" class="action-icon-btn preview-btn" data-id="${page.id}" title="Preview Public URL">👁️</button>
+                <button type="button" class="action-icon-btn preview-btn" data-id="${pageId}" title="Preview Public URL">👁️</button>
+                <!-- Copy Link -->
+                <button type="button" class="action-icon-btn copy-btn" data-id="${pageId}" title="Copy Sharing Link">🔗</button>
                 <!-- Edit -->
-                <button type="button" class="action-icon-btn edit-btn" data-id="${page.id}" title="Edit Card Parameters">✏️</button>
+                <button type="button" class="action-icon-btn edit-btn" data-id="${pageId}" title="Edit Card Parameters">✏️</button>
                 <!-- Duplicate -->
-                <button type="button" class="action-icon-btn duplicate-btn" data-id="${page.id}" title="Duplicate / Clone Layout">📋</button>
+                <button type="button" class="action-icon-btn duplicate-btn" data-id="${pageId}" title="Duplicate / Clone Layout">📋</button>
                 <!-- Analytics -->
-                <button type="button" class="action-icon-btn analytics-btn" data-id="${page.id}" title="View Card Analytics">📈</button>
+                <button type="button" class="action-icon-btn analytics-btn" data-id="${pageId}" title="View Card Analytics">📈</button>
                 <!-- Delete -->
-                <button type="button" class="action-icon-btn delete-btn" data-id="${page.id}" title="Delete Surprise Card">🗑️</button>
+                <button type="button" class="action-icon-btn delete-btn" data-id="${pageId}" title="Delete Surprise Card">🗑️</button>
             </div>
         `;
 
         card.querySelector('.preview-btn').addEventListener('click', () => {
-            window.open(`view.html?id=${page.id}`, '_blank');
+            window.open(`view.html?id=${pageId}`, '_blank');
+        });
+
+        card.querySelector('.copy-btn').addEventListener('click', () => {
+            const shareUrl = `${window.location.origin}/view.html?id=${pageId}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('Sharing link copied to clipboard! 📋🔗', 'success');
+            }).catch(() => {
+                showToast('Could not copy link automatically. URL is: ' + shareUrl, 'warning');
+            });
         });
 
         card.querySelector('.edit-btn').addEventListener('click', () => {
-            window.location.href = `generator.html?id=${page.id}`;
+            window.location.href = `generator.html?id=${pageId}`;
         });
 
         card.querySelector('.duplicate-btn').addEventListener('click', () => {
-            duplicatePage(page.id);
+            duplicatePage(pageId);
         });
 
         card.querySelector('.analytics-btn').addEventListener('click', () => {
-            openAnalyticsModal(page.id, page.name);
+            openAnalyticsModal(pageId, page.name);
         });
 
         card.querySelector('.delete-btn').addEventListener('click', () => {
-            deletePage(page.id, page.name);
+            deletePage(pageId, page.name);
         });
 
         cardsGrid.appendChild(card);
@@ -283,10 +296,10 @@ async function openAnalyticsModal(pageId, name) {
 
             analyticsModal.style.display = 'flex';
         } else {
-            showToast('Failed to load card analytics.', 'error');
+            showToast(data.message || 'Failed to load card analytics.', 'error');
         }
     } catch (e) {
-        showToast('Network error loading analytics.', 'error');
+        showToast(e.message || 'Network error loading analytics.', 'error');
     }
 }
 

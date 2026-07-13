@@ -225,6 +225,52 @@ module.exports = async function handler(req, res) {
             return success(res, entry, 'Guestbook wish signed successfully.', 201);
         }
 
+        else if (action === 'likeGuestbook') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { entryId } = req.body;
+            if (!entryId) return error(res, 'Missing entry ID.', 400);
+
+            const entry = await db.likeGuestbookEntry(entryId);
+            if (!entry) return error(res, 'Guestbook entry not found.', 404);
+
+            return success(res, entry, 'Guestbook entry liked.', 200);
+        }
+
+        else if (action === 'reactGuestbook') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { entryId, reaction } = req.body;
+            if (!entryId || !reaction) return error(res, 'Missing reaction fields.', 400);
+
+            const entry = await db.reactGuestbookEntry(entryId, reaction);
+            if (!entry) return error(res, 'Guestbook entry not found.', 404);
+
+            return success(res, entry, 'Reaction updated.', 200);
+        }
+
+        else if (action === 'deleteGuestbook') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { entryId, pageId } = req.body;
+            if (!entryId || !pageId) return error(res, 'Missing parameters.', 400);
+
+            let isOwner = false;
+            try {
+                const decoded = authenticate(req);
+                const page = await db.findPageById(pageId);
+                if (page && page.userId.toString() === decoded.userId) {
+                    isOwner = true;
+                }
+            } catch (e) {
+                // Not authenticated or error
+            }
+
+            if (!isOwner) {
+                return error(res, 'Unauthorized to delete this guestbook entry.', 403);
+            }
+
+            await db.deleteGuestbookEntry(entryId);
+            return success(res, null, 'Guestbook entry deleted successfully.', 200);
+        }
+
         // ====================================================
         // PROTECTED ACTIONS (Requires authentication)
         // ====================================================

@@ -83,7 +83,7 @@ body.theme-cosmic {
 }
 
 body {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background: var(--bg-gradient);
     overflow-x: hidden;
@@ -91,6 +91,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+body.scrollable-page {
+    height: auto;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding: 2rem 0;
+    overflow-y: auto;
 }
 
 /* Scrollbar styling */
@@ -530,7 +538,7 @@ body.theme-elegant .mini-card-preview {
    ======================================================== */
 
 .wish-body {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background: var(--bg-gradient);
     overflow: hidden;
@@ -567,7 +575,7 @@ body.theme-elegant .mini-card-preview {
     z-index: 10;
     perspective: 1000px;
     width: 100%;
-    max-width: 440px;
+    max-width: 480px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -694,6 +702,7 @@ body.theme-cosmic .envelope-flap { border-top-color: #4f46e5; }
     transform: scale(1) translateY(0);
     z-index: 20;
     pointer-events: auto;
+    position: relative;
 }
 
 .display-photo-frame {
@@ -831,4 +840,290 @@ body.theme-cosmic .control-btn {
         transform: translateY(-105vh) rotate(360deg) scale(1.3);
         opacity: 0;
     }
+}
+
+/* Split Layout Container for Opened View Card & Guestbook */
+.split-view-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 480px;
+    z-index: 10;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Base custom scrollbar styling for premium feel */
+.display-card::-webkit-scrollbar,
+#guestWishesList::-webkit-scrollbar {
+    width: 6px;
+}
+.display-card::-webkit-scrollbar-track,
+#guestWishesList::-webkit-scrollbar-track {
+    background: transparent;
+}
+.display-card::-webkit-scrollbar-thumb,
+#guestWishesList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+}
+.display-card::-webkit-scrollbar-thumb:hover,
+#guestWishesList::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Tablet Media Query (split layout with reduced spacing) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .split-view-container.revealed {
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: center;
+        max-width: 920px;
+        width: 95%;
+        gap: 20px;
+        padding: 0 1rem;
+        height: 780px;
+    }
+
+    .split-view-container.revealed .surprise-reveal-wrapper {
+        flex: 1.1;
+        max-width: 480px;
+        height: 100%;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .split-view-container.revealed .display-card {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        position: relative !important;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .split-view-container.revealed .guestbook-card {
+        flex: 1;
+        max-width: 400px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+    }
+}
+
+/* Desktop Media Query (wider cards, 32px gap, perfectly centered, equal height) */
+@media (min-width: 992px) {
+    .split-view-container.revealed {
+        flex-direction: row;
+        align-items: stretch; /* Force equal height */
+        justify-content: center;
+        max-width: 1200px;
+        width: 95%;
+        gap: 32px;
+        padding: 0 2rem;
+        height: 850px; /* Fixed height for equal-height scrolling cards */
+    }
+
+    .split-view-container.revealed .surprise-reveal-wrapper {
+        max-width: 620px;
+        flex: 1.3;
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+        height: 100%;
+    }
+
+    .split-view-container.revealed .display-card {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        position: relative !important;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .split-view-container.revealed .guestbook-card {
+        max-width: 480px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+}
+
+/* Guestbook inner structural layout (making list scrollable and form sticky) */
+.guestbook-card {
+    display: flex;
+    flex-direction: column;
+}
+
+#guestWishesList {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+#guestbookForm {
+    flex-shrink: 0;
+    background: inherit;
+    position: sticky;
+    bottom: 0;
+    border-top: 1px solid rgba(255,255,255,0.15) !important;
+    padding-top: 1rem;
+    margin-top: auto;
+}
+
+/* glowing profile image container */
+@keyframes profileGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(236, 72, 153, 0.4), 0 0 30px rgba(168, 85, 247, 0.2);
+        border-color: var(--primary-color);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(236, 72, 153, 0.8), 0 0 50px rgba(168, 85, 247, 0.5);
+        border-color: var(--accent-color);
+    }
+}
+.display-photo-frame.animated-glow {
+    animation: profileGlow 4s infinite alternate;
+}
+
+/* Premium Audio Controller Widget styles */
+.music-visualizer-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: left;
+}
+
+body.theme-elegant .music-visualizer-card,
+body.theme-cosmic .music-visualizer-card,
+body.theme-luxury .music-visualizer-card,
+body.theme-royal .music-visualizer-card,
+body.theme-dark .music-visualizer-card {
+    background: rgba(15, 23, 42, 0.4);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.visualizer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.visualizer-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.visualizer-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.visualizer-canvas-container {
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.visualizer-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.volume-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    outline: none;
+    transition: background 0.3s;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Theme Toggle Floating Switch */
+.theme-toggle-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.theme-toggle-floating:hover {
+    transform: scale(1.1) rotate(15deg);
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Mode Overrides */
+body.dark-mode {
+    --bg-color: #0f172a;
+    --text-color: #f8fafc;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    background: radial-gradient(circle at top, #1e1b4b, #0f172a 80%) !important;
+}
+
+body.dark-mode .guestbook-card {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+}
+
+body.dark-mode .theme-toggle-floating {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
 }
