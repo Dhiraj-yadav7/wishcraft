@@ -42,13 +42,27 @@ self.addEventListener('activate', event => {
 
 // Fetch Interceptor: Stale-While-Revalidate
 self.addEventListener('fetch', event => {
+  // Only intercept HTTP/HTTPS GET requests
+  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
+    return;
+  }
+
   // Avoid intercepting API routes
   if (event.request.url.includes('/api/')) {
     return;
   }
 
+  // Normalize clean URLs to match cached HTML files
+  const url = new URL(event.request.url);
+  let cacheKey = event.request;
+  
+  if (url.pathname !== '/' && !url.pathname.includes('.') && !url.pathname.endsWith('/')) {
+    // Search cache for the .html version
+    cacheKey = url.pathname + '.html';
+  }
+
   event.respondWith(
-    caches.match(event.request)
+    caches.match(cacheKey)
       .then(cachedResponse => {
         if (cachedResponse) {
           // Fetch updated version in the background
