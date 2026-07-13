@@ -36,6 +36,12 @@ module.exports = async function handler(req, res) {
             let privatePages = 0;
             let totalViews = 0;
             let totalWishes = 0;
+            let totalShares = 0;
+            let totalQrScans = 0;
+            let upcomingBirthdays = 0;
+
+            const now = new Date();
+            const currentYear = now.getFullYear();
 
             for (const page of pages) {
                 if (page.status === 'public') activePages++;
@@ -46,10 +52,26 @@ module.exports = async function handler(req, res) {
                 const analytics = await db.findAnalyticsByPageId(page._id.toString());
                 if (analytics) {
                     totalViews += (analytics.views || 0);
+                    totalShares += (analytics.sharesCount || 0);
+                    totalQrScans += (analytics.qrScans || 0);
                 }
 
                 const wishes = await db.findGuestbookByPageId(page._id.toString());
                 totalWishes += (wishes ? wishes.length : 0);
+
+                if (page.date) {
+                    const bdate = new Date(page.date);
+                    const thisYearBday = new Date(currentYear, bdate.getMonth(), bdate.getDate());
+                    let diffTime = thisYearBday - now;
+                    if (diffTime < 0) {
+                        const nextYearBday = new Date(currentYear + 1, bdate.getMonth(), bdate.getDate());
+                        diffTime = nextYearBday - now;
+                    }
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 30) {
+                        upcomingBirthdays++;
+                    }
+                }
             }
 
             return success(res, {
@@ -59,7 +81,10 @@ module.exports = async function handler(req, res) {
                 scheduledPages,
                 privatePages,
                 totalViews,
-                totalWishes
+                totalWishes,
+                totalShares,
+                totalQrScans,
+                upcomingBirthdays
             }, 'Dashboard stats computed successfully.', 200);
         }
 

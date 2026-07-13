@@ -66,6 +66,7 @@ const AnalyticsSchema = new mongoose.Schema({
     lastViewedAt: { type: Date, default: Date.now },
     
     sharesCount: { type: Number, default: 0 },
+    qrScans: { type: Number, default: 0 },
     visitDurations: { type: [Number], default: [] },
     referrals: { type: [Object], default: [] }
 });
@@ -413,12 +414,47 @@ const dbAdapter = {
                     visitorIps: [],
                     lastViewedAt: new Date().toISOString(),
                     sharesCount: 0,
+                    qrScans: 0,
                     visitDurations: [],
                     referrals: []
                 });
                 idx = db.analytics.length - 1;
             }
             db.analytics[idx].sharesCount += 1;
+            writeLocalDb(db);
+            return mapDoc(db.analytics[idx]);
+        }
+    },
+    incrementQrScans: async (pageId) => {
+        if (MONGODB_URI) {
+            await connectMongo();
+            return await AnalyticsModel.findOneAndUpdate(
+                { pageId },
+                { $inc: { qrScans: 1 } },
+                { upsert: true, new: true }
+            );
+        } else {
+            const db = readLocalDb();
+            let idx = db.analytics.findIndex(a => a.pageId === pageId);
+            if (idx === -1) {
+                db.analytics.push({
+                    id: Math.random().toString(36).substring(2, 11),
+                    pageId,
+                    views: 0,
+                    clicks: 0,
+                    visitorIps: [],
+                    lastViewedAt: new Date().toISOString(),
+                    sharesCount: 0,
+                    qrScans: 0,
+                    visitDurations: [],
+                    referrals: []
+                });
+                idx = db.analytics.length - 1;
+            }
+            if (db.analytics[idx].qrScans === undefined) {
+                db.analytics[idx].qrScans = 0;
+            }
+            db.analytics[idx].qrScans += 1;
             writeLocalDb(db);
             return mapDoc(db.analytics[idx]);
         }

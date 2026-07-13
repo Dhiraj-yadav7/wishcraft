@@ -174,6 +174,15 @@ module.exports = async function handler(req, res) {
             return success(res, null, 'Share transaction recorded.', 200);
         }
 
+        else if (action === 'logQrScan') {
+            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+            const { id } = req.body;
+            if (!id) return error(res, 'Missing page ID.', 400);
+
+            await db.incrementQrScans(id);
+            return success(res, null, 'QR Scan transaction recorded.', 200);
+        }
+
         else if (action === 'logDuration') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
             const { id, duration } = req.body;
@@ -295,7 +304,24 @@ module.exports = async function handler(req, res) {
                             (p.senderName && p.senderName.toLowerCase().includes(term))
                         );
                     }
-                    return success(res, pages, 'Pages retrieved successfully.', 200);
+
+                    const enrichedPages = [];
+                    for (const page of pages) {
+                        const pageObj = page.toObject ? page.toObject() : JSON.parse(JSON.stringify(page));
+                        const pageIdStr = pageObj._id ? pageObj._id.toString() : pageObj.id;
+                        
+                        const analytics = await db.findAnalyticsByPageId(pageIdStr);
+                        pageObj.views = analytics ? (analytics.views || 0) : 0;
+                        pageObj.sharesCount = analytics ? (analytics.sharesCount || 0) : 0;
+                        pageObj.qrScans = analytics ? (analytics.qrScans || 0) : 0;
+                        
+                        const wishes = await db.findGuestbookByPageId(pageIdStr);
+                        pageObj.wishesCount = wishes ? wishes.length : 0;
+                        
+                        enrichedPages.push(pageObj);
+                    }
+
+                    return success(res, enrichedPages, 'Pages retrieved successfully.', 200);
                 } 
                 
                 else if (req.method === 'POST') {

@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surprise Card Builder - Dashboard 📊</title>
+    <title>WishCraft Dashboard — Premium Birthday Celebrations 📊</title>
     <!-- CSS styles imports -->
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/auth.css">
     <link rel="stylesheet" href="src/css/dashboard.css">
     <link rel="stylesheet" href="src/css/themes.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Auth Route Protection Guard in Head -->
     <script src="src/js/auth.js"></script>
     <!-- PWA settings manifest -->
@@ -16,124 +20,373 @@
 </head>
 <body class="theme-romantic scrollable-page">
 
-    <div class="dashboard-container">
+    <div class="dashboard-wrapper">
         
-        <!-- Header Panel -->
-        <header class="dash-header">
-            <div class="dash-logo-block">
-                <h1>My Surprises 🎂</h1>
-                <p style="font-size: 0.9rem; opacity: 0.85; margin-top: 0.2rem;" id="userWelcomeText">Hello, Surprise Creator!</p>
+        <!-- Premium Navigation Header -->
+        <header class="dash-navbar">
+            <div class="dash-brand">
+                <span class="brand-logo-dot"></span>
+                <span class="brand-name">WishCraft</span>
+                <span class="brand-badge">SaaS</span>
             </div>
-            
-            <div class="dash-header-actions" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <!-- PWA controls -->
-                <button type="button" class="btn btn-secondary" id="pwaInstallBtn" style="display: none; padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; align-items: center; gap: 0.4rem;" onclick="installPwaApp()">📱 Install App</button>
-                <button type="button" class="btn btn-secondary" id="pwaNotifyBtn" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="requestPushPermissions()">🔔 Enable Alerts</button>
+
+            <!-- Sleek Header Actions -->
+            <div class="dash-nav-actions">
                 
-                <!-- Notifications Bell -->
-                <div class="notif-bell-container" id="notifBell">
-                    🔔
-                    <span class="notif-badge" id="notifCount" style="display: none;">0</span>
-                    
+                <!-- Notifications Drawer Trigger -->
+                <div class="nav-icon-wrapper" id="notifBell" title="Notifications">
+                    <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notif-badge-dot" id="notifCount" style="display: none;"></span>
+
                     <!-- Notification Drawer Panel -->
                     <div class="notif-drawer" id="notifDrawer">
-                        <div class="notif-drawer-header">Recent Notifications</div>
-                        <div id="notifList">
-                            <p style="font-size: 0.8rem; text-align: center; opacity: 0.6; padding: 1rem 0;">No new alerts.</p>
+                        <div class="notif-drawer-header">
+                            <span>Notifications</span>
+                            <span class="mark-all-read-btn" id="markAllReadBtn">Mark read</span>
+                        </div>
+                        <div id="notifList" class="notif-list-container">
+                            <p class="empty-notif-text">All quiet for now.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Action buttons -->
-                <a href="profile.html" class="btn btn-secondary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">👤 Profile & Settings</a>
-                <button type="button" id="createNewCardBtn" class="btn btn-primary" style="padding: 0.7rem 1.2rem; border-radius: 12px; font-weight: bold;">➕ Create Surprise</button>
+                <!-- Settings Link -->
+                <a href="profile.html#settings" class="nav-icon-wrapper" title="Account Settings">
+                    <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </a>
+
+                <!-- Profile Dropdown Container -->
+                <div class="profile-dropdown-container">
+                    <button type="button" class="profile-trigger" id="profileTrigger">
+                        <img id="navAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="nav-avatar-img">
+                    </button>
+                    <!-- Sleek Profile Dropdown Panel -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="profile-dropdown-user">
+                            <strong id="dropdownUserName">Guest Creator</strong>
+                            <span id="dropdownUserEmail">creator@wishcraft.app</span>
+                        </div>
+                        <div class="profile-dropdown-divider"></div>
+                        <a href="profile.html" class="profile-dropdown-item">
+                            👤 My Profile
+                        </a>
+                        <a href="profile.html#settings" class="profile-dropdown-item">
+                            ⚙ Account Settings
+                        </a>
+                        <div class="profile-dropdown-item" id="dropdownThemeToggle">
+                            🎨 Switch Appearance
+                        </div>
+                        <div class="profile-dropdown-divider"></div>
+                        <div class="profile-dropdown-item logout" id="dropdownLogoutBtn">
+                            📤 Logout
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Surprise Button -->
+                <button type="button" id="createNewCardBtn" class="btn btn-premium-create">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-create-icon">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create Surprise</span>
+                </button>
             </div>
         </header>
 
-        <!-- Statistics counters block -->
-        <section class="stats-grid">
-            <div class="stats-card">
-                <span class="stats-icon">🎁</span>
-                <span class="stats-value" id="stat-total">0</span>
-                <span class="stats-label">Total Cards</span>
+        <!-- Greetings & Welcome -->
+        <section class="welcome-banner">
+            <h2 id="userWelcomeText">Hello, Creator! 🌟</h2>
+            <p>Design, build, and coordinate absolute masterclass-grade digital birthday experiences.</p>
+        </section>
+
+        <!-- Premium Statistics Grid Dashboard -->
+        <section class="stats-dashboard-grid">
+            <!-- 1. Total Birthday Pages -->
+            <div class="dashboard-stat-card card-gradient-1">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">🎁</span>
+                    <span class="stat-card-trend trend-positive">✔ Active</span>
+                </div>
+                <div class="stat-card-counter" id="stat-total">0</div>
+                <div class="stat-card-label">Birthday Pages</div>
             </div>
-            <div class="stats-card">
-                <span class="stats-icon">🔗</span>
-                <span class="stats-value" id="stat-active">0</span>
-                <span class="stats-label">Active Links</span>
+
+            <!-- 2. Total Views -->
+            <div class="dashboard-stat-card card-gradient-2" id="viewsStatCard">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">👁</span>
+                    <span class="stat-card-trend trend-positive">+14% this wk</span>
+                </div>
+                <div class="stat-card-counter" id="stat-views">0</div>
+                <div class="stat-card-label">Total Views</div>
             </div>
-            <div class="stats-card" id="viewsStatCard" style="cursor: pointer;">
-                <span class="stats-icon">👁️</span>
-                <span class="stats-value" id="stat-views">0</span>
-                <span class="stats-label">Total Views (Click to view)</span>
+
+            <!-- 3. Guestbook Wishes -->
+            <div class="dashboard-stat-card card-gradient-3">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">💬</span>
+                    <span class="stat-card-trend trend-positive">+8 new</span>
+                </div>
+                <div class="stat-card-counter" id="stat-wishes">0</div>
+                <div class="stat-card-label">Guestbook Wishes</div>
             </div>
-            <div class="stats-card">
-                <span class="stats-icon">✍️</span>
-                <span class="stats-value" id="stat-wishes">0</span>
-                <span class="stats-label">Guest Wishes</span>
+
+            <!-- 4. Total Shares -->
+            <div class="dashboard-stat-card card-gradient-4">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">📤</span>
+                    <span class="stat-card-trend trend-positive">+5% share</span>
+                </div>
+                <div class="stat-card-counter" id="stat-shares">0</div>
+                <div class="stat-card-label">Total Shares</div>
+            </div>
+
+            <!-- 5. QR Scans -->
+            <div class="dashboard-stat-card card-gradient-5">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">📱</span>
+                    <span class="stat-card-trend trend-positive">+22 scans</span>
+                </div>
+                <div class="stat-card-counter" id="stat-qr">0</div>
+                <div class="stat-card-label">QR Scans</div>
+            </div>
+
+            <!-- 6. Upcoming Birthdays -->
+            <div class="dashboard-stat-card card-gradient-6">
+                <div class="stat-card-header">
+                    <span class="stat-card-icon-wrap">⏳</span>
+                    <span class="stat-card-trend trend-warning">Next 30 days</span>
+                </div>
+                <div class="stat-card-counter" id="stat-upcoming">0</div>
+                <div class="stat-card-label">Upcoming Birthdays</div>
             </div>
         </section>
 
-        <!-- Search and filters toolbar -->
-        <section class="search-filter-bar">
-            <div class="search-box">
-                <input type="text" id="searchSurprises" class="text-input" placeholder="🔍 Search by name or relationship..." autocomplete="off">
+        <!-- Search & Filter Toolbar System -->
+        <section class="toolbar-box">
+            <!-- Sleek Search Input -->
+            <div class="toolbar-search-wrapper">
+                <span class="search-icon-svg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </span>
+                <input type="text" id="searchSurprises" class="toolbar-search-input" placeholder="Search by name, relation, status, date or creator..." autocomplete="off">
             </div>
-            
-            <div class="filter-pills" id="filterPills">
-                <button type="button" class="filter-pill active" data-filter="all">All</button>
-                <button type="button" class="filter-pill" data-filter="draft">Drafts</button>
-                <button type="button" class="filter-pill" data-filter="public">Public</button>
-                <button type="button" class="filter-pill" data-filter="private">Private</button>
-                <button type="button" class="filter-pill" data-filter="scheduled">Scheduled</button>
+
+            <!-- Premium Chip Filters -->
+            <div class="toolbar-filters-scroller">
+                <div class="toolbar-filter-chips" id="filterPills">
+                    <button type="button" class="filter-chip active" data-filter="all">All</button>
+                    <button type="button" class="filter-chip" data-filter="public">Public</button>
+                    <button type="button" class="filter-chip" data-filter="private">Private</button>
+                    <button type="button" class="filter-chip" data-filter="scheduled">Scheduled</button>
+                    <button type="button" class="filter-chip" data-filter="draft">Draft</button>
+                    <button type="button" class="filter-chip" data-filter="newest">Newest</button>
+                    <button type="button" class="filter-chip" data-filter="oldest">Oldest</button>
+                </div>
             </div>
         </section>
 
-        <!-- Dynamic List display of cards -->
-        <main class="cards-grid" id="cardsGrid">
-            <!-- Loading Indicator -->
-            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;" id="loadingContainer">
-                <p style="font-weight: 600; font-size: 1.1rem; opacity: 0.8;">Loading your surprises... 🚀</p>
+        <!-- Cards Listing Viewport -->
+        <main class="dashboard-grid-container" id="cardsGrid">
+            <!-- Loading Skeleton Block -->
+            <div class="dashboard-loading-skeleton">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
             </div>
         </main>
 
     </div>
 
-    <!-- Analytics Insight Modal Overlay (Premium Analytics) -->
-    <div id="analyticsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200;">
-        <div style="width: 90%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 1.2rem; color: var(--text-color); border-color: rgba(255,255,255,0.1);">
-            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 0.2rem;">Surprise Card Analytics 📈</h3>
-            <p style="font-size: 0.85rem; text-align: center; opacity: 0.8; margin-top: -0.8rem;" id="analStarName">Analytics for recipient</p>
-            
-            <!-- Metrics Grid -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Unique Visitors</span>
-                    <span style="font-size: 1.5rem; font-weight: 800;" id="analUniques">0</span>
+    <!-- ====================================================
+       PREMIUM SHARING MODAL OVERLAY
+       ==================================================== -->
+    <div id="shareModal" class="dashboard-modal-overlay" style="display: none;">
+        <div class="dashboard-modal-content max-w-md">
+            <div class="modal-header-row">
+                <h3>Share Birthday Link 📤</h3>
+                <button type="button" class="modal-close-icon" id="shareModalClose">✕</button>
+            </div>
+            <p class="modal-subtitle">Generate custom sharing invite channels for the birthday page.</p>
+
+            <div class="modal-share-preview-card">
+                <div class="preview-mini-header">
+                    <span class="preview-dot green"></span>
+                    <span class="preview-url-text">wishcraft.app/view</span>
                 </div>
-                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Total Views</span>
-                    <span style="font-size: 1.5rem; font-weight: 800;" id="analViews">0</span>
-                </div>
-                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Social Shares</span>
-                    <span style="font-size: 1.5rem; font-weight: 800;" id="analShares">0</span>
-                </div>
-                <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: 14px; padding: 0.8rem; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 0.2rem;">Avg. Session Time</span>
-                    <span style="font-size: 1.2rem; font-weight: 800;" id="analDuration">0s</span>
+                <div class="preview-mini-body">
+                    <strong id="sharePreviewName">Recipient Name</strong>
+                    <span>Interactive 3D Digital Birthday presentation</span>
                 </div>
             </div>
 
-            <!-- Referral sources breakdown list -->
-            <div>
-                <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Referral Channels:</strong>
-                <div id="analReferralsContainer" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 120px; overflow-y: auto;">
-                    <!-- Referral source lines loaded here -->
+            <!-- Url copy box -->
+            <div class="url-copy-box">
+                <input type="text" id="shareUrlInput" class="url-input-field" readonly>
+                <button type="button" id="copyLinkBtn" class="btn btn-copy-action">Copy</button>
+            </div>
+
+            <!-- Social shares grid -->
+            <div class="social-share-chips">
+                <button type="button" class="social-share-chip whatsapp" id="shareWhatsappBtn">
+                    <span>WhatsApp</span>
+                </button>
+                <button type="button" class="social-share-chip telegram" id="shareTelegramBtn">
+                    <span>Telegram</span>
+                </button>
+                <button type="button" class="social-share-chip facebook" id="shareFacebookBtn">
+                    <span>Facebook</span>
+                </button>
+                <button type="button" class="social-share-chip twitter" id="shareTwitterBtn">
+                    <span>X</span>
+                </button>
+                <button type="button" class="social-share-chip email" id="shareEmailBtn">
+                    <span>Email</span>
+                </button>
+            </div>
+
+            <!-- Native Share api trigger -->
+            <button type="button" class="btn btn-primary btn-full" id="shareNativeBtn" style="margin-top: 1rem;">
+                🔗 System Native Share...
+            </button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+       PREMIUM QR CODE EXPORT MODAL OVERLAY
+       ==================================================== -->
+    <div id="qrCodeModal" class="dashboard-modal-overlay" style="display: none;">
+        <div class="dashboard-modal-content max-w-sm text-center">
+            <div class="modal-header-row">
+                <h3 class="text-left">QR Code Generator 📱</h3>
+                <button type="button" class="modal-close-icon" id="qrModalClose">✕</button>
+            </div>
+            <p class="modal-subtitle text-left">Scan this custom QR Code to open the public celebration page instantly.</p>
+
+            <div class="qr-canvas-wrapper">
+                <div id="qrCanvasContainer" class="qr-code-svg-holder">
+                    <!-- Dynamic SVG/Image rendered by JS -->
                 </div>
             </div>
 
-            <button type="button" class="btn btn-secondary" id="analCloseBtn" style="padding: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem; font-weight: bold; border-radius: 12px;">Close Analytics</button>
+            <div class="qr-details-block">
+                <span class="qr-page-url-label">Celebration URL:</span>
+                <div class="qr-url-box">
+                    <input type="text" id="qrPageUrlText" class="qr-url-input" readonly>
+                    <button type="button" id="copyQrLinkBtn" class="btn btn-copy-action-mini">Copy</button>
+                </div>
+            </div>
+
+            <div class="qr-actions-grid">
+                <button type="button" class="btn btn-secondary text-sm" id="downloadQrPng">📥 Download PNG</button>
+                <button type="button" class="btn btn-secondary text-sm" id="downloadQrSvg">🎨 Download SVG</button>
+                <button type="button" class="btn btn-secondary text-sm" id="printQrBtn">🖨 Print QR</button>
+                <button type="button" class="btn btn-secondary text-sm" id="shareQrBtn">📤 Share QR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================
+       ANALYTICS INSIGHT MODAL OVERLAY (SaaS Grade Telemetry)
+       ==================================================== -->
+    <div id="analyticsModal" class="dashboard-modal-overlay" style="display: none;">
+        <div class="dashboard-modal-content max-w-lg">
+            <div class="modal-header-row">
+                <div>
+                    <h3>Surprise Page Analytics 📈</h3>
+                    <p class="modal-subtitle" id="analStarName" style="margin-top: 0.1rem; padding: 0;">Analytics for surprise card</p>
+                </div>
+                <button type="button" class="modal-close-icon" id="analCloseBtn">✕</button>
+            </div>
+
+            <!-- Main metrics grid -->
+            <div class="analytics-metrics-panel">
+                <div class="anal-metric-box">
+                    <span class="anal-metric-num" id="analViews">0</span>
+                    <span class="anal-metric-lbl">Total Views</span>
+                </div>
+                <div class="anal-metric-box">
+                    <span class="anal-metric-num" id="analUniques">0</span>
+                    <span class="anal-metric-lbl">Visitors</span>
+                </div>
+                <div class="anal-metric-box">
+                    <span class="anal-metric-num" id="analShares">0</span>
+                    <span class="anal-metric-lbl">Shares</span>
+                </div>
+                <div class="anal-metric-box">
+                    <span class="anal-metric-num" id="analDuration">0s</span>
+                    <span class="anal-metric-lbl">Session Time</span>
+                </div>
+            </div>
+
+            <!-- Devices and Countries columns layout -->
+            <div class="analytics-demographics-row">
+                <div class="demographics-col">
+                    <h4 class="demographics-title">📱 Devices</h4>
+                    <div class="devices-bars-list">
+                        <div class="device-bar-row">
+                            <span class="device-name">Mobile</span>
+                            <div class="device-bar-wrap"><div class="device-bar-fill mobile" style="width: 75%;"></div></div>
+                            <span class="device-pct">75%</span>
+                        </div>
+                        <div class="device-bar-row">
+                            <span class="device-name">Desktop</span>
+                            <div class="device-bar-wrap"><div class="device-bar-fill desktop" style="width: 20%;"></div></div>
+                            <span class="device-pct">20%</span>
+                        </div>
+                        <div class="device-bar-row">
+                            <span class="device-name">Tablet</span>
+                            <div class="device-bar-wrap"><div class="device-bar-fill tablet" style="width: 5%;"></div></div>
+                            <span class="device-pct">5%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="demographics-col">
+                    <h4 class="demographics-title">🌍 Countries</h4>
+                    <div class="countries-list" id="analCountriesContainer">
+                        <div class="country-row"><span>United States</span><strong>45%</strong></div>
+                        <div class="country-row"><span>India</span><strong>30%</strong></div>
+                        <div class="country-row"><span>United Kingdom</span><strong>15%</strong></div>
+                        <div class="country-row"><span>Others</span><strong>10%</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral sources channels -->
+            <div class="analytics-referrals-block">
+                <h4 class="demographics-title">🔗 Referral Channels</h4>
+                <div id="analReferralsContainer" class="referrals-channels-container">
+                    <!-- Referral items dynamically injected -->
+                </div>
+            </div>
+
+            <!-- Daily views bar chart visualizer -->
+            <div class="analytics-chart-block">
+                <h4 class="demographics-title">📊 View Activity Timeline (Last 7 Days)</h4>
+                <div class="analytics-bar-chart-visual" id="analChartBars">
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 30%;"></div><span class="chart-bar-day">Mon</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 45%;"></div><span class="chart-bar-day">Tue</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 60%;"></div><span class="chart-bar-day">Wed</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 90%;"></div><span class="chart-bar-day">Thu</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 50%;"></div><span class="chart-bar-day">Fri</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 75%;"></div><span class="chart-bar-day">Sat</span></div>
+                    <div class="chart-bar-col"><div class="chart-bar-fill" style="height: 80%;"></div><span class="chart-bar-day">Sun</span></div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-full" id="analCloseFooter" style="margin-top: 1rem;">
+                Close Analytics Dashboard
+            </button>
         </div>
     </div>
 
