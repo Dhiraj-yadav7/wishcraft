@@ -1456,7 +1456,13 @@ function setupEnvelopeReveal() {
             setTimeout(() => {
                 envelope.style.opacity = '0';
                 envelope.style.pointerEvents = 'none';
-                displayCard.classList.add('show');
+                
+                // Show the scrolling card flow smoothly
+                displayCard.style.display = 'flex';
+                setTimeout(() => {
+                    displayCard.style.opacity = '1';
+                    initScrollReveal();
+                }, 50);
                 
                 triggerGreetingMessage();
                 startFloatingConfetti();
