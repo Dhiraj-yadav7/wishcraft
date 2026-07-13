@@ -1237,9 +1237,10 @@
     <canvas id="fireworks-canvas"></canvas>
 
     <!-- Glassmorphic Loading Screen (UX upgrade) -->
+    <!-- Brand New Premium Glassmorphic Loading Screen -->
     <div id="loadingScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #fbcfe8, #f5d0fe, #fae8ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100001; transition: opacity 0.5s ease; color: var(--text-color); overflow: hidden; font-family: 'Outfit', sans-serif;">
         
-        <!-- Local styles for isolation -->
+        <!-- Premium Loader Styles -->
         <style>
             .premium-loader-card {
                 background: rgba(255, 255, 255, 0.4);
@@ -1436,7 +1437,7 @@
             <div class="loader-heart heart-4">💗</div>
         </div>
 
-        <!-- Glassmorphic Card -->
+        <!-- Centered Glassmorphic Card -->
         <div class="premium-loader-card">
             <div class="magic-wand-container">
                 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.4)); animation: floatWand 3s ease-in-out infinite;">
@@ -1485,7 +1486,7 @@
             <h1 class="premium-brand-title">WishCraft</h1>
             <h2 class="premium-sub-title">Preparing your surprise...</h2>
             
-            <!-- Progress Bar Container -->
+            <!-- Animated Progress Bar -->
             <div class="premium-progress-container">
                 <div class="premium-progress-bar-track">
                     <div class="premium-progress-bar-fill"></div>
@@ -1498,12 +1499,12 @@
             </p>
         </div>
 
-        <!-- Subtle Creator Signature -->
+        <!-- Subtle Credit Signature -->
         <div style="position: absolute; bottom: 1.5rem; right: 2rem; font-family: 'Outfit', sans-serif; font-size: 0.75rem; color: #db2777; opacity: 0.5; z-index: 5; pointer-events: none;">
             Crafted by Dhiraj Yadav ❤️
         </div>
 
-        <!-- Progress Tracker Driver -->
+        <!-- Progress Tracker Logic -->
         <script>
             (() => {
                 const loader = document.getElementById('loadingScreen');
@@ -1538,7 +1539,7 @@
                 // Start immediately
                 startProgress();
 
-                // Observe loader styling mutations (for show/hide integrations)
+                // Observe loader styling mutations
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.attributeName === 'style') {
