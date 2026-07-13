@@ -50,7 +50,7 @@ function setupDashboardUser() {
         
         const avatarImg = document.getElementById('navAvatar');
         if (avatarImg) {
-            // Check if profile avatar is in localStorage
+            // Check if profile avatar is in localStorage first
             const localUser = localStorage.getItem('birthday_user');
             if (localUser) {
                 try {
@@ -61,6 +61,30 @@ function setupDashboardUser() {
                 } catch (e) {
                     console.error('Error parsing profilePhoto', e);
                 }
+            }
+
+            // Asynchronously fetch profile from backend to sync localStorage and navbar image
+            const token = authManager.getToken();
+            if (token) {
+                fetch('/api/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data.profile) {
+                        const profile = data.data.profile;
+                        if (profile.profilePhoto) {
+                            avatarImg.src = profile.profilePhoto;
+                            
+                            // Save updated profilePhoto in localStorage
+                            const savedUser = JSON.parse(localStorage.getItem('birthday_user') || '{}');
+                            savedUser.profilePhoto = profile.profilePhoto;
+                            localStorage.setItem('birthday_user', JSON.stringify(savedUser));
+                            authManager.setUser(savedUser);
+                        }
+                    }
+                })
+                .catch(err => console.error('Error fetching backend profile for avatar sync:', err));
             }
         }
     }
