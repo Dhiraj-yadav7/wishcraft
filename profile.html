@@ -459,6 +459,139 @@
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Modern SaaS View/Edit transitions */
+        .form-input-text {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-mode .form-input-text {
+            background: transparent !important;
+            border-color: transparent !important;
+            border-bottom: 1px solid var(--settings-border) !important;
+            border-radius: 0 !important;
+            padding-left: 0.1rem !important;
+            padding-right: 0.1rem !important;
+            pointer-events: none !important;
+            color: var(--settings-text) !important;
+            box-shadow: none !important;
+            opacity: 0.95 !important;
+            -webkit-text-fill-color: var(--settings-text) !important;
+        }
+
+        .view-mode select.form-input-text {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background-image: none !important;
+        }
+
+        .view-mode input[type="date"].form-input-text::-webkit-calendar-picker-indicator {
+            display: none !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Button micro-animations */
+        .btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Photo Uploader visibility animations */
+        .photo-settings-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .photo-uploader-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: scale(1);
+            max-width: 100%;
+        }
+        .view-mode .photo-uploader-box {
+            opacity: 0;
+            max-width: 0;
+            min-width: 0;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-width: 0 !important;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .view-mode #removePhotoBtn, .view-mode #btnUploadPhoto {
+            display: none !important;
+        }
+
+        /* Custom Modal overlays */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10000;
+            padding: 1.2rem;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            background: var(--settings-card-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: var(--settings-radius-lg);
+            padding: 2rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95) translateY(12px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .modal-overlay.open .modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Swap animation container */
+        .button-action-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.25s ease;
+        }
+        .text-link-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            color: var(--settings-accent);
+            text-decoration: underline;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: color 0.15s ease;
+        }
+        .text-link-btn:hover {
+            color: var(--settings-text);
+        }
     </style>
 </head>
 <body class="settings-page-body">
@@ -481,7 +614,7 @@
             <!-- Left Sidebar Navigation -->
             <aside class="settings-sidebar">
                 <button type="button" class="sidebar-tab-btn active" data-tab="general">👤 General Profile</button>
-                <button type="button" class="sidebar-tab-btn" data-tab="security">🔐 Change Password</button>
+                <button type="button" class="sidebar-tab-btn" data-tab="security">🔐 Login & Security</button>
                 <button type="button" class="sidebar-tab-btn" data-tab="sessions">🛡 Security Center</button>
                 <button type="button" class="sidebar-tab-btn" data-tab="preferences">🔔 Alerts Preferences</button>
                 <button type="button" class="sidebar-tab-btn" data-tab="appearance">🎨 Layout Theme</button>
@@ -494,7 +627,7 @@
             <section class="settings-content-wrapper">
 
                 <!-- 1. GENERAL TAB -->
-                <div class="settings-panel-card active" id="tab-general">
+                <div class="settings-panel-card active view-mode" id="tab-general">
                     <div class="panel-title-block">
                         <h2>Personal Information</h2>
                         <p>Configure your public developer profile and contact details.</p>
@@ -508,7 +641,10 @@
                             <span style="font-size: 0.75rem; color: var(--settings-text-muted);">or click to select file from desktop</span>
                             <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
                         </div>
-                        <button type="button" class="btn btn-secondary text-sm" id="removePhotoBtn" style="padding: 0.5rem 1rem; display: none;">Remove Photo</button>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button type="button" class="btn btn-secondary text-sm" id="btnUploadPhoto" style="padding: 0.5rem 1rem; display: none; font-weight: 600; justify-content: center; align-items: center;">Upload Photo</button>
+                            <button type="button" class="btn btn-secondary text-sm" id="removePhotoBtn" style="padding: 0.5rem 1rem; display: none; font-weight: 600; justify-content: center; align-items: center;">Remove Photo</button>
+                        </div>
                     </div>
 
                     <!-- Upload progress bar container -->
@@ -527,8 +663,11 @@
                             <input type="text" id="profileUsername" class="form-input-text" placeholder="e.g. janesmith">
                         </div>
                         <div class="form-field">
-                            <label>Email Address</label>
-                            <input type="email" id="profileEmail" class="form-input-text" required>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label>Email Address</label>
+                                <button type="button" id="btnChangeEmail" class="text-link-btn" style="display: none;">Change Email</button>
+                            </div>
+                            <input type="email" id="profileEmail" class="form-input-text" required readonly>
                         </div>
                         <div class="form-field">
                             <label>Phone Number</label>
@@ -582,8 +721,19 @@
                         </div>
 
                         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 0.6rem; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
-                            <button type="button" class="btn btn-secondary" id="btnCancelProfile" style="width: auto; padding: 0.65rem 1.4rem;">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="btnSaveProfile" style="width: auto; padding: 0.65rem 1.4rem;">Save Changes</button>
+                            <div id="viewModeActions" class="button-action-wrap">
+                                <button type="button" class="btn btn-primary" id="btnEditProfile" style="width: auto; padding: 0.65rem 1.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    ✏️ Edit Profile
+                                </button>
+                            </div>
+                            <div id="editModeActions" class="button-action-wrap" style="display: none;">
+                                <button type="button" class="btn btn-secondary" id="btnCancelProfile" style="width: auto; padding: 0.65rem 1.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    ❌ Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="btnSaveProfile" style="width: auto; padding: 0.65rem 1.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    ✔ Save Changes
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -591,49 +741,21 @@
                 <!-- 2. CHANGE PASSWORD -->
                 <div class="settings-panel-card" id="tab-security">
                     <div class="panel-title-block">
-                        <h2>Change Account Password</h2>
-                        <p>Keep your login credentials secure by switching passwords regularly.</p>
+                        <h2>Login Credentials</h2>
+                        <p>Keep your account secure by switching passwords regularly.</p>
                     </div>
 
-                    <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
-                        <div class="form-field">
-                            <label>Current Password</label>
-                            <input type="password" id="currPwd" class="form-input-text" required>
+                    <div style="border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1.6rem; background: rgba(148,163,184,0.03); display: flex; flex-direction: column; gap: 1.2rem;">
+                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                            <strong style="font-size: 1rem; color: var(--settings-text);">Update Password</strong>
+                            <span style="font-size: 0.825rem; color: var(--settings-text-muted);">Switching your password regularly helps block unauthorized entry attempts.</span>
                         </div>
-                        <div class="form-field">
-                            <label>New Password</label>
-                            <input type="password" id="newPwd" class="form-input-text" required>
-                            
-                            <!-- Password Strength Indicator bars -->
-                            <div class="pwd-strength-bar-container">
-                                <div class="pwd-strength-bar" id="pwd-strength-1"></div>
-                                <div class="pwd-strength-bar" id="pwd-strength-2"></div>
-                                <div class="pwd-strength-bar" id="pwd-strength-3"></div>
-                                <div class="pwd-strength-bar" id="pwd-strength-4"></div>
-                            </div>
-                            <span id="pwdStrengthText" style="font-size: 0.7rem; font-weight: bold; margin-top: 0.15rem; color: var(--settings-text-muted);">Strength: Weak</span>
+                        <div>
+                            <button type="button" class="btn btn-primary" id="btnOpenPasswordModal" style="width: auto; padding: 0.65rem 1.4rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                🔒 Change Password
+                            </button>
                         </div>
-                        <div class="form-field">
-                            <label>Confirm New Password</label>
-                            <input type="password" id="confirmNewPwd" class="form-input-text" required>
-                        </div>
-
-                        <!-- Requirements Checklist -->
-                        <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; font-size: 0.75rem; color: var(--settings-text-muted);">
-                            <strong style="display: block; margin-bottom: 0.4rem;">Password guidelines:</strong>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
-                                <span id="req-len">✗ Min 8 characters</span>
-                                <span id="req-upper">✗ One uppercase letter</span>
-                                <span id="req-lower">✗ One lowercase letter</span>
-                                <span id="req-num">✗ One numeric number</span>
-                                <span id="req-special">✗ One special symbol</span>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
-                            <button type="submit" class="btn btn-primary" id="btnUpdatePassword" style="width: auto; padding: 0.65rem 1.4rem;">Update Password</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <!-- 3. SECURITY CENTER & SESSSIONS -->
@@ -941,6 +1063,57 @@
 
     </div>
 
+    <!-- Change Password Modal -->
+    <div id="passwordChangeModal" class="modal-overlay">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--settings-border); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">🔒 Change Password</h3>
+                <button type="button" id="btnClosePasswordModal" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--settings-text-muted);">&times;</button>
+            </div>
+            
+            <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                <div class="form-field">
+                    <label>Current Password</label>
+                    <input type="password" id="currPwd" class="form-input-text" required placeholder="Enter current password">
+                </div>
+                <div class="form-field">
+                    <label>New Password</label>
+                    <input type="password" id="newPwd" class="form-input-text" required placeholder="Enter new password">
+                    
+                    <!-- Password Strength Indicator bars -->
+                    <div class="pwd-strength-bar-container">
+                        <div class="pwd-strength-bar" id="pwd-strength-1"></div>
+                        <div class="pwd-strength-bar" id="pwd-strength-2"></div>
+                        <div class="pwd-strength-bar" id="pwd-strength-3"></div>
+                        <div class="pwd-strength-bar" id="pwd-strength-4"></div>
+                    </div>
+                    <span id="pwdStrengthText" style="font-size: 0.7rem; font-weight: bold; margin-top: 0.15rem; color: var(--settings-text-muted);">Strength: Weak</span>
+                </div>
+                <div class="form-field">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmNewPwd" class="form-input-text" required placeholder="Confirm new password">
+                </div>
+
+                <!-- Requirements Checklist -->
+                <div style="background: rgba(148,163,184,0.04); border: 1px solid var(--settings-border); border-radius: var(--settings-radius-md); padding: 1rem; font-size: 0.75rem; color: var(--settings-text-muted);">
+                    <strong style="display: block; margin-bottom: 0.4rem;">Password guidelines:</strong>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
+                        <span id="req-len">✗ Min 8 characters</span>
+                        <span id="req-upper">✗ One uppercase letter</span>
+                        <span id="req-lower">✗ One lowercase letter</span>
+                        <span id="req-num">✗ One numeric number</span>
+                        <span id="req-special">✗ One special symbol</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.6rem; border-top: 1px solid var(--settings-border); padding-top: 1.2rem; margin-top: 0.8rem;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelPasswordChange" style="width: auto; padding: 0.65rem 1.4rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnUpdatePassword" style="width: auto; padding: 0.65rem 1.4rem;">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Image Cropper Modal popup -->
     <div class="cropper-modal" id="cropperModal">
         <div class="cropper-content">
@@ -985,6 +1158,123 @@
         let dragStartY = 0;
         let originalCropOffsetX = 0;
         let originalCropOffsetY = 0;
+
+        // View/Edit mode variables
+        let isEditMode = false;
+        let originalProfileData = {};
+
+        function captureOriginalData() {
+            originalProfileData = {
+                name: document.getElementById('profileName').value,
+                username: document.getElementById('profileUsername').value,
+                email: document.getElementById('profileEmail').value,
+                phone: document.getElementById('profilePhone').value,
+                bio: document.getElementById('profileBio').value,
+                birthday: document.getElementById('profileBirthday').value,
+                gender: document.getElementById('profileGender').value,
+                country: document.getElementById('profileCountry').value,
+                city: document.getElementById('profileCity').value,
+                timezone: document.getElementById('profileTimezone').value,
+                language: document.getElementById('profileLanguage').value,
+                photo: document.getElementById('profilePhotoCircle').querySelector('img')?.src || ''
+            };
+        }
+
+        function hasUnsavedChanges() {
+            const currentData = {
+                name: document.getElementById('profileName').value,
+                username: document.getElementById('profileUsername').value,
+                email: document.getElementById('profileEmail').value,
+                phone: document.getElementById('profilePhone').value,
+                bio: document.getElementById('profileBio').value,
+                birthday: document.getElementById('profileBirthday').value,
+                gender: document.getElementById('profileGender').value,
+                country: document.getElementById('profileCountry').value,
+                city: document.getElementById('profileCity').value,
+                timezone: document.getElementById('profileTimezone').value,
+                language: document.getElementById('profileLanguage').value,
+                photo: document.getElementById('profilePhotoCircle').querySelector('img')?.src || ''
+            };
+            for (let key in originalProfileData) {
+                if (originalProfileData[key] !== currentData[key]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function toggleEditMode(enableEdit) {
+            isEditMode = enableEdit;
+            const panel = document.getElementById('tab-general');
+            const emailInput = document.getElementById('profileEmail');
+            const changeEmailBtn = document.getElementById('btnChangeEmail');
+            const viewActions = document.getElementById('viewModeActions');
+            const editActions = document.getElementById('editModeActions');
+            const uploadBtn = document.getElementById('btnUploadPhoto');
+            const removeBtn = document.getElementById('removePhotoBtn');
+
+            if (enableEdit) {
+                panel.classList.remove('view-mode');
+                panel.classList.add('edit-mode');
+
+                const editableFields = [
+                    'profileName', 'profileUsername', 'profilePhone', 'profileBio',
+                    'profileBirthday', 'profileGender', 'profileCountry', 'profileCity',
+                    'profileTimezone', 'profileLanguage'
+                ];
+                editableFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.tagName === 'SELECT' || el.type === 'date') {
+                            el.disabled = false;
+                        } else {
+                            el.readOnly = false;
+                        }
+                    }
+                });
+
+                emailInput.readOnly = true;
+                changeEmailBtn.style.display = 'inline-block';
+
+                viewActions.style.display = 'none';
+                editActions.style.display = 'flex';
+
+                if (uploadBtn) uploadBtn.style.display = 'inline-flex';
+                if (removeBtn) {
+                    const hasPhoto = document.getElementById('profilePhotoCircle').querySelector('img') !== null;
+                    removeBtn.style.display = hasPhoto ? 'inline-flex' : 'none';
+                }
+
+                captureOriginalData();
+            } else {
+                panel.classList.remove('edit-mode');
+                panel.classList.add('view-mode');
+
+                const allFields = [
+                    'profileName', 'profileUsername', 'profilePhone', 'profileBio',
+                    'profileBirthday', 'profileGender', 'profileCountry', 'profileCity',
+                    'profileTimezone', 'profileLanguage', 'profileEmail'
+                ];
+                allFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.tagName === 'SELECT' || el.type === 'date') {
+                            el.disabled = true;
+                        } else {
+                            el.readOnly = true;
+                        }
+                    }
+                });
+
+                changeEmailBtn.style.display = 'none';
+
+                viewActions.style.display = 'flex';
+                editActions.style.display = 'none';
+
+                if (uploadBtn) uploadBtn.style.display = 'none';
+                if (removeBtn) removeBtn.style.display = 'none';
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             // Tab portal selectors
@@ -1035,6 +1325,94 @@
                     else if (val === 'large') previewText.style.fontSize = '1.45rem';
                 });
             }
+
+            // View / Edit profile triggers
+            document.getElementById('btnEditProfile').onclick = () => {
+                toggleEditMode(true);
+            };
+
+            document.getElementById('btnCancelProfile').onclick = () => {
+                if (hasUnsavedChanges()) {
+                    if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+                        // Restore original values
+                        document.getElementById('profileName').value = originalProfileData.name;
+                        document.getElementById('profileUsername').value = originalProfileData.username;
+                        document.getElementById('profileEmail').value = originalProfileData.email;
+                        document.getElementById('profilePhone').value = originalProfileData.phone;
+                        document.getElementById('profileBio').value = originalProfileData.bio;
+                        document.getElementById('profileBirthday').value = originalProfileData.birthday;
+                        document.getElementById('profileGender').value = originalProfileData.gender;
+                        document.getElementById('profileCountry').value = originalProfileData.country;
+                        document.getElementById('profileCity').value = originalProfileData.city;
+                        document.getElementById('profileTimezone').value = originalProfileData.timezone;
+                        document.getElementById('profileLanguage').value = originalProfileData.language;
+
+                        const circle = document.getElementById('profilePhotoCircle');
+                        const removeBtn = document.getElementById('removePhotoBtn');
+                        if (originalProfileData.photo) {
+                            circle.innerHTML = `<img src="${originalProfileData.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                            if (removeBtn && isEditMode) removeBtn.style.display = 'inline-flex';
+                        } else {
+                            const initials = originalProfileData.name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+                            circle.textContent = initials || '👤';
+                            if (removeBtn) removeBtn.style.display = 'none';
+                        }
+
+                        toggleEditMode(false);
+                    }
+                } else {
+                    toggleEditMode(false);
+                }
+            };
+
+            document.getElementById('btnChangeEmail').onclick = () => {
+                const emailInput = document.getElementById('profileEmail');
+                emailInput.readOnly = false;
+                emailInput.focus();
+                document.getElementById('btnChangeEmail').style.display = 'none';
+            };
+
+            const btnUploadPhoto = document.getElementById('btnUploadPhoto');
+            if (btnUploadPhoto) {
+                btnUploadPhoto.onclick = () => {
+                    document.getElementById('photoFileInput').click();
+                };
+            }
+
+            // Password modal triggers
+            const pwdModal = document.getElementById('passwordChangeModal');
+            document.getElementById('btnOpenPasswordModal').onclick = () => {
+                pwdModal.classList.add('open');
+            };
+
+            const closePwdModal = () => {
+                pwdModal.classList.remove('open');
+                document.getElementById('currPwd').value = '';
+                document.getElementById('newPwd').value = '';
+                document.getElementById('confirmNewPwd').value = '';
+                const bars = ['pwd-strength-1', 'pwd-strength-2', 'pwd-strength-3', 'pwd-strength-4'];
+                bars.forEach(b => {
+                    const el = document.getElementById(b);
+                    if (el) el.style.background = 'rgba(148, 163, 184, 0.15)';
+                });
+                document.getElementById('pwdStrengthText').textContent = 'Strength: Weak';
+                document.getElementById('pwdStrengthText').style.color = 'var(--settings-text-muted)';
+                const checklist = ['req-len', 'req-upper', 'req-lower', 'req-num', 'req-special'];
+                checklist.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.style.color = 'inherit';
+                        const text = el.textContent.substring(1);
+                        el.innerHTML = '✗' + text;
+                    }
+                });
+            };
+
+            document.getElementById('btnClosePasswordModal').onclick = closePwdModal;
+            document.getElementById('btnCancelPasswordChange').onclick = closePwdModal;
+            pwdModal.onclick = (e) => {
+                if (e.target === pwdModal) closePwdModal();
+            };
 
             // Fetch and load initial Profile Settings values
             loadProfileDetails();
@@ -1124,6 +1502,7 @@
                         domainStatus.textContent = profile.customDomainDnsVerified ? `Connected & verified ✅` : `CNAME mapping validation pending ⏳`;
                         domainDot.style.background = profile.customDomainDnsVerified ? `#10b981` : `#f59e0b`;
                     }
+                    toggleEditMode(false);
                 }
             } catch (err) {
                 console.error(err);
@@ -1201,6 +1580,7 @@
                         savedUser.email = data.data.email;
                         localStorage.setItem('birthday_user', JSON.stringify(savedUser));
                     }
+                    toggleEditMode(false);
                     loadProfileDetails();
                 } else {
                     showToast(data.message || 'Failed to update settings.', 'error');
@@ -1733,6 +2113,11 @@
                     document.getElementById('currPwd').value = '';
                     document.getElementById('newPwd').value = '';
                     document.getElementById('confirmNewPwd').value = '';
+                    
+                    const pwdModal = document.getElementById('passwordChangeModal');
+                    if (pwdModal) {
+                        pwdModal.classList.remove('open');
+                    }
                 } else {
                     showToast(data.message || 'Failed to change password.', 'error');
                 }
