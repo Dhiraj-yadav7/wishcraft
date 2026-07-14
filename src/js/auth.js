@@ -339,13 +339,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initFirebaseClient = async () => {
         try {
-            const res = await fetch('/api/auth?action=config');
+            const res = await fetch('/api/auth?action=config&t=' + Date.now());
             const data = await res.json();
             if (data.success && data.data.firebaseConfig) {
                 const config = data.data.firebaseConfig;
                 if (config.apiKey) {
                     firebase.initializeApp(config);
                     firebaseAuth = firebase.auth();
+                    const maskedKey = config.apiKey.substring(0, 6) + '...';
+                    console.log('Resolved Firebase API Key in development:', maskedKey);
                     console.log('Firebase Client SDK initialized successfully with configuration:', {
                         authDomain: config.authDomain,
                         projectId: config.projectId,

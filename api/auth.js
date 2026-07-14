@@ -62,6 +62,7 @@ export default async function handler(req, res) {
         // ====================================================
         if (action === 'config') {
             if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
             return success(res, {
                 firebaseConfig: {
                     apiKey: process.env.FIREBASE_API_KEY || '',
