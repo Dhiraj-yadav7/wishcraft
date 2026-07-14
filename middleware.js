@@ -58,7 +58,7 @@ async function verifyHS256(token, secret) {
     }
 }
 
-export async function middleware(request) {
+export default async function middleware(request) {
     const url = new URL(request.url);
     const pathname = url.pathname;
     

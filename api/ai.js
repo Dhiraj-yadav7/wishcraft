@@ -1,3 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
+require('dotenv').config();
+
 const { success, error } = require('./utils/response');
 const { checkRateLimit } = require('./utils/rateLimiter');
 const { getUserIdFromRequest } = require('./utils/auth');

@@ -1,3 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
+require('dotenv').config();
+
 const jwt = require('jsonwebtoken');
 const db = require('./utils/db');
 const { success, error } = require('./utils/response');
