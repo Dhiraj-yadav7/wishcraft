@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initFirebaseClient = async () => {
         // Fallback configuration for static server loads or local testing
         const fallbackConfig = {
-            apiKey: "AIzaSyCq3jgy7CSVI1pE5NXZ8Ou5lmwkm68yllE",
+            apiKey: "AIzaSyCq3jgy7CSVI1pE5NXZ8Ou5lmwkm68ylLE",
             authDomain: "wishcraft-auth-ea541.firebaseapp.com",
             projectId: "wishcraft-auth-ea541",
             storageBucket: "wishcraft-auth-ea541.firebasestorage.app",
