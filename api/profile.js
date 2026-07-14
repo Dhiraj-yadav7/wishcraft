@@ -13,7 +13,7 @@ if (process.env.CLOUDINARY_URL || (process.env.CLOUDINARY_CLOUD_NAME && process.
     });
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     const userId = getUserIdFromRequest(req);
     if (!userId) {
         return error(res, 'Session expired or invalid token. Please log in again.', 401);

@@ -49,7 +49,7 @@ async function loginUserAndSetCookie(req, res, user, message = 'Welcome back! Lo
     }, message, 200);
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     const { action } = req.query;
 
     try {

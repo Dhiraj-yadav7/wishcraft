@@ -346,7 +346,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (config.apiKey) {
                     firebase.initializeApp(config);
                     firebaseAuth = firebase.auth();
-                    console.log('Firebase Client SDK initialized.');
+                    console.log('Firebase Client SDK initialized successfully with configuration:', {
+                        authDomain: config.authDomain,
+                        projectId: config.projectId,
+                        storageBucket: config.storageBucket,
+                        messagingSenderId: config.messagingSenderId,
+                        appId: config.appId
+                    });
                 } else {
                     isFirebaseConfigMissing = true;
                     console.warn('Firebase configuration details missing in dynamic config.');

@@ -11,7 +11,7 @@ function authenticate(req) {
     return { userId };
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     const { action } = req.query;
 
     try {

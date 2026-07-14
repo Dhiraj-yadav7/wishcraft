@@ -2,7 +2,7 @@ const db = require('./utils/db');
 const { success, error } = require('./utils/response');
 const { getUserIdFromRequest } = require('./utils/auth');
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     const userId = getUserIdFromRequest(req);
     if (!userId) {
         return error(res, 'Session expired or invalid token. Please log in again.', 401);
