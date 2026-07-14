@@ -1,3 +1,21 @@
+console.log("PROJECT_ID =", process.env.FIREBASE_PROJECT_ID);
+console.log("CLIENT_EMAIL =", process.env.FIREBASE_CLIENT_EMAIL);
+console.log("PRIVATE_KEY EXISTS =", !!process.env.FIREBASE_PRIVATE_KEY);
+
+try {
+    initializeApp({
+        credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+        })
+    });
+
+    console.log("Firebase Admin Initialized Successfully");
+} catch (e) {
+    console.error("INITIALIZE APP FAILED:");
+    console.error(e);
+}
 const { initializeApp, getApps, cert } = require('firebase-admin');
 const { getAuth } = require('firebase-admin/auth');
 const fs = require('fs');
