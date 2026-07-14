@@ -412,5 +412,5 @@ document.getElementById('fireworksBtn').addEventListener('click', () => {
 
 document.getElementById('createBtn').addEventListener('click', () => {
     stopSong();
-    window.location.href = 'index.html';
+    window.location.href = '/home';
 });

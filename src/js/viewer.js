@@ -179,7 +179,7 @@ async function fetchCardDetails(pageId, passwordValue = '') {
             renderGuestbookWishes();
         } else {
             alert(data.message || 'Birthday surprise not found.');
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
     } catch (e) {
         console.error('Fetch card details error:', e);

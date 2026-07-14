@@ -210,7 +210,7 @@ const authManager = {
         const isGuestbookMgmt = path.includes('/guestbook');
 
         const isProtectedRoute = isDashboard || isGenerator || isProfile || isSettings || isGuestbookMgmt;
-        const isPublicPage = path.includes('/view') || path.includes('/wish');
+        const isPublicPage = path.includes('/view') || path.includes('/wish') || path.includes('/home') || path.includes('/landing');
 
         // Skip checks on public viewer pages
         if (isPublicPage) {
@@ -224,8 +224,12 @@ const authManager = {
         // Validate session with the backend
         const authenticated = await authManager.verifySession();
 
-        if (isIndex && authenticated) {
-            window.location.href = '/dashboard';
+        if (isIndex) {
+            if (authenticated) {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/login';
+            }
             return;
         }
 
@@ -323,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(data.message, 'success');
                     authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }
@@ -376,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(data.message, 'success');
                     authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }
@@ -511,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(data.message, 'success');
                     authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }

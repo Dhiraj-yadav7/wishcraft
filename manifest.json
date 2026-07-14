@@ -2,7 +2,7 @@
   "name": "Surprise Capsule SaaS Platform",
   "short_name": "SurpriseSaaS",
   "description": "Premium multi-step time-locked digital birthday capsules and cards builder.",
-  "start_url": "/login.html",
+  "start_url": "/login",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#09090b",

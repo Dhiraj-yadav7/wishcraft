@@ -1,7 +1,9 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/landing", "destination": "/home.html" },
     { "source": "/signup", "destination": "/login.html" },
+    { "source": "/login", "destination": "/login.html" },
     { "source": "/api/profile/:action*", "destination": "/api/profile?action=:action" }
   ]
 }
