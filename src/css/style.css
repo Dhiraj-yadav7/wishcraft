@@ -2092,3 +2092,9 @@ body.wish-body {
     }
 }
 
+@media (max-width: 768px) {
+    .floating-guestbook-trigger {
+        display: none !important;
+    }
+}
+

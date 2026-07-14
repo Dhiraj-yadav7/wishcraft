@@ -292,6 +292,7 @@ function setupSurpriseCardUI() {
         document.getElementById('creatorNameText').textContent = `Created by ${viewerConfig.creator.name}`;
         const avatar = document.getElementById('creatorAvatar');
         if (viewerConfig.creator.profilePhoto) {
+            avatar.crossOrigin = "anonymous";
             avatar.src = viewerConfig.creator.profilePhoto;
             avatar.style.display = 'inline-block';
         } else {
@@ -1185,7 +1186,46 @@ function setupPremiumActions() {
     const imgBtn = document.getElementById('downloadImgBtn');
     const calendarBtn = document.getElementById('calendarBtn');
 
-    // 1. Download PDF using html2canvas and jsPDF (capturing the core hero card only)
+    // Helper function to preload all images on the page and in the configuration
+    const preloadAllImages = () => {
+        const images = Array.from(document.querySelectorAll('img'));
+        const configPhotos = viewerConfig.photos || [];
+        const configPromises = configPhotos.map(url => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = resolve;
+                img.onerror = resolve;
+                img.src = url;
+            });
+        });
+
+        if (viewerConfig.creator && viewerConfig.creator.profilePhoto) {
+            const creatorPhotoPromise = new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = resolve;
+                img.onerror = resolve;
+                img.src = viewerConfig.creator.profilePhoto;
+            });
+            configPromises.push(creatorPhotoPromise);
+        }
+
+        const docPromises = images.map(img => {
+            if (!img.src) return Promise.resolve();
+            if (img.complete && img.naturalWidth !== 0) {
+                return Promise.resolve();
+            }
+            return new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
+        
+        return Promise.all([...configPromises, ...docPromises]);
+    };
+
+    // 1. Download PDF using html2canvas and jsPDF (capturing all active slides)
     pdfBtn.addEventListener('click', async () => {
         if (typeof html2canvas === 'undefined') {
             showToast('Image capture library (html2canvas) is not loaded yet. Check your connection.', 'error');
@@ -1203,32 +1243,100 @@ function setupPremiumActions() {
         showToast('Preparing PDF download...', 'info');
         logShareClick();
 
+        // Show premium loading screen overlay to hide screen flicker during rendering
+        const loader = document.getElementById('loadingScreen');
+        if (loader) {
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+        }
+
         try {
-            const heroCard = document.getElementById('birthdayCardHero');
-            const canvasEl = await html2canvas(heroCard, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                logging: false
-            });
-            const imgData = canvasEl.toDataURL('image/png');
-            
+            // Wait for all cross-origin images and web fonts to be fully loaded
+            await preloadAllImages();
+            await document.fonts.ready;
+
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 190;
-            let imgHeight = (canvasEl.height * imgWidth) / canvasEl.width;
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
             
-            if (imgHeight > 260) {
-                imgHeight = 260;
+            // Get computed background of the body so each PDF page has the correct theme color/gradient
+            const bodyStyle = window.getComputedStyle(document.body);
+            let bodyBg = bodyStyle.backgroundImage;
+            if (!bodyBg || bodyBg === 'none') {
+                bodyBg = bodyStyle.backgroundColor;
             }
-            
-            pdf.addImage(imgData, 'PNG', 10, 15, imgWidth, imgHeight);
-            pdf.save(`Surprise_${viewerConfig.name}.pdf`);
+
+            const originalIdx = currentStoryIdx;
+
+            // Render and capture each active section slide
+            for (let i = 0; i < storyPages.length; i++) {
+                const page = storyPages[i];
+
+                // Save styles to restore later
+                const origDisplay = page.style.display;
+                const origOpacity = page.style.opacity;
+                const origVisibility = page.style.visibility;
+                const origTransform = page.style.transform;
+                const origFilter = page.style.filter;
+                const origBg = page.style.background;
+
+                // Make page fully visible and un-animated
+                page.style.display = 'flex';
+                page.style.opacity = '1';
+                page.style.visibility = 'visible';
+                page.style.transform = 'none';
+                page.style.filter = 'none';
+                if (bodyBg) {
+                    page.style.background = bodyBg;
+                }
+
+                // Force layout reflow
+                page.getBoundingClientRect();
+
+                // Wait 100ms for browser rendering to settle
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const canvasEl = await html2canvas(page, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false
+                });
+
+                const imgData = canvasEl.toDataURL('image/png');
+
+                if (i > 0) {
+                    pdf.addPage();
+                }
+
+                // Render page to fit A4 size exactly
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                // Restore styles
+                page.style.display = origDisplay;
+                page.style.opacity = origOpacity;
+                page.style.visibility = origVisibility;
+                page.style.transform = origTransform;
+                page.style.filter = origFilter;
+                page.style.background = origBg;
+            }
+
+            // Restore active view page
+            showStoryPage(originalIdx);
+
+            pdf.save(`SurpriseBook_${viewerConfig.name || 'WishCraft'}.pdf`);
             showToast('PDF downloaded successfully! 📄', 'success');
         } catch (e) {
             console.error('PDF export error:', e);
             showToast('PDF download failed. Try again.', 'error');
         } finally {
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }
             pdfBtn.disabled = false;
             pdfBtn.textContent = originalText;
         }
