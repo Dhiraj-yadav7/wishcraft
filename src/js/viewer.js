@@ -1226,7 +1226,8 @@ function setupPremiumActions() {
     };
 
     // 1. Download PDF using html2canvas and jsPDF (capturing all active slides)
-    pdfBtn.addEventListener('click', async () => {
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', async () => {
         if (typeof html2canvas === 'undefined') {
             showToast('Image capture library (html2canvas) is not loaded yet. Check your connection.', 'error');
             return;
@@ -1341,9 +1342,11 @@ function setupPremiumActions() {
             pdfBtn.textContent = originalText;
         }
     });
+    }
 
     // 2. Download Image (PNG) (capturing the core hero card only)
-    imgBtn.addEventListener('click', async () => {
+    if (imgBtn) {
+        imgBtn.addEventListener('click', async () => {
         if (typeof html2canvas === 'undefined') {
             showToast('Image capture library (html2canvas) is not loaded yet. Check your connection.', 'error');
             return;
@@ -1377,9 +1380,11 @@ function setupPremiumActions() {
             imgBtn.textContent = originalText;
         }
     });
+    }
 
     // 3. Add to Google Calendar Template Link
-    calendarBtn.addEventListener('click', () => {
+    if (calendarBtn) {
+        calendarBtn.addEventListener('click', () => {
         logShareClick();
         
         const name = viewerConfig.name;
@@ -1393,6 +1398,7 @@ function setupPremiumActions() {
         
         window.open(calUrl, '_blank');
     });
+    }
 
     // 4. Social media direct redirects & native share
     const shareUrlInput = document.getElementById('shareUrlInput');
