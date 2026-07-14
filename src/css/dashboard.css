@@ -525,7 +525,7 @@ body.scrollable-page {
 
 .filter-chip.active {
     background: var(--dash-text);
-    color: var(--dash-bg);
+    color: #ffffff !important;
     border-color: var(--dash-text);
 }
 
