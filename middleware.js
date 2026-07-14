@@ -1,5 +1,3 @@
-import { NextResponse } from 'next/server';
-
 const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 
 // Base64URL decode helper for Edge runtime
@@ -61,7 +59,8 @@ async function verifyHS256(token, secret) {
 }
 
 export async function middleware(request) {
-    const { pathname } = request.nextUrl;
+    const url = new URL(request.url);
+    const pathname = url.pathname;
     
     // Normalize path to lowercase
     const path = pathname.toLowerCase();
@@ -73,11 +72,23 @@ export async function middleware(request) {
     const privateApis = ['/api/dashboard', '/api/profile', '/api/pages', '/api/ai'];
     const isPrivateApi = privateApis.some(api => path === api || path.startsWith(api + '/'));
     
+    // Helper to retrieve cookie on standard request
+    const getCookie = (name) => {
+        const cookieHeader = request.headers.get('cookie');
+        if (!cookieHeader) return null;
+        const cookies = {};
+        cookieHeader.split(';').forEach(c => {
+            let [k, ...v] = c.split('=');
+            k = k.trim();
+            if (k) {
+                cookies[k] = decodeURIComponent(v.join('='));
+            }
+        });
+        return cookies[name] || null;
+    };
+    
     if (isPrivatePage || isPrivateApi) {
-        // Retrieve token from cookie
-        const tokenCookie = request.cookies.get('auth_token');
-        const token = tokenCookie ? tokenCookie.value : null;
-        
+        const token = getCookie('auth_token');
         let payload = null;
         if (token) {
             payload = await verifyHS256(token, JWT_SECRET);
@@ -85,58 +96,34 @@ export async function middleware(request) {
         
         if (!payload) {
             if (isPrivateApi) {
-                return new NextResponse(
+                return new Response(
                     JSON.stringify({ success: false, message: 'Session expired or invalid token. Please log in again.' }),
                     { status: 401, headers: { 'content-type': 'application/json' } }
                 );
             } else {
                 // Redirect HTML requests to /login
-                const loginUrl = new URL('/login', request.url);
-                return NextResponse.redirect(loginUrl);
+                return Response.redirect(new URL('/login', request.url));
             }
         }
         
-        // Pass the user ID down to the API function via header
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-user-id', payload.userId);
+        // Pass the user ID down to the API function via header prefix pattern
+        const responseHeaders = new Headers();
+        responseHeaders.set('x-middleware-request-x-user-id', payload.userId);
         
-        return NextResponse.next({
-            request: {
-                headers: requestHeaders,
-            },
+        return new Response(null, {
+            headers: responseHeaders
         });
     }
     
     // Auth pages (login, signup) - if user is logged in, redirect to dashboard
     const isAuthPage = path === '/login' || path === '/signup' || path.startsWith('/login/') || path.startsWith('/signup/');
     if (isAuthPage) {
-        const tokenCookie = request.cookies.get('auth_token');
-        const token = tokenCookie ? tokenCookie.value : null;
+        const token = getCookie('auth_token');
         if (token) {
             const payload = await verifyHS256(token, JWT_SECRET);
             if (payload) {
-                return NextResponse.redirect(new URL('/dashboard', request.url));
+                return Response.redirect(new URL('/dashboard', request.url));
             }
         }
     }
-    
-    return NextResponse.next();
 }
-
-// Config to specify matching routes
-export const config = {
-    matcher: [
-        '/dashboard',
-        '/dashboard.html',
-        '/profile',
-        '/profile.html',
-        '/generator',
-        '/generator.html',
-        '/login',
-        '/signup',
-        '/api/dashboard',
-        '/api/profile',
-        '/api/pages',
-        '/api/ai'
-    ]
-};
