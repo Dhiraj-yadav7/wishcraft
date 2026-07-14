@@ -858,7 +858,7 @@ function setupDashboardEvents() {
             const input = document.getElementById('shareUrlInput');
             input.select();
             navigator.clipboard.writeText(input.value);
-            showToast('Sharing link copied to clipboard! 📋🔗', 'success');
+            showToast('Link copied!', 'success');
         };
     }
 
