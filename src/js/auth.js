@@ -338,33 +338,48 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFirebaseConfigMissing = false;
 
     const initFirebaseClient = async () => {
+        // Fallback configuration for static server loads or local testing
+        const fallbackConfig = {
+            apiKey: "AIzaSyCq3jgy7CSVI1pE5NXZ8Ou5lmwkm68yllE",
+            authDomain: "wishcraft-auth-ea541.firebaseapp.com",
+            projectId: "wishcraft-auth-ea541",
+            storageBucket: "wishcraft-auth-ea541.firebasestorage.app",
+            messagingSenderId: "153931402382",
+            appId: "1:153931402382:web:6dc519a98b7fe31dd38ddf"
+        };
+
         try {
             const res = await fetch('/api/auth?action=config&t=' + Date.now());
             const data = await res.json();
-            if (data.success && data.data.firebaseConfig) {
-                const config = data.data.firebaseConfig;
-                if (config.apiKey) {
-                    firebase.initializeApp(config);
-                    firebaseAuth = firebase.auth();
-                    const maskedKey = config.apiKey.substring(0, 6) + '...';
-                    console.log('Resolved Firebase API Key in development:', maskedKey);
-                    console.log('Firebase Client SDK initialized successfully with configuration:', {
-                        authDomain: config.authDomain,
-                        projectId: config.projectId,
-                        storageBucket: config.storageBucket,
-                        messagingSenderId: config.messagingSenderId,
-                        appId: config.appId
-                    });
-                } else {
-                    isFirebaseConfigMissing = true;
-                    console.warn('Firebase configuration details missing in dynamic config.');
-                }
+            let config = null;
+
+            if (data.success && data.data.firebaseConfig && data.data.firebaseConfig.apiKey) {
+                config = data.data.firebaseConfig;
             } else {
+                config = fallbackConfig;
+            }
+
+            firebase.initializeApp(config);
+            firebaseAuth = firebase.auth();
+            const maskedKey = config.apiKey.substring(0, 6) + '...';
+            console.log('Resolved Firebase API Key in development:', maskedKey);
+            console.log('Firebase Client SDK initialized successfully with configuration:', {
+                authDomain: config.authDomain,
+                projectId: config.projectId,
+                storageBucket: config.storageBucket,
+                messagingSenderId: config.messagingSenderId,
+                appId: config.appId
+            });
+        } catch (err) {
+            console.warn('Dynamic config fetch failed, using fallback config. Details:', err);
+            try {
+                firebase.initializeApp(fallbackConfig);
+                firebaseAuth = firebase.auth();
+                console.log('Firebase Client SDK initialized using static fallback configuration.');
+            } catch (initErr) {
+                console.error('Failed to initialize Firebase with static fallback config:', initErr);
                 isFirebaseConfigMissing = true;
             }
-        } catch (err) {
-            console.error('Error loading dynamic Firebase config:', err);
-            isFirebaseConfigMissing = true;
         }
     };
 
