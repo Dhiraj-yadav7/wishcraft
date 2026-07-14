@@ -167,6 +167,16 @@ const authManager = {
         } catch (e) {
             console.error('Logout API call failed:', e);
         }
+        
+        try {
+            if (typeof firebase !== 'undefined' && firebase.apps.length) {
+                await firebase.auth().signOut();
+                console.log('Firebase client session cleared.');
+            }
+        } catch (err) {
+            console.error('Error signing out Firebase client:', err);
+        }
+
         authManager.clearSession();
         showToast('Logged out successfully. See you! 👋');
         setTimeout(() => window.location.href = '/login', 1000);

@@ -3,6 +3,7 @@
 .agents/
 antigravity-ide/
 *.log
+firebase-service-account.json
 
 # Local package dependencies & Database
 node_modules/
