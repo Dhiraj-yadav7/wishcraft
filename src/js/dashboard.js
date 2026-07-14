@@ -868,7 +868,7 @@ function setupDashboardEvents() {
             const input = document.getElementById('qrPageUrlText');
             input.select();
             navigator.clipboard.writeText(input.value);
-            showToast('Celebration URL copied! 📱🔗', 'success');
+            showToast('Link copied!', 'success');
         };
     }
 
