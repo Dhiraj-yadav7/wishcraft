@@ -7,7 +7,7 @@
    ======================================================== */
 
 /* Core page overrides for auth experience */
-body.scrollable-page {
+body.auth-page.scrollable-page {
     position: relative;
     min-height: 100vh;
     display: flex;
@@ -18,7 +18,7 @@ body.scrollable-page {
 }
 
 /* Animated Floating Cosmic Background Blobs */
-.blob-bg-container {
+body.auth-page .blob-bg-container {
     position: fixed;
     inset: 0;
     width: 100%;
@@ -28,7 +28,7 @@ body.scrollable-page {
     pointer-events: none;
 }
 
-.blob {
+body.auth-page .blob {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
@@ -37,7 +37,7 @@ body.scrollable-page {
     animation: floatBlob 25s infinite alternate ease-in-out;
 }
 
-.blob-purple {
+body.auth-page .blob-purple {
     width: 500px;
     height: 500px;
     background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(168, 85, 247, 0) 70%);
@@ -46,7 +46,7 @@ body.scrollable-page {
     animation-duration: 20s;
 }
 
-.blob-pink {
+body.auth-page .blob-pink {
     width: 600px;
     height: 600px;
     background: radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(236, 72, 153, 0) 70%);
@@ -55,7 +55,7 @@ body.scrollable-page {
     animation-duration: 28s;
 }
 
-.blob-blue {
+body.auth-page .blob-blue {
     width: 450px;
     height: 450px;
     background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(59, 130, 246, 0) 70%);
@@ -78,14 +78,14 @@ body.scrollable-page {
 }
 
 /* Floating Top Nav Learn More Button */
-.floating-nav {
+body.auth-page .floating-nav {
     position: absolute;
     top: 2rem;
     right: 2rem;
     z-index: 100;
 }
 
-.btn-floating {
+body.auth-page .btn-floating {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -103,7 +103,7 @@ body.scrollable-page {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.btn-floating:hover {
+body.auth-page .btn-floating:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
     color: #ffffff;
@@ -112,7 +112,7 @@ body.scrollable-page {
 }
 
 /* Glassmorphic Auth Box */
-.auth-box-card {
+body.auth-page .auth-box-card {
     width: 90% !important;
     max-width: 460px !important;
     background: rgba(15, 12, 30, 0.55) !important;
@@ -129,12 +129,12 @@ body.scrollable-page {
 }
 
 /* Brand Header */
-.auth-header {
+body.auth-page .auth-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
-.auth-logo-container {
+body.auth-page .auth-logo-container {
     width: 60px;
     height: 60px;
     background: rgba(255, 255, 255, 0.05);
@@ -148,18 +148,18 @@ body.scrollable-page {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.auth-logo-container:hover {
+body.auth-page .auth-logo-container:hover {
     transform: scale(1.1) rotate(6deg);
 }
 
-.auth-logo {
+body.auth-page .auth-logo {
     width: 32px;
     height: 32px;
     object-fit: contain;
     filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));
 }
 
-.auth-brand-name {
+body.auth-page .auth-brand-name {
     font-size: 1.8rem;
     font-weight: 900;
     letter-spacing: -0.02em;
@@ -169,7 +169,7 @@ body.scrollable-page {
     margin-bottom: 0.15rem;
 }
 
-.auth-brand-tagline {
+body.auth-page .auth-brand-tagline {
     font-size: 0.85rem;
     color: #a78bfa;
     font-weight: 500;
@@ -177,7 +177,7 @@ body.scrollable-page {
 }
 
 /* Sliding Tab Headers */
-.auth-tabs-container {
+body.auth-page .auth-tabs-container {
     position: relative;
     display: flex;
     background: rgba(255, 255, 255, 0.03);
@@ -188,7 +188,7 @@ body.scrollable-page {
     transition: opacity 0.3s ease, visibility 0.3s ease, height 0.3s ease, margin-bottom 0.3s ease;
 }
 
-.auth-tabs-container.hide-tabs {
+body.auth-page .auth-tabs-container.hide-tabs {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -198,7 +198,7 @@ body.scrollable-page {
     border: none;
 }
 
-.auth-tab-btn {
+body.auth-page .auth-tab-btn {
     flex: 1;
     background: transparent;
     border: none;
@@ -212,11 +212,11 @@ body.scrollable-page {
     border-radius: 10px;
 }
 
-.auth-tab-btn.active {
+body.auth-page .auth-tab-btn.active {
     color: #ffffff;
 }
 
-.auth-tab-slider {
+body.auth-page .auth-tab-slider {
     position: absolute;
     top: 4px;
     bottom: 4px;
@@ -230,16 +230,16 @@ body.scrollable-page {
     box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
 }
 
-.auth-tabs-container[style*="--active-index: 1"] .auth-tab-slider {
+body.auth-page .auth-tabs-container[style*="--active-index: 1"] .auth-tab-slider {
     transform: translateX(100%);
 }
 
 /* Smooth Slide-up & Fade Form Transitions */
-.auth-form {
+body.auth-page .auth-form {
     display: none;
 }
 
-.auth-form.active {
+body.auth-page .auth-form.active {
     display: block;
     animation: slideUpFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -256,13 +256,13 @@ body.scrollable-page {
 }
 
 /* Modern Inputs & Form Grid */
-.form-group {
+body.auth-page .form-group {
     margin-bottom: 1.25rem;
     position: relative;
     width: 100%;
 }
 
-.form-label {
+body.auth-page .form-label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
@@ -270,7 +270,7 @@ body.scrollable-page {
     margin-bottom: 0.5rem;
 }
 
-.text-input {
+body.auth-page .text-input {
     width: 100%;
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -283,18 +283,18 @@ body.scrollable-page {
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-.text-input::placeholder {
+body.auth-page .text-input::placeholder {
     color: #64748b;
 }
 
-.text-input:focus {
+body.auth-page .text-input:focus {
     background: rgba(255, 255, 255, 0.06) !important;
     border-color: rgba(168, 85, 247, 0.5) !important;
     box-shadow: 0 0 14px rgba(168, 85, 247, 0.2),
                 inset 0 0 0 1px rgba(168, 85, 247, 0.08) !important;
 }
 
-.forgot-link {
+body.auth-page .forgot-link {
     font-size: 0.8rem;
     color: #c084fc;
     text-decoration: none;
@@ -302,13 +302,13 @@ body.scrollable-page {
     transition: color 0.2s ease;
 }
 
-.forgot-link:hover {
+body.auth-page .forgot-link:hover {
     color: #f472b6;
     text-decoration: underline;
 }
 
 /* Premium Buttons Styling */
-.btn-primary {
+body.auth-page .btn-primary {
     background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%) !important;
     color: #ffffff !important;
     border: none !important;
@@ -327,18 +327,18 @@ body.scrollable-page {
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-.btn-primary:hover {
+body.auth-page .btn-primary:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 12px 24px -6px rgba(168, 85, 247, 0.6) !important;
     filter: brightness(1.1) !important;
 }
 
-.btn-primary:active {
+body.auth-page .btn-primary:active {
     transform: translateY(0) !important;
 }
 
 /* Google Sign-in Button */
-.btn-google {
+body.auth-page .btn-google {
     width: 100%;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -357,25 +357,25 @@ body.scrollable-page {
     font-family: 'Outfit', sans-serif;
 }
 
-.btn-google:hover {
+body.auth-page .btn-google:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-.google-icon {
+body.auth-page .google-icon {
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
 }
 
 /* Divider styling */
-.auth-divider {
+body.auth-page .auth-divider {
     text-align: center;
     position: relative;
     margin: 1.6rem 0;
 }
 
-.auth-divider::before {
+body.auth-page .auth-divider::before {
     content: "";
     position: absolute;
     top: 50%;
@@ -386,7 +386,7 @@ body.scrollable-page {
     z-index: 1;
 }
 
-.auth-divider span {
+body.auth-page .auth-divider span {
     position: relative;
     z-index: 2;
     background: #0d0a1b; /* Dark backdrop color matches overlay */
@@ -399,7 +399,7 @@ body.scrollable-page {
 }
 
 /* Footer / Auth Switch Link */
-.auth-footer-link {
+body.auth-page .auth-footer-link {
     text-align: center;
     margin-top: 1.5rem;
     font-size: 0.9rem;
@@ -407,20 +407,20 @@ body.scrollable-page {
     font-weight: 500;
 }
 
-.auth-footer-link a {
+body.auth-page .auth-footer-link a {
     color: #c084fc;
     text-decoration: none;
     font-weight: 700;
     transition: color 0.2s ease;
 }
 
-.auth-footer-link a:hover {
+body.auth-page .auth-footer-link a:hover {
     color: #f472b6;
     text-decoration: underline;
 }
 
 /* Extra links at bottom (Guest Mode) */
-.auth-extra-links-container {
+body.auth-page .auth-extra-links-container {
     margin-top: 2rem;
     width: 100%;
     display: flex;
@@ -428,20 +428,20 @@ body.scrollable-page {
     align-items: center;
 }
 
-.divider-line {
+body.auth-page .divider-line {
     width: 100%;
     height: 1px;
     background: rgba(255, 255, 255, 0.06);
     margin-bottom: 1.5rem;
 }
 
-.auth-secondary-actions {
+body.auth-page .auth-secondary-actions {
     display: flex;
     justify-content: center;
     width: 100%;
 }
 
-.btn-secondary-action {
+body.auth-page .btn-secondary-action {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -452,7 +452,7 @@ body.scrollable-page {
     transition: all 0.2s ease;
 }
 
-.btn-secondary-action:hover {
+body.auth-page .btn-secondary-action:hover {
     color: #ffffff;
     transform: translateY(-1px);
 }
@@ -461,17 +461,17 @@ body.scrollable-page {
    RESPONSIVE DESIGN SYSTEM
    ======================================================== */
 @media (max-width: 480px) {
-    .floating-nav {
+    body.auth-page .floating-nav {
         top: 1.25rem;
         right: 1.25rem;
     }
     
-    .auth-box-card {
+    body.auth-page .auth-box-card {
         padding: 2.5rem 1.75rem 2.2rem !important;
         border-radius: 20px !important;
     }
     
-    .auth-brand-name {
+    body.auth-page .auth-brand-name {
         font-size: 1.6rem;
     }
 }

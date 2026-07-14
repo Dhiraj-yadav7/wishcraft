@@ -4,10 +4,10 @@
    ======================================================== */
 
 :root {
-    --dash-bg: #f8fafc;
-    --dash-card-bg: rgba(255, 255, 255, 0.7);
-    --dash-card-border: rgba(148, 163, 184, 0.15);
-    --dash-text: #0f172a;
+    --dash-bg: linear-gradient(135deg, #FFEAF3 0%, #FFD6E8 50%, #FFF5F8 100%);
+    --dash-card-bg: rgba(255, 255, 255, 0.75);
+    --dash-card-border: rgba(255, 255, 255, 0.4);
+    --dash-text: #1e1b4b;
     --dash-text-muted: #64748b;
     --dash-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
     --dash-shadow-hover: 0 20px 40px -15px rgba(15, 23, 42, 0.12), 0 1px 10px rgba(15, 23, 42, 0.04);
@@ -23,7 +23,7 @@
 /* Elegant and Cosmic themes support */
 body.theme-elegant, body.theme-cosmic {
     --dash-bg: #090d16;
-    --dash-card-bg: rgba(15, 23, 42, 0.5);
+    --dash-card-bg: rgba(15, 23, 42, 0.55);
     --dash-card-border: rgba(255, 255, 255, 0.08);
     --dash-text: #f1f5f9;
     --dash-text-muted: #94a3b8;
@@ -32,8 +32,9 @@ body.theme-elegant, body.theme-cosmic {
 }
 
 /* Global Reset & Base Styling */
-.scrollable-page {
-    background: var(--dash-bg);
+body.scrollable-page {
+    background: var(--dash-bg) !important;
+    background-attachment: fixed !important;
     color: var(--dash-text);
     font-family: 'Outfit', sans-serif;
     margin: 0;
