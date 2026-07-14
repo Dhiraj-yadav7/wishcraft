@@ -325,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Firebase client
     let firebaseAuth = null;
+    let isFirebaseConfigMissing = false;
 
     const initFirebaseClient = async () => {
         try {
@@ -337,11 +338,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     firebaseAuth = firebase.auth();
                     console.log('Firebase Client SDK initialized.');
                 } else {
+                    isFirebaseConfigMissing = true;
                     console.warn('Firebase configuration details missing in dynamic config.');
                 }
+            } else {
+                isFirebaseConfigMissing = true;
             }
         } catch (err) {
             console.error('Error loading dynamic Firebase config:', err);
+            isFirebaseConfigMissing = true;
         }
     };
 
@@ -360,7 +365,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!firebaseAuth) {
-                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                if (isFirebaseConfigMissing) {
+                    showToast('Firebase credentials missing! Please configure environment variables in your .env.local file.', 'error');
+                } else {
+                    showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                }
                 return;
             }
 
@@ -425,7 +434,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!firebaseAuth) {
-                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                if (isFirebaseConfigMissing) {
+                    showToast('Firebase credentials missing! Please configure environment variables in your .env.local file.', 'error');
+                } else {
+                    showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                }
                 return;
             }
 
@@ -474,7 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!firebaseAuth) {
-                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                if (isFirebaseConfigMissing) {
+                    showToast('Firebase credentials missing! Please configure environment variables in your .env.local file.', 'error');
+                } else {
+                    showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                }
                 return;
             }
 
@@ -505,7 +522,11 @@ document.addEventListener('DOMContentLoaded', () => {
         googleBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             if (!firebaseAuth) {
-                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                if (isFirebaseConfigMissing) {
+                    showToast('Firebase credentials missing! Please configure environment variables in your .env.local file.', 'error');
+                } else {
+                    showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                }
                 return;
             }
 
