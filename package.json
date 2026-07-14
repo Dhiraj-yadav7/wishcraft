@@ -4,13 +4,14 @@
   "description": "Premium Birthday Surprise App with JWT Authentication and Visual Themes",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "dev": "echo 'Starting Static Server...'",
+    "start": "echo 'Starting Static Server...'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.10.0",
     "dotenv": "^16.4.5",
+    "firebase-admin": "^14.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.1"
   }

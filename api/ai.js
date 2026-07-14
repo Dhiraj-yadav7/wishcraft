@@ -1,8 +1,7 @@
-const jwt = require('jsonwebtoken');
 const { success, error } = require('./utils/response');
 const { checkRateLimit } = require('./utils/rateLimiter');
+const { getUserIdFromRequest } = require('./utils/auth');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Curriculum of local rules fallbacks for advanced AI actions
@@ -86,18 +85,11 @@ module.exports = async function handler(req, res) {
 
     const isPublicCategory = publicCategories.includes(category);
 
-    const authHeader = req.headers.authorization;
-    let isAuthenticated = false;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        try {
-            jwt.verify(token, JWT_SECRET);
-            isAuthenticated = true;
-        } catch (e) {}
-    }
+    const userId = getUserIdFromRequest(req);
+    const isAuthenticated = !!userId;
 
     if (!isAuthenticated && !isPublicCategory) {
-        return error(res, 'Unauthenticated. Token missing.', 401);
+        return error(res, 'Session expired or invalid token. Please log in again.', 401);
     }
 
     // ====================================================

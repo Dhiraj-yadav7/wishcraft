@@ -1,44 +1,114 @@
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('./utils/db');
 const { success, error } = require('./utils/response');
+const { getUserIdFromRequest, JWT_SECRET } = require('./utils/auth');
+const { verifyFirebaseIdToken } = require('./utils/firebase');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
+// Common helper to register session history and set backend JWT cookie
+async function loginUserAndSetCookie(req, res, user, message = 'Welcome back! Logged in successfully 🎉') {
+    const userAgent = req.headers['user-agent'] || 'Unknown User-Agent';
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    const country = req.headers['x-vercel-ip-country'] || 'US';
+    const city = req.headers['x-vercel-ip-city'] || 'Localhost';
+    
+    let os = 'Unknown OS';
+    if (userAgent.includes('Windows')) os = 'Windows';
+    else if (userAgent.includes('Macintosh')) os = 'macOS';
+    else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+    else if (userAgent.includes('Android')) os = 'Android';
+    else if (userAgent.includes('Linux')) os = 'Linux';
+    
+    let browser = 'Unknown Browser';
+    if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Chrome')) browser = 'Chrome';
+    else if (userAgent.includes('Safari')) browser = 'Safari';
+    else if (userAgent.includes('Edge')) browser = 'Edge';
+    
+    const newHistoryItem = {
+        timestamp: new Date().toISOString(),
+        browser,
+        os,
+        ip: clientIp.split(',')[0].trim(),
+        location: `${city}, ${country}`
+    };
+    
+    const history = user.loginHistory || [];
+    history.unshift(newHistoryItem);
+    if (history.length > 10) history.pop();
+    
+    await db.updateUser(user._id.toString(), { loginHistory: history });
+
+    const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.setHeader('Set-Cookie', [
+        `auth_token=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${7 * 24 * 60 * 60}`
+    ]);
+
+    return success(res, {
+        user: { id: user._id, name: user.name, email: user.email }
+    }, message, 200);
+}
 
 module.exports = async function handler(req, res) {
     const { action } = req.query;
 
     try {
         // ====================================================
+        // CONFIG ACTION (Exposes public Firebase Client Config)
+        // ====================================================
+        if (action === 'config') {
+            if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
+            return success(res, {
+                firebaseConfig: {
+                    apiKey: process.env.FIREBASE_API_KEY || '',
+                    authDomain: process.env.FIREBASE_AUTH_DOMAIN || '',
+                    projectId: process.env.FIREBASE_PROJECT_ID || '',
+                    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+                    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '',
+                    appId: process.env.FIREBASE_APP_ID || ''
+                }
+            }, 'Config loaded successfully.', 200);
+        }
+
+        // ====================================================
         // SIGNUP ACTION
         // ====================================================
-        if (action === 'signup') {
+        else if (action === 'signup') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { name, email, password } = req.body;
+            const { idToken, name } = req.body;
 
-            if (!name || !email || !password) return error(res, 'Please fill in all required fields.', 400);
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) return error(res, 'Please provide a valid email address.', 400);
-            if (password.length < 6) return error(res, 'Password must be at least 6 characters long.', 400);
+            if (!idToken) return error(res, 'Firebase ID Token is required.', 400);
 
-            const existingUser = await db.findUserByEmail(email);
-            if (existingUser) return error(res, 'An account with this email address already exists.', 409);
+            let decoded;
+            try {
+                decoded = await verifyFirebaseIdToken(idToken);
+            } catch (err) {
+                console.error('Firebase token verification error during signup:', err);
+                return error(res, 'Firebase authentication failed: ' + err.message, 401);
+            }
 
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
+            const email = decoded.email;
+            const uid = decoded.uid;
+            const finalName = name || decoded.name || email.split('@')[0];
 
-            const user = await db.createUser({
-                name,
-                email: email.toLowerCase(),
-                password: hashedPassword
-            });
+            let user = await db.findUserByEmail(email);
+            if (!user) {
+                user = await db.createUser({
+                    name: finalName,
+                    email: email.toLowerCase(),
+                    socialProvider: 'firebase',
+                    socialId: uid
+                });
+            } else {
+                if (!user.socialId) {
+                    await db.updateUser(user._id.toString(), {
+                        socialProvider: 'firebase',
+                        socialId: uid
+                    });
+                }
+            }
 
-            const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
-            return success(res, {
-                token,
-                user: { id: user._id, name: user.name, email: user.email }
-            }, 'Account created successfully! Welcome 🎉', 201);
+            return await loginUserAndSetCookie(req, res, user, 'Account registered successfully! Welcome 🎉');
         }
 
         // ====================================================
@@ -46,102 +116,83 @@ module.exports = async function handler(req, res) {
         // ====================================================
         else if (action === 'login') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { email, password } = req.body;
+            const { idToken } = req.body;
 
-            if (!email || !password) return error(res, 'Please provide both email and password.', 400);
+            if (!idToken) return error(res, 'Firebase ID Token is required.', 400);
 
-            const user = await db.findUserByEmail(email);
-            if (!user) return error(res, 'Invalid credentials. Please try again.', 401);
-
-            if (!user.password) {
-                return error(res, `This account is linked via ${user.socialProvider}. Please use social login.`, 400);
+            let decoded;
+            try {
+                decoded = await verifyFirebaseIdToken(idToken);
+            } catch (err) {
+                console.error('Firebase token verification error during login:', err);
+                return error(res, 'Firebase authentication failed: ' + err.message, 401);
             }
 
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) return error(res, 'Invalid credentials. Please try again.', 401);
+            const email = decoded.email;
+            const uid = decoded.uid;
 
-            // Log session history details
-            const userAgent = req.headers['user-agent'] || 'Unknown User-Agent';
-            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-            const country = req.headers['x-vercel-ip-country'] || 'US';
-            const city = req.headers['x-vercel-ip-city'] || 'Localhost';
-            
-            let os = 'Unknown OS';
-            if (userAgent.includes('Windows')) os = 'Windows';
-            else if (userAgent.includes('Macintosh')) os = 'macOS';
-            else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
-            else if (userAgent.includes('Android')) os = 'Android';
-            else if (userAgent.includes('Linux')) os = 'Linux';
-            
-            let browser = 'Unknown Browser';
-            if (userAgent.includes('Firefox')) browser = 'Firefox';
-            else if (userAgent.includes('Chrome')) browser = 'Chrome';
-            else if (userAgent.includes('Safari')) browser = 'Safari';
-            else if (userAgent.includes('Edge')) browser = 'Edge';
-            
-            const newHistoryItem = {
-                timestamp: new Date().toISOString(),
-                browser,
-                os,
-                ip: clientIp.split(',')[0].trim(),
-                location: `${city}, ${country}`
-            };
-            
-            const history = user.loginHistory || [];
-            history.unshift(newHistoryItem);
-            if (history.length > 10) history.pop();
-            
-            await db.updateUser(user._id.toString(), { loginHistory: history });
+            let user = await db.findUserByEmail(email);
+            if (!user) {
+                // Autocreate user record in MongoDB if validated by Firebase but missing in db
+                user = await db.createUser({
+                    name: decoded.name || email.split('@')[0],
+                    email: email.toLowerCase(),
+                    socialProvider: 'firebase',
+                    socialId: uid
+                });
+            } else {
+                if (!user.socialId) {
+                    await db.updateUser(user._id.toString(), {
+                        socialProvider: 'firebase',
+                        socialId: uid
+                    });
+                }
+            }
 
-            const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
-            return success(res, {
-                token,
-                user: { id: user._id, name: user.name, email: user.email }
-            }, 'Welcome back! Logged in successfully 🎉', 200);
+            return await loginUserAndSetCookie(req, res, user, 'Logged in successfully! Welcome back 🎉');
         }
 
         // ====================================================
-        // FORGOT PASSWORD ACTION
+        // GOOGLE AUTHENTICATION ACTION
         // ====================================================
-        else if (action === 'forgot') {
+        else if (action === 'google') {
             if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { email } = req.body;
+            const { idToken } = req.body;
 
-            if (!email) return error(res, 'Please provide an email address.', 400);
+            if (!idToken) return error(res, 'Firebase ID Token is required.', 400);
 
-            const user = await db.findUserByEmail(email);
-            if (!user) return error(res, 'No account found with this email address.', 404);
+            let decoded;
+            try {
+                decoded = await verifyFirebaseIdToken(idToken);
+            } catch (err) {
+                console.error('Firebase Google verification error:', err);
+                return error(res, 'Firebase Google verification failed: ' + err.message, 401);
+            }
 
-            const resetToken = Math.random().toString(36).substring(2, 15) + 
-                               Math.random().toString(36).substring(2, 15);
-            const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+            const email = decoded.email;
+            const uid = decoded.uid;
+            const picture = decoded.picture || '';
 
-            await db.updateUser(user._id.toString(), { resetToken, resetTokenExpiry });
-            return success(res, { resetToken }, 'Password recovery token generated successfully! Link sent ✉️', 200);
-        }
+            let user = await db.findUserByEmail(email);
+            if (!user) {
+                user = await db.createUser({
+                    name: decoded.name || email.split('@')[0],
+                    email: email.toLowerCase(),
+                    socialProvider: 'google',
+                    socialId: uid,
+                    profilePhoto: picture
+                });
+            } else {
+                if (user.socialProvider !== 'google') {
+                    await db.updateUser(user._id.toString(), {
+                        socialProvider: 'google',
+                        socialId: uid,
+                        profilePhoto: picture || user.profilePhoto
+                    });
+                }
+            }
 
-        // ====================================================
-        // RESET PASSWORD ACTION
-        // ====================================================
-        else if (action === 'reset') {
-            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { token, password } = req.body;
-
-            if (!token || !password) return error(res, 'Reset token and password are required.', 400);
-            if (password.length < 6) return error(res, 'Password must be at least 6 characters long.', 400);
-
-            const user = await db.findUserByResetToken(token);
-            if (!user) return error(res, 'Invalid or expired recovery token. Please try again.', 400);
-
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-
-            await db.updateUser(user._id.toString(), {
-                password: hashedPassword,
-                resetToken: null,
-                resetTokenExpiry: null
-            });
-            return success(res, null, 'Password reset successfully! You can now log in 🔐', 200);
+            return await loginUserAndSetCookie(req, res, user, 'Welcome! Google authentication successful 🎉');
         }
 
         // ====================================================
@@ -149,21 +200,12 @@ module.exports = async function handler(req, res) {
         // ====================================================
         else if (action === 'user') {
             if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
-            const authHeader = req.headers.authorization;
-            
-            if (!authHeader || !authHeader.startsWith('Bearer ')) {
-                return error(res, 'Authorization token missing or invalid.', 401);
-            }
-
-            const token = authHeader.split(' ')[1];
-            let decoded;
-            try {
-                decoded = jwt.verify(token, JWT_SECRET);
-            } catch (e) {
+            const userId = getUserIdFromRequest(req);
+            if (!userId) {
                 return error(res, 'Session expired or invalid token. Please log in again.', 401);
             }
 
-            const user = await db.findUserById(decoded.userId);
+            const user = await db.findUserById(userId);
             if (!user) return error(res, 'User account not found.', 404);
 
             return success(res, {
@@ -172,38 +214,13 @@ module.exports = async function handler(req, res) {
         }
 
         // ====================================================
-        // SOCIAL LOGIN ACTION
+        // LOGOUT ACTION
         // ====================================================
-        else if (action === 'social') {
-            if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
-            const { email, name, provider, providerId } = req.body;
-
-            if (!email || !name || !provider || !providerId) {
-                return error(res, 'Missing required social login details.', 400);
-            }
-
-            let user = await db.findUserByEmail(email);
-            if (!user) {
-                user = await db.createUser({
-                    name,
-                    email: email.toLowerCase(),
-                    socialProvider: provider,
-                    socialId: providerId
-                });
-            } else {
-                if (!user.socialProvider) {
-                    await db.updateUser(user._id.toString(), {
-                        socialProvider: provider,
-                        socialId: providerId
-                    });
-                }
-            }
-
-            const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
-            return success(res, {
-                token,
-                user: { id: user._id, name: user.name, email: user.email }
-            }, `Welcome! Logged in via ${provider.charAt(0).toUpperCase() + provider.slice(1)} 🎉`, 200);
+        else if (action === 'logout') {
+            res.setHeader('Set-Cookie', [
+                `auth_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0`
+            ]);
+            return success(res, null, 'Logged out successfully', 200);
         }
 
         // Default

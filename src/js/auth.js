@@ -133,12 +133,13 @@ window.showToast = showToast;
 // ========================================================
 // SESSION & JWT PERSISTENCE MANAGEMENT
 // ========================================================
-const TOKEN_KEY = 'birthdaySurpriseAuthToken';
-
 const authManager = {
-    getToken: () => localStorage.getItem(TOKEN_KEY),
-    setToken: (token) => localStorage.setItem(TOKEN_KEY, token),
-    removeToken: () => localStorage.removeItem(TOKEN_KEY),
+    // Under HttpOnly cookie authentication, the frontend cannot read the actual token.
+    // We return a truthy indicator string if user details exist in localStorage,
+    // which allows existing client code (e.g. checks for !token) to pass seamlessly.
+    getToken: () => authManager.getUser() ? 'session-active' : null,
+    setToken: (token) => { /* no-op: stored automatically by server in HttpOnly cookie */ },
+    removeToken: () => { /* no-op */ },
     
     // Check local session
     getUser: () => {
@@ -153,7 +154,6 @@ const authManager = {
     setUser: (user) => localStorage.setItem('birthdaySurpriseUser', JSON.stringify(user)),
     
     clearSession: () => {
-        authManager.removeToken();
         localStorage.removeItem('birthdaySurpriseUser');
         // Clear all cookies
         document.cookie.split(";").forEach(function(c) { 
@@ -161,7 +161,12 @@ const authManager = {
         });
     },
 
-    logout: () => {
+    logout: async () => {
+        try {
+            await fetch('/api/auth?action=logout', { method: 'POST' });
+        } catch (e) {
+            console.error('Logout API call failed:', e);
+        }
         authManager.clearSession();
         showToast('Logged out successfully. See you! 👋');
         setTimeout(() => window.location.href = '/login', 1000);
@@ -169,15 +174,9 @@ const authManager = {
 
     // Verify session with the backend API
     verifySession: async () => {
-        const token = authManager.getToken();
-        if (!token) return false;
-
         try {
             const res = await fetch('/api/auth?action=user', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                method: 'GET'
             });
             const data = await res.json();
             if (data.success) {
@@ -260,13 +259,36 @@ const authManager = {
 
 window.authManager = authManager;
 
+// Intercept all fetch requests to handle expired/invalid JWT sessions globally
+if (typeof window !== 'undefined') {
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch(...args);
+            if (response.status === 401) {
+                const path = window.location.pathname.toLowerCase();
+                const isPublicPage = path.includes('/view') || path.includes('/wish') || path.includes('/home') || path.includes('/landing');
+                const isAuthPage = path.includes('/login') || path.includes('/signup');
+                if (!isPublicPage && !isAuthPage) {
+                    authManager.clearSession();
+                    window.location.href = '/login';
+                }
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+}
+
 // Auto-run route guards when loaded
 if (typeof window !== 'undefined') {
     authManager.guardRoute();
 }
 
 // ========================================================
-// AUTHENTICATION INTERACTIVE FORMS
+// ========================================================
+// AUTHENTICATION INTERACTIVE FORMS & FIREBASE INTEGRATION
 // ========================================================
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form-el');
@@ -301,8 +323,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toLogin2) toLogin2.addEventListener('click', (e) => { e.preventDefault(); showFormSection('login-form'); });
     if (toLogin3) toLogin3.addEventListener('click', (e) => { e.preventDefault(); showFormSection('login-form'); });
 
-    // Handle Form Submissions & Validations
-    
+    // Initialize Firebase client
+    let firebaseAuth = null;
+
+    const initFirebaseClient = async () => {
+        try {
+            const res = await fetch('/api/auth?action=config');
+            const data = await res.json();
+            if (data.success && data.data.firebaseConfig) {
+                const config = data.data.firebaseConfig;
+                if (config.apiKey) {
+                    firebase.initializeApp(config);
+                    firebaseAuth = firebase.auth();
+                    console.log('Firebase Client SDK initialized.');
+                } else {
+                    console.warn('Firebase configuration details missing in dynamic config.');
+                }
+            }
+        } catch (err) {
+            console.error('Error loading dynamic Firebase config:', err);
+        }
+    };
+
+    initFirebaseClient();
+
     // 1. LOGIN Form submission
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -315,24 +359,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (!firebaseAuth) {
+                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                return;
+            }
+
             try {
+                showToast('Authenticating with Firebase... 🔐', 'info');
+                // Authenticate with Firebase Email/Password
+                const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
+                const idToken = await userCredential.user.getIdToken();
+
+                showToast('Verifying session with backend... 🛡️', 'info');
+                // Exchange Firebase ID Token for Backend JWT Cookie
                 const res = await fetch('/api/auth?action=login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ idToken })
                 });
                 const data = await res.json();
                 
                 if (data.success) {
                     showToast(data.message, 'success');
-                    authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
                     setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }
             } catch (err) {
-                showToast('Network error. Please try again.', 'error');
+                console.error('Firebase Login Error:', err);
+                showToast(err.message || 'Firebase login failed.', 'error');
             }
         });
     }
@@ -368,24 +424,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (!firebaseAuth) {
+                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                return;
+            }
+
             try {
+                showToast('Registering user with Firebase... 🚀', 'info');
+                // Register with Firebase Email/Password
+                const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+                
+                // Update Firebase display name profile
+                await userCredential.user.updateProfile({ displayName: name });
+                
+                const idToken = await userCredential.user.getIdToken();
+
+                showToast('Creating database profile... 🛡️', 'info');
+                // Create account on backend using Firebase ID Token
                 const res = await fetch('/api/auth?action=signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
+                    body: JSON.stringify({ idToken, name })
                 });
                 const data = await res.json();
                 
                 if (data.success) {
                     showToast(data.message, 'success');
-                    authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
                     setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }
             } catch (err) {
-                showToast('Network error. Please try again.', 'error');
+                console.error('Firebase Signup Error:', err);
+                showToast(err.message || 'Firebase signup failed.', 'error');
             }
         });
     }
@@ -401,134 +473,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (!firebaseAuth) {
+                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                return;
+            }
+
             try {
-                const res = await fetch('/api/auth?action=forgot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    
-                    // Auto redirect to reset screen and fill token for testing
-                    document.getElementById('reset-token').value = data.data.resetToken;
-                    setTimeout(() => {
-                        showFormSection('reset-form');
-                        showToast('Autofilled recovery token in Reset form for testing! 🔐', 'info');
-                    }, 1500);
-                } else {
-                    showToast(data.message, 'error');
-                }
+                showToast('Sending password reset email... ✉️', 'info');
+                await firebaseAuth.sendPasswordResetEmail(email);
+                showToast('Password reset email sent! Check your inbox ✉️', 'success');
             } catch (err) {
-                showToast('Network error. Please try again.', 'error');
+                console.error('Firebase password reset error:', err);
+                showToast(err.message || 'Failed to send password reset email.', 'error');
             }
         });
     }
 
-    // 4. RESET PASSWORD Form submission
+    // 4. RESET PASSWORD Form submission (Handled via Firebase email redirection link)
     if (resetForm) {
-        resetForm.addEventListener('submit', async (e) => {
+        resetForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const token = document.getElementById('reset-token').value.trim();
-            const password = document.getElementById('reset-password').value;
-            const confirm = document.getElementById('reset-confirm').value;
-
-            if (!token || !password || !confirm) {
-                showToast('Please fill in all fields.', 'warning');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('Password must be at least 6 characters long.', 'warning');
-                return;
-            }
-
-            if (password !== confirm) {
-                showToast('Passwords do not match.', 'error');
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/auth?action=reset', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, password })
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => showFormSection('login-form'), 1500);
-                } else {
-                    showToast(data.message, 'error');
-                }
-            } catch (err) {
-                showToast('Network error. Please try again.', 'error');
-            }
+            showToast('Please use the password reset link sent to your email to configure a new password.', 'info');
         });
     }
 
-    // ========================================================
-    // SOCIAL LOGINS (GOOGLE & GITHUB SIMULATOR)
-    // ========================================================
-    const handleSocialLogin = async (provider) => {
-        showToast(`Connecting to ${provider.toUpperCase()}... 🚀`, 'info');
-
-        // Simulate social callback details (creates a secure DB account and JWT via social API)
-        const socialProfiles = {
-            google: {
-                email: 'dhiraj.yadav.google@gmail.com',
-                name: 'Dhiraj Yadav (Google)',
-                provider: 'google',
-                providerId: 'gg_109283748293817'
-            },
-            github: {
-                email: 'dhiraj.github@github.com',
-                name: 'Dhiraj Yadav (GitHub)',
-                provider: 'github',
-                providerId: 'gh_9928374'
+    // Google Sign-In with Firebase Provider
+    const googleBtn = document.getElementById('google-btn');
+    const githubBtn = document.getElementById('github-btn');
+    
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!firebaseAuth) {
+                showToast('Authentication system is initializing. Please try again in a moment.', 'warning');
+                return;
             }
-        };
 
-        const profile = socialProfiles[provider];
-
-        setTimeout(async () => {
             try {
-                const res = await fetch('/api/auth?action=social', {
+                showToast('Connecting to Google... 🚀', 'info');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                // Open popup flow
+                const result = await firebaseAuth.signInWithPopup(provider);
+                const idToken = await result.user.getIdToken();
+
+                showToast('Verifying Google account details... 👤', 'info');
+                const res = await fetch('/api/auth?action=google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(profile)
+                    body: JSON.stringify({ idToken })
                 });
-                
-                if (!res.ok) {
-                    const text = await res.text();
-                    console.error('Server returned non-ok response:', res.status, text);
-                    showToast(`Server Error (${res.status}). Check Vercel Logs.`, 'error');
-                    return;
-                }
-
                 const data = await res.json();
                 
                 if (data.success) {
                     showToast(data.message, 'success');
-                    authManager.setToken(data.data.token);
                     authManager.setUser(data.data.user);
                     setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {
                     showToast(data.message, 'error');
                 }
             } catch (err) {
-                console.error('Social auth request network exception:', err);
-                showToast('Network exception. Check your database connections or Atlas whitelist.', 'error');
+                console.error('Google Auth Error:', err);
+                showToast(err.message || 'Google Sign-in failed.', 'error');
             }
-        }, 1200); // Small loading animation delay
-    };
-
-    const googleBtn = document.getElementById('google-btn');
-    const githubBtn = document.getElementById('github-btn');
+        });
+    }
     
-    if (googleBtn) googleBtn.addEventListener('click', () => handleSocialLogin('google'));
-    if (githubBtn) githubBtn.addEventListener('click', () => handleSocialLogin('github'));
+    if (githubBtn) {
+        githubBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showToast('GitHub login is not supported. Please use Google or Email login.', 'warning');
+        });
+    }
 });

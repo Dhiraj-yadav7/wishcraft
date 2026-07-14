@@ -1,17 +1,14 @@
-const jwt = require('jsonwebtoken');
 const db = require('./utils/db');
 const { success, error } = require('./utils/response');
 const { checkRateLimit } = require('./utils/rateLimiter');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'birthday-surprise-secret-key-12345';
+const { getUserIdFromRequest } = require('./utils/auth');
 
 function authenticate(req) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error('Unauthenticated. Token missing.');
+    const userId = getUserIdFromRequest(req);
+    if (!userId) {
+        throw new Error('Session expired or invalid token. Please log in again.');
     }
-    const token = authHeader.split(' ')[1];
-    return jwt.verify(token, JWT_SECRET);
+    return { userId };
 }
 
 module.exports = async function handler(req, res) {
@@ -37,17 +34,8 @@ module.exports = async function handler(req, res) {
             // 2. Gating check: Digital Time Capsule Time Lock (Secure redact)
             if (page.capsuleLocked && page.unlockDate && new Date(page.unlockDate) > new Date()) {
                 // Check if visitors is the owner (allow previewing even if locked)
-                const authHeader = req.headers.authorization;
-                let isOwner = false;
-                if (authHeader && authHeader.startsWith('Bearer ')) {
-                    try {
-                        const token = authHeader.split(' ')[1];
-                        const decoded = jwt.verify(token, JWT_SECRET);
-                        if (decoded.userId === page.userId.toString()) {
-                            isOwner = true;
-                        }
-                    } catch (e) {}
-                }
+                const userId = getUserIdFromRequest(req);
+                const isOwner = userId && userId === page.userId.toString();
 
                 if (!isOwner) {
                     // RETURN SECURELY REDACTED METADATA ONLY
@@ -88,19 +76,9 @@ module.exports = async function handler(req, res) {
                 }
             }
 
-            // 4. Visibility check: draft/private
             if (page.status === 'private' || page.status === 'draft') {
-                const authHeader = req.headers.authorization;
-                let authenticated = false;
-                if (authHeader && authHeader.startsWith('Bearer ')) {
-                    try {
-                        const token = authHeader.split(' ')[1];
-                        const decoded = jwt.verify(token, JWT_SECRET);
-                        if (decoded.userId === page.userId.toString()) {
-                            authenticated = true;
-                        }
-                    } catch (e) {}
-                }
+                const userId = getUserIdFromRequest(req);
+                const authenticated = userId && userId === page.userId.toString();
                 if (!authenticated) {
                     return error(res, 'This surprise card is private or in draft mode. Access denied.', 403);
                 }
