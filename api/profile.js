@@ -16,8 +16,7 @@ if (process.env.CLOUDINARY_URL || (process.env.CLOUDINARY_CLOUD_NAME && process.
         api_secret: process.env.CLOUDINARY_API_SECRET
     });
 }
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     const userId = getUserIdFromRequest(req);
     if (!userId) {
         return error(res, 'Session expired or invalid token. Please log in again.', 401);
@@ -310,4 +309,4 @@ export default async function handler(req, res) {
         console.error(`Profile settings error on action ${action}:`, err);
         return error(res, 'Internal server error.', 500);
     }
-};
+}

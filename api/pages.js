@@ -14,8 +14,7 @@ function authenticate(req) {
     }
     return { userId };
 }
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     const { action } = req.query;
 
     try {
@@ -474,4 +473,4 @@ export default async function handler(req, res) {
         }
         return error(res, 'Internal server error.', 500);
     }
-};
+}

@@ -66,7 +66,7 @@ const fallbackTemplates = {
     }
 };
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
         return error(res, 'Method not allowed', 405);
     }
@@ -145,4 +145,4 @@ export default async function handler(req, res) {
     textResult = textResult.replace(/recipient/g, recipientName);
 
     return success(res, { text: textResult, isFallback: true }, 'Content loaded from curated template library.', 200);
-};
+}

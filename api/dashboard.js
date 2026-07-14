@@ -6,7 +6,7 @@ const db = require('./utils/db');
 const { success, error } = require('./utils/response');
 const { getUserIdFromRequest } = require('./utils/auth');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     const userId = getUserIdFromRequest(req);
     if (!userId) {
         return error(res, 'Session expired or invalid token. Please log in again.', 401);
@@ -109,4 +109,4 @@ export default async function handler(req, res) {
         console.error(`Dashboard API action ${action} error:`, err);
         return error(res, 'Internal server error.', 500);
     }
-};
+}
