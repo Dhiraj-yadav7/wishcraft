@@ -4,6 +4,9 @@
     { "source": "/landing", "destination": "/home.html" },
     { "source": "/signup", "destination": "/login.html" },
     { "source": "/login", "destination": "/login.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/generator", "destination": "/generator.html" },
     { "source": "/api/profile/:action*", "destination": "/api/profile?action=:action" }
   ]
 }

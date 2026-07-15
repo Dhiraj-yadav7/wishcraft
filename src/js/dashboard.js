@@ -6,28 +6,30 @@ let dashState = {
     searchQuery: ''
 };
 
-// DOM elements
-const cardsGrid = document.getElementById('cardsGrid');
-const searchInput = document.getElementById('searchSurprises');
-const filterPills = document.getElementById('filterPills');
-const notifBell = document.getElementById('notifBell');
-const notifCount = document.getElementById('notifCount');
-const notifDrawer = document.getElementById('notifDrawer');
-const notifList = document.getElementById('notifList');
-
-// Modals elements
-const shareModal = document.getElementById('shareModal');
-const shareModalClose = document.getElementById('shareModalClose');
-const qrCodeModal = document.getElementById('qrCodeModal');
-const qrModalClose = document.getElementById('qrModalClose');
-const analyticsModal = document.getElementById('analyticsModal');
-const analCloseBtn = document.getElementById('analCloseBtn');
-const analCloseFooter = document.getElementById('analCloseFooter');
+// DOM element refs — populated inside DOMContentLoaded (DOM must exist first)
+let cardsGrid, searchInput, filterPills, notifBell, notifCount, notifDrawer, notifList;
+let shareModal, shareModalClose, qrCodeModal, qrModalClose, analyticsModal, analCloseBtn, analCloseFooter;
 
 // Active Card ID for modals
 let activeCardId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ✅ Resolve DOM refs only after DOM is fully parsed
+    cardsGrid       = document.getElementById('cardsGrid');
+    searchInput     = document.getElementById('searchSurprises');
+    filterPills     = document.getElementById('filterPills');
+    notifBell       = document.getElementById('notifBell');
+    notifCount      = document.getElementById('notifCount');
+    notifDrawer     = document.getElementById('notifDrawer');
+    notifList       = document.getElementById('notifList');
+    shareModal      = document.getElementById('shareModal');
+    shareModalClose = document.getElementById('shareModalClose');
+    qrCodeModal     = document.getElementById('qrCodeModal');
+    qrModalClose    = document.getElementById('qrModalClose');
+    analyticsModal  = document.getElementById('analyticsModal');
+    analCloseBtn    = document.getElementById('analCloseBtn');
+    analCloseFooter = document.getElementById('analCloseFooter');
+
     // Hide modals initially to prevent flashes
     if (shareModal) shareModal.style.display = 'none';
     if (qrCodeModal) qrCodeModal.style.display = 'none';
@@ -40,6 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Sync user details
 function setupDashboardUser() {
+    // ✅ Guard: authManager must be defined (auth.js must load before dashboard.js)
+    if (typeof authManager === 'undefined') {
+        console.error('[dashboard] authManager is undefined. Ensure auth.js loads before dashboard.js.');
+        return;
+    }
     const user = authManager.getUser();
     if (user) {
         document.getElementById('userWelcomeText').textContent = `Welcome, ${user.name}! 🌟`;

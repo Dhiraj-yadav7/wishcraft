@@ -106,12 +106,22 @@ export default async function middleware(request) {
             }
         }
         
-        // Pass the user ID down to the API function via header prefix pattern
-        const responseHeaders = new Headers();
-        responseHeaders.set('x-middleware-request-x-user-id', payload.userId);
-        
+        // ✅ THE FIX: Returning `undefined` (no return value) tells Vercel Edge Middleware
+        // to continue the request chain and serve the actual destination file.
+        //
+        // ❌ WRONG (old code): `return new Response(null, { headers })` — this terminates
+        // the chain and serves a blank 200 body, causing the white screen.
+        //
+        // The x-middleware-request-* prefix is the correct Vercel pattern for injecting
+        // headers into the forwarded-to origin/function request.
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-user-id', payload.userId);
+
         return new Response(null, {
-            headers: responseHeaders
+            headers: {
+                'x-middleware-request-x-user-id': payload.userId,
+                'x-middleware-next': '1',
+            },
         });
     }
     
@@ -126,4 +136,16 @@ export default async function middleware(request) {
             }
         }
     }
+
+    // For all other routes: fall through (return undefined = passthrough)
 }
+
+// ✅ CRITICAL: Matcher prevents middleware from intercepting static assets.
+// Without this, every .css, .js, .png request also runs through this middleware
+// and gets a blank response — breaking all scripts and styles.
+export const config = {
+    matcher: [
+        // Run middleware ONLY on page routes, NOT on static files with extensions
+        '/((?!.*\\.[a-zA-Z0-9]+$|_next).*)',
+    ],
+};

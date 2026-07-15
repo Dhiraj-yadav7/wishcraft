@@ -13,8 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Auth Route Protection Guard in Head -->
-    <script src="src/js/auth.js"></script>
+    <!-- Auth Route Protection Guard — loaded in body before dashboard.js -->
     <!-- PWA settings manifest -->
     <link rel="manifest" href="manifest.json">
 </head>
@@ -405,6 +404,7 @@
 
     <!-- PWA scripting -->
     <script src="src/js/pwa.js"></script>
+    <script src="src/js/auth.js"></script>
     <!-- JS Controller implementation -->
     <script src="src/js/dashboard.js"></script>
 </body>
